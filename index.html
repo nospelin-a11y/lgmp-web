@@ -7,15 +7,6 @@
 <title>Muy pronto…</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-<!-- MailerLite Universal -->
-<script>
-    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-    ml('account', '1740625');
-</script>
-<!-- End MailerLite Universal -->
 <style>
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -62,7 +53,7 @@
 
   <div class="aviso">
     <p>Déjanos tu email y serás de los primeros en descubrirlo.</p>
-    <button class="ml-onclick-form" onclick="ml('show', 'tVANqC', true)">Quiero enterarme antes que nadie</button>
+    <button class="ml-onclick-form" id="btn-email" type="button">Quiero enterarme antes que nadie</button>
   </div>
 
   <p class="pista">© 2026 · Muy pronto en lageneracionmejorpreparada.com</p>
@@ -93,6 +84,17 @@
     tick();
     var intervalo = setInterval(tick, 1000);
   })();
+
+  // MailerLite se carga SOLO al pulsar el botón, para que el popup no salte al entrar
+  document.getElementById('btn-email').addEventListener('click', function(){
+    if (window.ml) { ml('show', 'tVANqC', true); return; }
+    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+    ml('account', '1740625');
+    ml('show', 'tVANqC', true);
+  });
 </script>
 </body>
 </html>
