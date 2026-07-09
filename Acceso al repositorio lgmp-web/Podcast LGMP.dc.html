@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html{scroll-behavior:smooth}
+  body{margin:0;background:#ffffff;font-family:'Nunito Sans',sans-serif;color:#1E2A4A;-webkit-font-smoothing:antialiased}
+  a{color:#1E2A4A;text-decoration:none}
+  a:hover{color:#F0503C}
+  summary::-webkit-details-marker{display:none}
+  @keyframes lgmpHeroUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes lgmpFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+</style>
+</helmet>
+
+<div data-screen-label="Podcast LGMP" style="min-width:320px">
+
+  <!-- ============ NAV ============ -->
+  <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(30,42,74,.08)">
+    <div style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+      <a href="Home LGMP.dc.html" style="display:flex;align-items:center"><img src="assets/logo-light.png" alt="LGMP — Asociación la generación mejor preparada" style="height:52px;display:block"></a>
+      <nav style="display:flex;align-items:center;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px">
+        <a href="Home LGMP.dc.html#asociacion">La Asociación</a>
+        <details style="position:relative">
+          <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;color:#1E2A4A" style-hover="color:#F0503C">Actividades<span aria-hidden="true" style="font-size:10px;color:#F0503C">▼</span></summary>
+          <div style="position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:14px;box-shadow:0 16px 40px rgba(30,42,74,.16);padding:10px;display:flex;flex-direction:column;gap:2px;min-width:220px;z-index:60">
+            <a href="Actividades LGMP.dc.html#eventos" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Eventos</a>
+            <a href="Actividades LGMP.dc.html#recursos" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Recursos para socios</a>
+            <a href="Actividades LGMP.dc.html#comunidad" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Comunidad Online</a>
+            <a href="Actividades LGMP.dc.html#noticias" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Noticias</a>
+          </div>
+        </details>
+        <a href="Socios LGMP.dc.html">Socios</a>
+        <a href="Podcast LGMP.dc.html">Podcast</a>
+        <a href="Contacto LGMP.dc.html">Contacto</a>
+        <a href="Hazte Socio LGMP.dc.html" style="background:#F0503C;color:#ffffff;padding:11px 22px;border-radius:999px;box-shadow:0 4px 14px rgba(240,80,60,.35);transition:transform .2s,box-shadow .2s" style-hover="color:#ffffff;transform:translateY(-2px);box-shadow:0 8px 20px rgba(240,80,60,.45)">Hazte socio</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section style="position:relative;overflow:hidden;background:#ffffff">
+    <div aria-hidden="true" style="position:absolute;top:-180px;right:-160px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.12),rgba(240,80,60,0) 65%);animation:lgmpFloat 9s ease-in-out infinite"></div>
+    <div style="position:relative;max-width:1400px;margin:0 auto;padding:100px 48px 72px;display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-items:center">
+      <div>
+        <span style="animation:lgmpHeroUp .8s both;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C">El podcast</span>
+        <h1 style="animation:lgmpHeroUp .9s .1s cubic-bezier(.22,1,.36,1) both;font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(32px,4.4vw,52px);line-height:1.15;margin:14px 0 0;color:#1E2A4A">Bienvenidos al podcast,<br>donde nació <span style="color:#F0503C">todo</span>.</h1>
+        <div style="animation:lgmpHeroUp 1s .22s cubic-bezier(.22,1,.36,1) both;display:flex;flex-direction:column;gap:14px;margin-top:24px">
+          <p style="font-size:clamp(16px,1.7vw,18px);line-height:1.65;color:rgba(30,42,74,.75);margin:0">Cuando terminé la carrera estaba más perdido que un pedo en un jacuzzi: no sabía por dónde empezar ni lo que me gustaría hacer.</p>
+          <p style="font-size:clamp(16px,1.7vw,18px);line-height:1.65;color:rgba(30,42,74,.75);margin:0">Al final, tuve suerte y terminé en un trabajo que me apasiona, pero...</p>
+          <p style="font-size:clamp(16px,1.7vw,18px);line-height:1.65;color:rgba(30,42,74,.75);margin:0">Por desgracia, mucha gente no tiene esa suerte, y creo ciegamente que esto se debe a un <strong style="color:#1E2A4A">único motivo: el desconocimiento</strong>.</p>
+          <p style="font-size:clamp(16px,1.7vw,18px);line-height:1.65;color:rgba(30,42,74,.75);margin:0">No has tenido mala suerte, simplemente no estabas informado.</p>
+          <p style="font-size:clamp(16px,1.7vw,18px);line-height:1.65;color:rgba(30,42,74,.75);margin:0">Por eso nació el podcast: para ayudar a todos los que están igual de perdidos que yo lo estaba.</p>
+        </div>
+        <div style="animation:lgmpHeroUp 1s .32s cubic-bezier(.22,1,.36,1) both;display:flex;gap:14px;flex-wrap:wrap;margin-top:32px">
+          <a href="https://www.youtube.com/@LaGeneracionMejorPreparada/videos" target="_blank" rel="noopener" style="background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;padding:14px 30px;border-radius:999px;box-shadow:0 6px 18px rgba(240,80,60,.35);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-2px)">Ver en YouTube</a>
+          <a href="https://open.spotify.com/show/71loMrrju6KJBK8F6sTqEg" target="_blank" rel="noopener" style="border:2px solid rgba(30,42,74,.2);color:#1E2A4A;font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;padding:12px 28px;border-radius:999px;transition:border-color .2s" style-hover="border-color:#F0503C;color:#F0503C">Escuchar en Spotify</a>
+        </div>
+      </div>
+      <div data-reveal="true" style="height:380px;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(30,42,74,.18)">
+        <image-slot id="podcast-cover" shape="rect" placeholder="Portada o foto del podcast" src="https://storage.mlcdn.com/account_image/1740625/cO7UpHiC2fX7kwPdpZWrpiFD7z5Mi9L0KfkIlm6n.png"></image-slot>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MEDIOS ============ -->
+  <section style="background:#F4F6FA;padding:96px 0">
+    <div style="max-width:1400px;margin:0 auto;padding:0 48px">
+      <div data-reveal="true" style="margin-bottom:40px">
+        <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(26px,3vw,38px);line-height:1.12;color:#1E2A4A;margin:0">Apariciones en medios</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+        <div data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:20px;overflow:hidden;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
+          <div style="height:220px"><image-slot id="medio-1" shape="rect" placeholder="Pantallazo de El Confidencial" src="https://storage.mlcdn.com/account_image/1740625/8Vmdsy4MPxIKUus7Y70eNXtCydtTuWDaRZe32ShO.png"></image-slot></div>
+          <div style="padding:24px 24px 28px;display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#F0503C">Prensa</span>
+            <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A">Entrevista en el diario El Confidencial</span>
+            <a href="https://www.elconfidencial.com/alma-corazon-vida/2026-02-14/jaime-echaide-big-four-auditoria-master-1qrt_4300860/" target="_blank" rel="noopener" style="font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:#F0503C;margin-top:4px">Leer la noticia →</a>
+          </div>
+        </div>
+        <div data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:20px;overflow:hidden;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
+          <div style="height:220px"><image-slot id="medio-2" shape="rect" placeholder="Pantallazo de La Vanguardia" src="https://storage.mlcdn.com/account_image/1740625/AiyioGvSQUqeaO7pDyaANeHIZOKmB95fiHrdk7d0.png"></image-slot></div>
+          <div style="padding:24px 24px 28px;display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#F0503C">Prensa</span>
+            <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A">Entrevista en el diario La Vanguardia</span>
+            <a href="https://www.lavanguardia.com/dinero/20250414/10584880/ana-inspectora-hacienda-si-alguien-no-quiere-pagar-voluntariamente-hay-que-forzarlo-mi-trabajo-es-que-eso-se-cobre-porque-es-dinero-todos-los-espanoles.html" target="_blank" rel="noopener" style="font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:#F0503C;margin-top:4px">Leer la noticia →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRESENCIA EN REDES SOCIALES ============ -->
+  <section style="background:#1E2A4A;padding:96px 0;color:#ffffff">
+    <div style="max-width:1400px;margin:0 auto;padding:0 48px">
+      <div data-reveal="true" style="margin:0 0 56px">
+        <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(30px,3.6vw,44px);line-height:1.12;margin:0;color:#ffffff">Presencia en Redes Sociales</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+        <div data-reveal="true" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:32px 26px;display:flex;flex-direction:column;gap:16px;transition:transform .25s,background .25s" style-hover="transform:translateY(-6px);background:rgba(255,255,255,.10)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:#F0503C;display:inline-flex"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2 31 31 0 000 12a31 31 0 00.5 5.8 3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1A31 31 0 0024 12a31 31 0 00-.5-5.8zM9.6 15.5V8.5l6.4 3.5-6.4 3.5z"></path></svg></span>
+            <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;color:#ffffff">YouTube</span>
+          </div>
+          <div>
+            <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:38px;color:#ffffff;line-height:1"><span data-counter data-counter-end="520190" data-counter-format="dot">520.190</span></div>
+            <div style="font-size:14.5px;color:rgba(255,255,255,.65);margin-top:4px">visualizaciones</div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,.12);padding-top:14px;display:flex;align-items:baseline;gap:8px">
+            <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#F0503C"><span data-counter data-counter-end="2520" data-counter-format="dot">2.520</span></div>
+            <div style="font-size:13.5px;color:rgba(255,255,255,.55)">suscriptores</div>
+          </div>
+        </div>
+        <div data-reveal="true" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:32px 26px;display:flex;flex-direction:column;gap:16px;transition:transform .25s,background .25s" style-hover="transform:translateY(-6px);background:rgba(255,255,255,.10)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:#1DB954;display:inline-flex"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="M6.5 9.8c3.7-1.1 8-.8 11 1"></path><path d="M6.8 12.8c3.1-.9 6.7-.6 9.2.8"></path><path d="M7.2 15.6c2.5-.7 5.3-.5 7.3.6"></path></svg></span>
+            <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;color:#ffffff">Spotify</span>
+          </div>
+          <div>
+            <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:38px;color:#ffffff;line-height:1"><span data-counter data-counter-end="4309" data-counter-format="dot">4.309</span></div>
+            <div style="font-size:14.5px;color:rgba(255,255,255,.65);margin-top:4px">horas de escucha</div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,.12);padding-top:14px;display:flex;align-items:baseline;gap:8px">
+            <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#F0503C"><span data-counter data-counter-end="183" data-counter-format="dot">183</span></div>
+            <div style="font-size:13.5px;color:rgba(255,255,255,.55)">suscriptores</div>
+          </div>
+        </div>
+        <div data-reveal="true" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:32px 26px;display:flex;flex-direction:column;gap:16px;transition:transform .25s,background .25s" style-hover="transform:translateY(-6px);background:rgba(255,255,255,.10)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:#ffffff;display:inline-flex"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.3 2 1.7 3.6 3.7 3.9v3a7 7 0 01-3.7-1.1v6.6a5.6 5.6 0 11-5.6-5.6c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 102.2 2.6V3h2.5z"></path></svg></span>
+            <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;color:#ffffff">TikTok</span>
+          </div>
+          <div>
+            <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:38px;color:#ffffff;line-height:1"><span data-counter data-counter-end="800000" data-counter-format="dot">800.000</span></div>
+            <div style="font-size:14.5px;color:rgba(255,255,255,.65);margin-top:4px">impresiones</div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,.12);padding-top:14px;display:flex;align-items:baseline;gap:8px">
+            <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#F0503C"><span data-counter data-counter-end="2423" data-counter-format="dot">2.423</span></div>
+            <div style="font-size:13.5px;color:rgba(255,255,255,.55)">seguidores</div>
+          </div>
+        </div>
+        <div data-reveal="true" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:32px 26px;display:flex;flex-direction:column;gap:16px;transition:transform .25s,background .25s" style-hover="transform:translateY(-6px);background:rgba(255,255,255,.10)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:#ffffff;display:inline-flex"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4.2"></circle><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle></svg></span>
+            <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;color:#ffffff">Instagram</span>
+          </div>
+          <div>
+            <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:38px;color:#ffffff;line-height:1"><span data-counter data-counter-end="900000" data-counter-format="dot">900.000</span></div>
+            <div style="font-size:14.5px;color:rgba(255,255,255,.65);margin-top:4px">impresiones</div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,.12);padding-top:14px;display:flex;align-items:baseline;gap:8px">
+            <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#F0503C"><span data-counter data-counter-end="1558" data-counter-format="dot">1.558</span></div>
+            <div style="font-size:13.5px;color:rgba(255,255,255,.55)">seguidores</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VIDEOS MAS VISTOS ============ -->
+  <section style="background:#ffffff;padding:96px 0">
+    <div style="max-width:1400px;margin:0 auto;padding:0 48px">
+      <div data-reveal="true" style="margin-bottom:20px">
+        <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.4vw,42px);line-height:1.12;color:#1E2A4A;margin:0">Los episodios más vistos</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:36px">
+        <div data-reveal="true" style="border-radius:20px;overflow:hidden;box-shadow:0 14px 34px rgba(30,42,74,.12);background:#182548">
+          <div style="position:relative;padding-top:56.25%">
+            <iframe src="https://www.youtube-nocookie.com/embed/oN8i3NgRw2o" title="Vídeo del podcast" style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block" allowfullscreen="{{ true }}"></iframe>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center">
+            <span style="background:rgba(240,80,60,.12);color:#F0503C;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px">Derecho</span>
+          </div>
+        </div>
+        <div data-reveal="true" style="border-radius:20px;overflow:hidden;box-shadow:0 14px 34px rgba(30,42,74,.12);background:#182548">
+          <div style="position:relative;padding-top:56.25%">
+            <iframe src="https://www.youtube-nocookie.com/embed/Rmp0C4m8RJk" title="Vídeo del podcast" style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block" allowfullscreen="{{ true }}"></iframe>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center">
+            <span style="background:rgba(240,80,60,.12);color:#F0503C;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px">ADE</span>
+          </div>
+        </div>
+        <div data-reveal="true" style="border-radius:20px;overflow:hidden;box-shadow:0 14px 34px rgba(30,42,74,.12);background:#182548">
+          <div style="position:relative;padding-top:56.25%">
+            <iframe src="https://www.youtube-nocookie.com/embed/WS-y0Fs8mDw" title="Vídeo del podcast" style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block" allowfullscreen="{{ true }}"></iframe>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center">
+            <span style="background:rgba(240,80,60,.12);color:#F0503C;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px">Economía</span>
+          </div>
+        </div>
+        <div data-reveal="true" style="border-radius:20px;overflow:hidden;box-shadow:0 14px 34px rgba(30,42,74,.12);background:#182548">
+          <div style="position:relative;padding-top:56.25%">
+            <iframe src="https://www.youtube-nocookie.com/embed/bN_5Yig-N1Y" title="Vídeo del podcast" style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block" allowfullscreen="{{ true }}"></iframe>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center">
+            <span style="background:rgba(240,80,60,.12);color:#F0503C;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px">Marketing</span>
+          </div>
+        </div>
+        <div data-reveal="true" style="border-radius:20px;overflow:hidden;box-shadow:0 14px 34px rgba(30,42,74,.12);background:#182548">
+          <div style="position:relative;padding-top:56.25%">
+            <iframe src="https://www.youtube-nocookie.com/embed/lNmDO-H0bmg" title="Vídeo del podcast" style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block" allowfullscreen="{{ true }}"></iframe>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center">
+            <span style="background:rgba(240,80,60,.12);color:#F0503C;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px">Derecho</span>
+          </div>
+        </div>
+        <div data-reveal="true" style="border-radius:20px;overflow:hidden;box-shadow:0 14px 34px rgba(30,42,74,.12);background:#182548">
+          <div style="position:relative;padding-top:56.25%">
+            <iframe src="https://www.youtube-nocookie.com/embed/kLXebx2rI4k" title="Vídeo del podcast" style="position:absolute;inset:0;width:100%;height:100%;border:none;display:block" allowfullscreen="{{ true }}"></iframe>
+          </div>
+          <div style="padding:14px 18px;display:flex;align-items:center">
+            <span style="background:rgba(240,80,60,.12);color:#F0503C;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;border-radius:999px">ADE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section style="background:#1E2A4A;padding:90px 0;position:relative;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;top:-140px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.18),rgba(240,80,60,0) 65%);animation:lgmpFloat 10s ease-in-out infinite"></div>
+    <div data-reveal="true" style="position:relative;max-width:1400px;margin:0 auto;padding:0 48px;color:#ffffff">
+      <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.6vw,44px);line-height:1.12;margin:0;color:#ffffff">¿Quieres venir al podcast?</h2>
+      <p style="font-size:18px;line-height:1.65;color:rgba(255,255,255,.75);margin:16px 0 0">Si tu trayectoria puede inspirar a otros jóvenes, no te cortes y escríbenos.</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:30px;align-items:center">
+        <a href="Contacto LGMP.dc.html" style="background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:16px 34px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-3px)">Contacto</a>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a href="https://www.youtube.com/@LaGeneracionMejorPreparada" target="_blank" rel="noopener" aria-label="YouTube" style="border:1.5px solid rgba(255,255,255,.35);color:#ffffff;width:46px;height:46px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px" style-hover="background:rgba(255,255,255,.12);color:#ffffff"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2 31 31 0 000 12a31 31 0 00.5 5.8 3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1A31 31 0 0024 12a31 31 0 00-.5-5.8zM9.6 15.5V8.5l6.4 3.5-6.4 3.5z"></path></svg></a>
+          <a href="https://open.spotify.com/show/71loMrrju6KJBK8F6sTqEg" target="_blank" rel="noopener" aria-label="Spotify" style="border:1.5px solid rgba(255,255,255,.35);color:#ffffff;width:46px;height:46px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px" style-hover="background:rgba(255,255,255,.12);color:#ffffff"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="M6.5 9.8c3.7-1.1 8-.8 11 1"></path><path d="M6.8 12.8c3.1-.9 6.7-.6 9.2.8"></path><path d="M7.2 15.6c2.5-.7 5.3-.5 7.3.6"></path></svg></a>
+          <a href="https://www.instagram.com/lageneracionmejorpreparada/" target="_blank" rel="noopener" aria-label="Instagram" style="border:1.5px solid rgba(255,255,255,.35);color:#ffffff;width:46px;height:46px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px" style-hover="background:rgba(255,255,255,.12);color:#ffffff"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4.2"></circle><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle></svg></a>
+          <a href="https://www.tiktok.com/@lageneracionmejor" target="_blank" rel="noopener" aria-label="TikTok" style="border:1.5px solid rgba(255,255,255,.35);color:#ffffff;width:46px;height:46px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px" style-hover="background:rgba(255,255,255,.12);color:#ffffff"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.3 2 1.7 3.6 3.7 3.9v3a7 7 0 01-3.7-1.1v6.6a5.6 5.6 0 11-5.6-5.6c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 102.2 2.6V3h2.5z"></path></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer style="background:#182548;padding:56px 0 32px;color:rgba(255,255,255,.7)">
+    <div style="max-width:1100px;margin:0 auto;padding:0 32px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:32px">
+        <img src="assets/logo-dark.png" alt="LGMP — Asociación la generación mejor preparada" style="height:64px;display:block">
+        <nav style="display:flex;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px">
+          <a href="Home LGMP.dc.html#asociacion" style="color:rgba(255,255,255,.75)">La Asociación</a>
+          <a href="Actividades LGMP.dc.html" style="color:rgba(255,255,255,.75)">Actividades</a>
+          <a href="Socios LGMP.dc.html" style="color:rgba(255,255,255,.75)">Socios</a>
+          <a href="Podcast LGMP.dc.html" style="color:rgba(255,255,255,.75)">Podcast</a>
+          <a href="Contacto LGMP.dc.html" style="color:rgba(255,255,255,.75)">Contacto</a>
+        </nav>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:24px;font-size:13.5px;color:rgba(255,255,255,.5)">
+        <span>© 2026 Asociación La Generación Mejor Preparada · Región de Murcia</span>
+        <span style="display:flex;gap:18px"><a href="#" style="color:rgba(255,255,255,.5)">Política de privacidad</a><a href="#" style="color:rgba(255,255,255,.5)">Aviso legal</a></span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;motion&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;}}">
+class Component extends DCLogic {
+  renderVals() { return {}; }
+
+  componentDidMount() {
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.props.motion === false || reduced) return;
+    this._timer = setTimeout(() => {
+      const els = Array.from(document.querySelectorAll('[data-reveal]'));
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.style.opacity = '1';
+            en.target.style.transform = en.target.dataset.baseTransform || 'none';
+            io.unobserve(en.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      els.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight * 0.9) return;
+        el.dataset.baseTransform = el.style.transform || 'none';
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(28px)';
+        el.style.transition = 'opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1)';
+        io.observe(el);
+      });
+      this._io = io;
+
+      const counters = Array.from(document.querySelectorAll('[data-counter]'));
+      const fmt = (n, kind) => {
+        const rounded = Math.round(n);
+        if (kind === 'k') return rounded + 'k';
+        return rounded.toLocaleString('es-ES');
+      };
+      const counterIo = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          if (!en.isIntersecting) return;
+          const el = en.target;
+          counterIo.unobserve(el);
+          const end = parseFloat(el.dataset.counterEnd || '0');
+          const kind = el.dataset.counterFormat || 'plain';
+          const duration = 1400;
+          const startTime = performance.now();
+          const step = (now) => {
+            const t = Math.min(1, (now - startTime) / duration);
+            const eased = 1 - Math.pow(1 - t, 3);
+            el.textContent = fmt(end * eased, kind);
+            if (t < 1) requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        });
+      }, { threshold: 0.4 });
+      counters.forEach((el) => counterIo.observe(el));
+      this._counterIo = counterIo;
+    }, 60);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._timer);
+    if (this._io) this._io.disconnect();
+    if (this._counterIo) this._counterIo.disconnect();
+  }
+}
+</script>
+</body>
+</html>
