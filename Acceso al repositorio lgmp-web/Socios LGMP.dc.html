@@ -34,6 +34,7 @@
   .menu-movil .panel a.cta{margin-top:14px;background:#F0503C;color:#ffffff;text-align:center;border-radius:999px;padding:15px 12px;box-shadow:0 6px 18px rgba(240,80,60,.35)}
 
 
+
   /* ===== Adaptación a móvil =====
      El runtime .dc reescribe los atributos style normalizándolos, así que los
      selectores [style*="..."] no casan. Se marcan los contenedores con clase,
@@ -47,6 +48,9 @@
     .lg-hero{padding:64px 20px 44px !important}
     .lg-sec{padding-top:56px !important;padding-bottom:56px !important}
     .lg-grid{grid-template-columns:1fr !important;gap:18px !important}
+    .lg-blob{display:none !important}
+    .lg-footnav{flex-wrap:wrap !important;gap:12px 18px !important}
+    .lgmp-tip{white-space:normal !important;max-width:170px}
   }
   </style>
 </helmet>
@@ -91,7 +95,7 @@
 
   <!-- ============ HERO ============ -->
   <section style="position:relative;overflow:hidden;background:#ffffff">
-    <div aria-hidden="true" style="position:absolute;top:-180px;right:-160px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.12),rgba(240,80,60,0) 65%);animation:lgmpFloat 9s ease-in-out infinite"></div>
+    <div class="lg-blob" aria-hidden="true" style="position:absolute;top:-180px;right:-160px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.12),rgba(240,80,60,0) 65%);animation:lgmpFloat 9s ease-in-out infinite"></div>
     <div style="position:relative;max-width:1400px;margin:0 auto;padding:100px 48px 80px;text-align:left">
       <h1 style="animation:lgmpHeroUp .9s .1s cubic-bezier(.22,1,.36,1) both;font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(36px,5vw,60px);line-height:1.1;margin:0;color:#1E2A4A">Directorio de <span style="color:#F0503C">socios</span>.</h1>
       <p style="animation:lgmpHeroUp 1s .22s cubic-bezier(.22,1,.36,1) both;font-size:clamp(17px,2vw,21px);line-height:1.6;color:rgba(30,42,74,.75);margin:24px 0 0">Ya forman parte de la Asociación</p>
@@ -178,7 +182,7 @@
 
   <!-- ============ CTA ============ -->
   <section style="background:#1E2A4A;padding:90px 0;position:relative;overflow:hidden">
-    <div aria-hidden="true" style="position:absolute;top:-140px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.18),rgba(240,80,60,0) 65%);animation:lgmpFloat 10s ease-in-out infinite"></div>
+    <div class="lg-blob" aria-hidden="true" style="position:absolute;top:-140px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.18),rgba(240,80,60,0) 65%);animation:lgmpFloat 10s ease-in-out infinite"></div>
     <div class="lg-cont" data-reveal="true" style="position:relative;max-width:1400px;margin:0 auto;padding:0 48px;color:#ffffff">
       <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.6vw,44px);line-height:1.12;margin:0;color:#ffffff">¿Quieres aparecer aquí?</h2>
       <p style="font-size:18px;line-height:1.65;color:rgba(255,255,255,.75);margin:16px 0 0">Únete a la comunidad de jóvenes profesionales de la Región.</p>
@@ -191,7 +195,7 @@
     <div class="lg-cont" style="max-width:1100px;margin:0 auto;padding:0 32px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:32px">
         <img src="assets/logo-dark.png" alt="LGMP — Asociación la generación mejor preparada" style="height:64px;display:block">
-        <nav style="display:flex;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px">
+        <nav class="lg-footnav" style="display:flex;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px">
           <a href="Home LGMP.dc.html#asociacion" style="color:rgba(255,255,255,.75)">La Asociación</a>
           <a href="Actividades LGMP.dc.html" style="color:rgba(255,255,255,.75)">Actividades</a>
           <a href="Socios LGMP.dc.html" style="color:rgba(255,255,255,.75)">Socios</a>
