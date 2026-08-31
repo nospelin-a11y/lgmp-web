@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Socios honoríficos y entidades colaboradoras · Asociación La Generación Mejor Preparada</title>
+<meta name="description" content="Empresas e instituciones que quieren conectar con el talento joven de la Región de Murcia y apoyar su desarrollo profesional.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#F4F6FA;font-family:'Nunito Sans',sans-serif;color:#1E2A4A;-webkit-font-smoothing:antialiased}
+  a{color:#F0503C}
+  @keyframes lgmpHeroUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+  .cab{background:#1E2A4A;padding:22px 0}
+  .cab .cont{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .cab img{height:52px;display:block}
+  .cab a.volver{font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:rgba(255,255,255,.75);text-decoration:none}
+  .cab a.volver:hover{color:#ffffff}
+
+  .hero{max-width:820px;margin:0 auto;padding:64px 28px 0;text-align:center;animation:lgmpHeroUp .8s cubic-bezier(.22,1,.36,1) both}
+  .kicker{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;margin:0 0 14px}
+  h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(30px,4.6vw,46px);line-height:1.15;margin:0}
+  h1 .destacado{color:#F0503C}
+  .hero p{font-size:clamp(16px,1.8vw,18.5px);line-height:1.65;color:rgba(30,42,74,.75);margin:18px 0 0}
+
+  .tarjeta{max-width:820px;margin:44px auto 0;background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:24px;padding:clamp(28px,5vw,48px)}
+  fieldset{border:none;margin:0 0 34px;padding:0}
+  fieldset:last-of-type{margin-bottom:0}
+  legend{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;padding:0;margin:0 0 20px}
+  .fila{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+  .campo{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+  .fila .campo{margin-bottom:0}
+  label{font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:#1E2A4A}
+  label .req{color:#F0503C}
+  .ayuda{font-size:13.5px;line-height:1.5;color:rgba(30,42,74,.6);margin:0}
+  input[type=text],input[type=email],input[type=tel],input[type=url],select,textarea{
+    background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:14px 16px;
+    font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;
+    transition:border-color .2s,background .2s}
+  input:focus,select:focus,textarea:focus{border-color:#F0503C;background:#ffffff}
+  input::placeholder,textarea::placeholder{color:rgba(30,42,74,.42)}
+  textarea{resize:vertical;min-height:104px}
+  select{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%231E2A4A' d='M6 8 0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:42px}
+
+  /* ---- Formas de colaborar ---- */
+  .opciones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .opcion{position:relative}
+  .opcion input{position:absolute;opacity:0;width:0;height:0}
+  .opcion span{display:block;cursor:pointer;background:#F4F6FA;border:2px solid rgba(30,42,74,.1);border-radius:14px;padding:15px 16px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;transition:border-color .2s,background .2s,transform .2s}
+  .opcion span:hover{transform:translateY(-3px)}
+  .opcion input:checked + span{border-color:#F0503C;background:#ffffff;color:#F0503C}
+  .opcion input:focus-visible + span{outline:2px solid #F0503C;outline-offset:3px}
+
+  .check{display:flex;align-items:flex-start;gap:12px;font-size:14.5px;line-height:1.55;color:rgba(30,42,74,.78);cursor:pointer;margin-bottom:14px}
+  .check input{width:19px;height:19px;flex:none;margin-top:1px;accent-color:#F0503C;cursor:pointer}
+
+  .btn{background:#F0503C;color:#ffffff;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:16px 42px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s,box-shadow .2s}
+  .btn:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(240,80,60,.5)}
+  .btn:disabled{opacity:.6;cursor:wait;transform:none}
+  .error{color:#C4341F;font-size:14.5px;font-weight:600;margin:0 0 14px}
+  .exito{text-align:center;padding:24px 0}
+  .exito h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:26px;margin:0 0 12px}
+  .exito p{font-size:16.5px;line-height:1.65;color:rgba(30,42,74,.75);margin:0 auto;max-width:460px}
+  .oculto{display:none !important}
+
+  footer{background:#182548;color:rgba(255,255,255,.55);margin-top:72px;padding:36px 0;font-size:13.5px}
+  footer .cont{max-width:1100px;margin:0 auto;padding:0 28px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  footer a{color:rgba(255,255,255,.55)}
+
+  @media (max-width:640px){
+    .fila,.opciones{grid-template-columns:1fr}
+    .hero{padding-top:44px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero{animation:none}
+    .btn:hover,.opcion span:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="cab">
+  <div class="cont">
+    <img src="assets/logo-dark.png" alt="Asociación La Generación Mejor Preparada">
+    <a class="volver" href="Hazte Socio LGMP.dc.html">← Volver</a>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <p class="kicker">Empresas e instituciones</p>
+    <h1>Sé parte activa de <span class="destacado">La Generación Mejor Preparada</span>.</h1>
+    <p>Cuéntanos quién eres y cómo te gustaría colaborar. Nos pondremos en contacto para explicarte las opciones y formalizar el alta.</p>
+  </div>
+
+  <div class="tarjeta">
+
+    <div id="exito" class="exito oculto">
+      <h2>¡Gracias por dar el paso!</h2>
+      <p>Hemos recibido vuestra solicitud. Os escribiremos muy pronto para concretar cómo colaboramos.</p>
+    </div>
+
+    <form id="formEntidad" novalidate>
+      <input type="hidden" name="access_key" value="bd66ee88-ebfb-4c8b-96b1-1106c4d1279b">
+      <input type="hidden" name="subject" value="Nueva solicitud de alta — Entidad">
+      <input type="hidden" name="from_name" value="Web LGMP">
+      <input type="hidden" name="Origen" id="origen" value="No indicado">
+      <input type="checkbox" name="botcheck" class="oculto" tabindex="-1" autocomplete="off">
+
+      <fieldset>
+        <legend>La entidad</legend>
+
+        <div class="campo">
+          <label for="entidad">Nombre de la entidad <span class="req">*</span></label>
+          <input type="text" id="entidad" name="Entidad" autocomplete="organization" required>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="cif">CIF <span class="req">*</span></label>
+            <input type="text" id="cif" name="CIF" required>
+          </div>
+          <div class="campo">
+            <label for="municipio">Municipio</label>
+            <input type="text" id="municipio" name="Municipio" autocomplete="address-level2">
+          </div>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="sector">Sector o actividad</label>
+            <input type="text" id="sector" name="Sector" placeholder="Por ejemplo: consultoría, tecnología, educación…">
+          </div>
+          <div class="campo">
+            <label for="web">Página web</label>
+            <input type="url" id="web" name="Web" placeholder="https://…">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Persona de contacto</legend>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="nombre">Nombre y apellidos <span class="req">*</span></label>
+            <input type="text" id="nombre" name="Persona de contacto" autocomplete="name" required>
+          </div>
+          <div class="campo">
+            <label for="cargo">Cargo <span class="req">*</span></label>
+            <input type="text" id="cargo" name="Cargo" autocomplete="organization-title" required>
+          </div>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="email">Correo electrónico <span class="req">*</span></label>
+            <input type="email" id="email" name="Email" autocomplete="email" required>
+          </div>
+          <div class="campo">
+            <label for="telefono">Teléfono <span class="req">*</span></label>
+            <input type="tel" id="telefono" name="Teléfono" autocomplete="tel" required>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Cómo queréis colaborar</legend>
+        <p class="ayuda" style="margin-bottom:16px">Marca todo lo que os encaje. Nada es un compromiso cerrado: nos sirve para preparar la conversación.</p>
+        <div class="opciones">
+          <label class="opcion"><input type="checkbox" name="Colaboración: mentorías" value="Sí"><span>Mentorías</span></label>
+          <label class="opcion"><input type="checkbox" name="Colaboración: ofertas de empleo" value="Sí"><span>Ofertas de empleo</span></label>
+          <label class="opcion"><input type="checkbox" name="Colaboración: prácticas" value="Sí"><span>Prácticas</span></label>
+          <label class="opcion"><input type="checkbox" name="Colaboración: patrocinio" value="Sí"><span>Patrocinio</span></label>
+          <label class="opcion"><input type="checkbox" name="Colaboración: cesión de espacio" value="Sí"><span>Cesión de espacio</span></label>
+          <label class="opcion"><input type="checkbox" name="Colaboración: ponencias" value="Sí"><span>Ponencias</span></label>
+          <label class="opcion"><input type="checkbox" name="Colaboración: podcast" value="Sí"><span>Podcast</span></label>
+          <label class="opcion"><input type="checkbox" name="Colaboración: otras" value="Sí"><span>Otras</span></label>
+        </div>
+
+        <div class="campo" style="margin-top:22px">
+          <label for="mensaje">Cuéntanos más</label>
+          <textarea id="mensaje" name="Mensaje" placeholder="¿Qué os gustaría conseguir colaborando con la Asociación?"></textarea>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Protección de datos</legend>
+
+        <label class="check">
+          <input type="checkbox" id="rgpd" required>
+          <span>He leído y acepto la <a href="privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a> y el tratamiento de los datos facilitados para gestionar esta solicitud. <span class="req">*</span></span>
+        </label>
+
+        <label class="check">
+          <input type="checkbox" name="Acepta comunicaciones" value="Sí">
+          <span>Queremos recibir por correo las noticias y actividades de la Asociación.</span>
+        </label>
+
+        <p id="error" class="error oculto"></p>
+        <button type="submit" id="enviar" class="btn">Enviar solicitud</button>
+      </fieldset>
+    </form>
+  </div>
+</main>
+
+<footer>
+  <div class="cont">
+    <span>© 2026 Asociación La Generación Mejor Preparada · Región de Murcia</span>
+    <span><a href="mailto:hola@lageneracionmejorpreparada.com">hola@lageneracionmejorpreparada.com</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var form  = document.getElementById('formEntidad');
+  var exito = document.getElementById('exito');
+  var error = document.getElementById('error');
+  var boton = document.getElementById('enviar');
+
+  // Registra desde qué botón de Hazte Socio se ha llegado, sin preguntárselo
+  // al usuario (?tipo=corporativo | institucional | colaboradora).
+  var etiquetas = {
+    corporativo:   'Socio corporativo',
+    institucional: 'Socio institucional',
+    colaboradora:  'Entidad colaboradora'
+  };
+  var tipo = new URLSearchParams(location.search).get('tipo');
+  if (etiquetas[tipo]) document.getElementById('origen').value = etiquetas[tipo];
+
+  function fallo(msg){
+    error.textContent = msg;
+    error.classList.remove('oculto');
+    boton.disabled = false;
+    boton.textContent = 'Enviar solicitud';
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    error.classList.add('oculto');
+
+    if (!form.entidad.value.trim())                     return fallo('Escribe el nombre de la entidad.');
+    if (!form.cif.value.trim())                         return fallo('Escribe el CIF de la entidad.');
+    if (!form.nombre.value.trim())                      return fallo('Escribe el nombre de la persona de contacto.');
+    if (!form.cargo.value.trim())                       return fallo('Indica el cargo de la persona de contacto.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.value.trim()))
+                                                        return fallo('Escribe un correo electrónico válido.');
+    if (form.telefono.value.replace(/\D/g,'').length < 9) return fallo('Escribe un teléfono válido.');
+    if (!document.getElementById('rgpd').checked)       return fallo('Debéis aceptar la Política de Privacidad para continuar.');
+
+    boton.disabled = true;
+    boton.textContent = 'Enviando…';
+
+    var datos = Object.fromEntries(new FormData(form).entries());
+    datos['Acepta la política de privacidad'] = 'Sí';
+
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(datos)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (res.success) {
+        form.classList.add('oculto');
+        exito.classList.remove('oculto');
+        exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        fallo('No hemos podido enviar la solicitud. Escríbenos a hola@lageneracionmejorpreparada.com y lo resolvemos.');
+      }
+    })
+    .catch(function(){
+      fallo('No hemos podido enviar la solicitud. Revisad la conexión o escribidnos a hola@lageneracionmejorpreparada.com.');
+    });
+  });
+})();
+</script>
+</body>
+</html>

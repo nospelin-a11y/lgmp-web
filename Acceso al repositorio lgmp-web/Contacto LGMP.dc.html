@@ -77,7 +77,10 @@
               <input type="text" placeholder="Nombre" value="{{ fName }}" onChange="{{ onName }}" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:15px 16px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box">
               <input type="text" placeholder="Apellido" value="{{ fSurname }}" onChange="{{ onSurname }}" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:15px 16px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box">
             </div>
-            <input type="email" placeholder="Correo electrónico" value="{{ fEmail }}" onChange="{{ onEmail }}" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:15px 16px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <input type="email" placeholder="Correo electrónico" value="{{ fEmail }}" onChange="{{ onEmail }}" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:15px 16px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box">
+              <input type="tel" placeholder="Teléfono" value="{{ fPhone }}" onChange="{{ onPhone }}" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:15px 16px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box">
+            </div>
             <textarea placeholder="Mensaje" rows="{{ 5 }}" value="{{ fMsg }}" onChange="{{ onMsg }}" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:15px 16px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box;resize:vertical"></textarea>
             <label style="display:flex;align-items:center;gap:10px;font-size:14.5px;color:rgba(30,42,74,.7);cursor:pointer">
               <input type="checkbox" checked="{{ fAccept }}" onChange="{{ onAccept }}" style="width:18px;height:18px;accent-color:#F0503C">
@@ -86,7 +89,7 @@
             <sc-if value="{{ fError }}" hint-placeholder-val="{{ false }}">
               <div style="color:#C4341F;font-size:14.5px;font-weight:600">{{ fError }}</div>
             </sc-if>
-            <button onClick="{{ onSubmit }}" style="align-self:flex-start;background:#F0503C;color:#ffffff;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:15px 36px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s;margin-top:6px" style-hover="transform:translateY(-2px)">Enviar</button>
+            <button onClick="{{ onSubmit }}" style="align-self:flex-start;background:#F0503C;color:#ffffff;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:15px 36px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s;margin-top:6px" style-hover="transform:translateY(-2px)">{{ btnLabel }}</button>
           </div>
         </sc-if>
       </div>
@@ -117,7 +120,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;motion&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;}}">
 class Component extends DCLogic {
-  state = { fName: '', fSurname: '', fEmail: '', fMsg: '', fAccept: false, sent: false, fError: null };
+  state = { fName: '', fSurname: '', fEmail: '', fPhone: '', fMsg: '', fAccept: false, sent: false, sending: false, fError: null };
 
   renderVals() {
     return {
@@ -126,21 +129,49 @@ class Component extends DCLogic {
       fName: this.state.fName,
       fSurname: this.state.fSurname,
       fEmail: this.state.fEmail,
+      fPhone: this.state.fPhone,
       fMsg: this.state.fMsg,
       fAccept: this.state.fAccept,
       fError: this.state.fError,
+      btnLabel: this.state.sending ? 'Enviando…' : 'Enviar',
       onName: (e) => this.setState({ fName: e.target.value, fError: null }),
       onSurname: (e) => this.setState({ fSurname: e.target.value, fError: null }),
       onEmail: (e) => this.setState({ fEmail: e.target.value, fError: null }),
+      onPhone: (e) => this.setState({ fPhone: e.target.value, fError: null }),
       onMsg: (e) => this.setState({ fMsg: e.target.value, fError: null }),
       onAccept: (e) => this.setState({ fAccept: e.target.checked, fError: null }),
       onSubmit: () => {
+        if (this.state.sending) return;
         const email = this.state.fEmail.trim();
+        const phone = this.state.fPhone.trim();
         if (!this.state.fName.trim()) return this.setState({ fError: 'Escribe tu nombre.' });
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return this.setState({ fError: 'Escribe un correo electrónico válido.' });
+        if (phone.replace(/\D/g, '').length < 9) return this.setState({ fError: 'Escribe un teléfono válido.' });
         if (!this.state.fMsg.trim()) return this.setState({ fError: 'Escribe tu mensaje.' });
         if (!this.state.fAccept) return this.setState({ fError: 'Debes aceptar recibir comunicaciones.' });
-        this.setState({ sent: true });
+
+        this.setState({ sending: true, fError: null });
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: 'bd66ee88-ebfb-4c8b-96b1-1106c4d1279b',
+            subject: 'Nuevo mensaje desde el formulario de contacto',
+            from_name: 'Web LGMP',
+            Nombre: this.state.fName.trim(),
+            Apellido: this.state.fSurname.trim(),
+            Email: email,
+            'Teléfono': phone,
+            Mensaje: this.state.fMsg.trim(),
+            'Acepta comunicaciones': 'Sí'
+          })
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.success) this.setState({ sent: true, sending: false });
+            else this.setState({ sending: false, fError: 'No hemos podido enviar tu mensaje. Escríbenos a hola@lageneracionmejorpreparada.com y lo resolvemos.' });
+          })
+          .catch(() => this.setState({ sending: false, fError: 'No hemos podido enviar tu mensaje. Revisa tu conexión o escríbenos a hola@lageneracionmejorpreparada.com.' }));
       }
     };
   }
