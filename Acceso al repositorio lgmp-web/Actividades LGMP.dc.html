@@ -20,6 +20,43 @@
   summary::-webkit-details-marker{display:none}
   @keyframes lgmpHeroUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
   @keyframes lgmpFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+  /* ===== Menú de móvil ===== */
+  .menu-movil{display:none;position:static}
+  .menu-movil>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:12px;border:1px solid rgba(30,42,74,.16);background:#ffffff;color:#1E2A4A}
+  .menu-movil>summary::-webkit-details-marker{display:none}
+  .menu-movil[open]>summary{background:#F0503C;color:#ffffff;border-color:#F0503C}
+  .menu-movil .panel{position:absolute;top:100%;left:0;right:0;background:#ffffff;border-bottom:1px solid rgba(30,42,74,.1);box-shadow:0 18px 40px rgba(30,42,74,.16);padding:12px 18px 20px;display:flex;flex-direction:column;gap:2px;z-index:70;max-height:78vh;overflow-y:auto}
+  .menu-movil .panel a{padding:13px 12px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:16.5px;color:#1E2A4A}
+  .menu-movil .panel a:active{background:#F4F6FA}
+  .menu-movil .panel .sub{font-family:'Nunito',sans-serif;font-weight:800;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;padding:16px 12px 4px}
+  .menu-movil .panel a.hijo{padding-left:26px;font-weight:600;font-size:15.5px;color:rgba(30,42,74,.8)}
+  .menu-movil .panel a.cta{margin-top:14px;background:#F0503C;color:#ffffff;text-align:center;border-radius:999px;padding:15px 12px;box-shadow:0 6px 18px rgba(240,80,60,.35)}
+
+  /* ===== Adaptación a móvil =====
+     Toda la maqueta lleva el CSS en atributos style, así que las anulaciones
+     van por selector de atributo y necesitan !important. */
+  @media (max-width:900px){
+    .nav-escritorio{display:none !important}
+    .menu-movil{display:block !important}
+    header img{height:42px !important}
+
+    [style*="padding:14px 32px"]{padding:12px 18px !important}
+    [style*="padding:0 48px"]{padding-left:20px !important;padding-right:20px !important}
+    [style*="padding:110px 48px 72px"]{padding:64px 20px 44px !important}
+    [style*="padding:0 32px"]{padding-left:20px !important;padding-right:20px !important}
+    [style*="padding:96px 0"]{padding-top:56px !important;padding-bottom:56px !important}
+
+    [style*="grid-template-columns:repeat(4,1fr)"],
+    [style*="grid-template-columns:repeat(3,1fr)"],
+    [style*="grid-template-columns:repeat(2,1fr)"],
+    [style*="grid-template-columns:1fr 1fr"],
+    [style*="grid-template-columns:1.2fr 1fr"],
+    [style*="grid-template-columns:1fr 1.2fr"]{grid-template-columns:1fr !important}
+
+    [style*="gap:56px"]{gap:32px !important}
+    [style*="padding:34px 28px"],[style*="padding:28px 32px"],[style*="padding:40px 36px"]{padding:26px 22px !important}
+  }
 </style>
 </helmet>
 
@@ -29,7 +66,7 @@
   <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(30,42,74,.08)">
     <div style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px">
       <a href="Home LGMP.dc.html" style="display:flex;align-items:center"><img src="assets/logo-light.png" alt="LGMP — Asociación la generación mejor preparada" style="height:52px;display:block"></a>
-      <nav style="display:flex;align-items:center;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px">
+      <nav class="nav-escritorio" style="display:flex;align-items:center;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px">
         <a href="Home LGMP.dc.html#asociacion">La Asociación</a>
         <details style="position:relative">
           <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;color:#1E2A4A" style-hover="color:#F0503C">Actividades<span aria-hidden="true" style="font-size:10px;color:#F0503C">▼</span></summary>
@@ -37,7 +74,6 @@
             <a href="#eventos" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Eventos</a>
             <a href="#recursos" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Recursos para socios</a>
             <a href="#comunidad" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Comunidad Online</a>
-            <a href="#noticias" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Noticias</a>
           </div>
         </details>
         <a href="Socios LGMP.dc.html">Socios</a>
@@ -45,6 +81,20 @@
         <a href="Contacto LGMP.dc.html">Contacto</a>
         <a href="Hazte Socio LGMP.dc.html" style="background:#F0503C;color:#ffffff;padding:11px 22px;border-radius:999px;box-shadow:0 4px 14px rgba(240,80,60,.35);transition:transform .2s,box-shadow .2s" style-hover="color:#ffffff;transform:translateY(-2px);box-shadow:0 8px 20px rgba(240,80,60,.45)">Hazte socio</a>
       </nav>
+      <details class="menu-movil">
+        <summary aria-label="Abrir menú"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></summary>
+        <div class="panel">
+            <a href="Home LGMP.dc.html#asociacion">La Asociación</a>
+            <span class="sub">Actividades</span>
+            <a class="hijo" href="#eventos">Eventos</a>
+            <a class="hijo" href="#recursos">Recursos para socios</a>
+            <a class="hijo" href="#comunidad">Comunidad Online</a>
+            <a href="Socios LGMP.dc.html">Socios</a>
+            <a href="Podcast LGMP.dc.html">Podcast</a>
+            <a href="Contacto LGMP.dc.html">Contacto</a>
+            <a class="cta" href="Hazte Socio LGMP.dc.html">Hazte socio</a>
+        </div>
+      </details>
     </div>
   </header>
 
@@ -66,25 +116,14 @@
       <div style="display:flex;flex-direction:column;gap:18px">
         <div data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
           <div style="flex:none;width:84px;height:84px;border-radius:16px;background:#1E2A4A;color:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Nunito',sans-serif">
-            <span style="font-weight:900;font-size:28px;line-height:1">—</span>
-            <span style="font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7)">Mes</span>
+            <span style="font-weight:900;font-size:28px;line-height:1">1</span>
+            <span style="font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7)">Oct</span>
           </div>
           <div style="flex:1;min-width:240px">
-            <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A;margin:0 0 6px">Nombre del evento</h3>
-            <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">Lugar · Hora · Breve descripción del evento.</p>
+            <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A;margin:0 0 6px">Presentación oficial de la Asociación</h3>
+            <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">Presentación + mesa redonda + networking con antiguos alumnos de la UMU. Te escribimos con el sitio y la hora en cuanto te apuntes.</p>
           </div>
-          <a href="Contacto LGMP.dc.html" style="flex:none;background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 24px;border-radius:999px;box-shadow:0 6px 18px rgba(240,80,60,.35);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-2px)">Apúntate</a>
-        </div>
-        <div data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
-          <div style="flex:none;width:84px;height:84px;border-radius:16px;background:#1E2A4A;color:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Nunito',sans-serif">
-            <span style="font-weight:900;font-size:28px;line-height:1">—</span>
-            <span style="font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7)">Mes</span>
-          </div>
-          <div style="flex:1;min-width:240px">
-            <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A;margin:0 0 6px">Nombre del evento</h3>
-            <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">Lugar · Hora · Breve descripción del evento.</p>
-          </div>
-          <a href="Contacto LGMP.dc.html" style="flex:none;background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 24px;border-radius:999px;box-shadow:0 6px 18px rgba(240,80,60,.35);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-2px)">Apúntate</a>
+          <a href="presentacion.html" style="flex:none;background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 24px;border-radius:999px;box-shadow:0 6px 18px rgba(240,80,60,.35);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-2px)">Apúntate</a>
         </div>
       </div>
     </div>
@@ -141,39 +180,9 @@
   </section>
 
   <!-- ============ NOTICIAS ============ -->
-  <section id="noticias" style="background:#F4F6FA;padding:96px 0">
-    <div style="max-width:1400px;margin:0 auto;padding:0 48px">
-      <div data-reveal="true" style="text-align:left;margin-bottom:48px">
-        <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.4vw,42px);line-height:1.12;color:#1E2A4A;margin:0">Noticias de interés</h2>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
-        <article data-reveal="true" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.06);border-radius:20px;overflow:hidden;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-6px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
-          <div style="height:200px"><image-slot id="noticia-1" shape="rect" placeholder="Imagen de la noticia"></image-slot></div>
-          <div style="padding:24px 24px 28px;display:flex;flex-direction:column;gap:8px">
-            <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#F0503C">Fecha · Categoría</span>
-            <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:19px;color:#1E2A4A;margin:0">Título de la noticia</h3>
-            <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">Breve resumen de la noticia en una o dos frases.</p>
-          </div>
-        </article>
-        <article data-reveal="true" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.06);border-radius:20px;overflow:hidden;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-6px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
-          <div style="height:200px"><image-slot id="noticia-2" shape="rect" placeholder="Imagen de la noticia"></image-slot></div>
-          <div style="padding:24px 24px 28px;display:flex;flex-direction:column;gap:8px">
-            <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#F0503C">Fecha · Categoría</span>
-            <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:19px;color:#1E2A4A;margin:0">Título de la noticia</h3>
-            <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">Breve resumen de la noticia en una o dos frases.</p>
-          </div>
-        </article>
-        <article data-reveal="true" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.06);border-radius:20px;overflow:hidden;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-6px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
-          <div style="height:200px"><image-slot id="noticia-3" shape="rect" placeholder="Imagen de la noticia"></image-slot></div>
-          <div style="padding:24px 24px 28px;display:flex;flex-direction:column;gap:8px">
-            <span style="font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#F0503C">Fecha · Categoría</span>
-            <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:19px;color:#1E2A4A;margin:0">Título de la noticia</h3>
-            <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">Breve resumen de la noticia en una o dos frases.</p>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
+  <!-- Sección de noticias retirada el 31 ago 2026: no hay noticias reales todavía.
+       El marcado original está en el historial de git. -->
+  
 
   <!-- ============ FOOTER ============ -->
   <footer style="background:#182548;padding:56px 0 32px;color:rgba(255,255,255,.7)">

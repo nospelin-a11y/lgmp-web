@@ -28,6 +28,43 @@
   .lgmp-tip i{display:block;font-style:normal;font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;margin-top:5px}
   .lgmp-cara:hover .lgmp-tip,.lgmp-cara:focus-within .lgmp-tip{opacity:1;visibility:visible;transform:translate(-50%,0)}
   @media (prefers-reduced-motion: reduce){.lgmp-tip{transition:none}}
+
+  /* ===== Menú de móvil ===== */
+  .menu-movil{display:none;position:static}
+  .menu-movil>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:12px;border:1px solid rgba(30,42,74,.16);background:#ffffff;color:#1E2A4A}
+  .menu-movil>summary::-webkit-details-marker{display:none}
+  .menu-movil[open]>summary{background:#F0503C;color:#ffffff;border-color:#F0503C}
+  .menu-movil .panel{position:absolute;top:100%;left:0;right:0;background:#ffffff;border-bottom:1px solid rgba(30,42,74,.1);box-shadow:0 18px 40px rgba(30,42,74,.16);padding:12px 18px 20px;display:flex;flex-direction:column;gap:2px;z-index:70;max-height:78vh;overflow-y:auto}
+  .menu-movil .panel a{padding:13px 12px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:16.5px;color:#1E2A4A}
+  .menu-movil .panel a:active{background:#F4F6FA}
+  .menu-movil .panel .sub{font-family:'Nunito',sans-serif;font-weight:800;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;padding:16px 12px 4px}
+  .menu-movil .panel a.hijo{padding-left:26px;font-weight:600;font-size:15.5px;color:rgba(30,42,74,.8)}
+  .menu-movil .panel a.cta{margin-top:14px;background:#F0503C;color:#ffffff;text-align:center;border-radius:999px;padding:15px 12px;box-shadow:0 6px 18px rgba(240,80,60,.35)}
+
+  /* ===== Adaptación a móvil =====
+     Toda la maqueta lleva el CSS en atributos style, así que las anulaciones
+     van por selector de atributo y necesitan !important. */
+  @media (max-width:900px){
+    .nav-escritorio{display:none !important}
+    .menu-movil{display:block !important}
+    header img{height:42px !important}
+
+    [style*="padding:14px 32px"]{padding:12px 18px !important}
+    [style*="padding:0 48px"]{padding-left:20px !important;padding-right:20px !important}
+    [style*="padding:110px 48px 72px"]{padding:64px 20px 44px !important}
+    [style*="padding:0 32px"]{padding-left:20px !important;padding-right:20px !important}
+    [style*="padding:96px 0"]{padding-top:56px !important;padding-bottom:56px !important}
+
+    [style*="grid-template-columns:repeat(4,1fr)"],
+    [style*="grid-template-columns:repeat(3,1fr)"],
+    [style*="grid-template-columns:repeat(2,1fr)"],
+    [style*="grid-template-columns:1fr 1fr"],
+    [style*="grid-template-columns:1.2fr 1fr"],
+    [style*="grid-template-columns:1fr 1.2fr"]{grid-template-columns:1fr !important}
+
+    [style*="gap:56px"]{gap:32px !important}
+    [style*="padding:34px 28px"],[style*="padding:28px 32px"],[style*="padding:40px 36px"]{padding:26px 22px !important}
+  }
 </style>
 </helmet>
 
@@ -37,7 +74,7 @@
   <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(30,42,74,.08)">
     <div style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px">
       <a href="#top" style="display:flex;align-items:center"><img src="assets/logo-light.png" alt="LGMP — Asociación la generación mejor preparada" style="height:52px;display:block"></a>
-      <nav style="display:flex;align-items:center;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px">
+      <nav class="nav-escritorio" style="display:flex;align-items:center;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px">
         <a href="#asociacion">La Asociación</a>
         <details style="position:relative">
           <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;color:#1E2A4A" style-hover="color:#F0503C">Actividades<span aria-hidden="true" style="font-size:10px;color:#F0503C">▼</span></summary>
@@ -46,7 +83,6 @@
             <a href="Actividades LGMP.dc.html#eventos" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Eventos</a>
             <a href="Actividades LGMP.dc.html#recursos" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Recursos para socios</a>
             <a href="Actividades LGMP.dc.html#comunidad" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Comunidad Online</a>
-            <a href="Actividades LGMP.dc.html#noticias" style="padding:10px 14px;border-radius:9px" style-hover="background:#F4F6FA">Noticias</a>
           </div>
         </details>
         <a href="Socios LGMP.dc.html">Socios</a>
@@ -54,6 +90,21 @@
         <a href="Contacto LGMP.dc.html">Contacto</a>
         <a href="Hazte Socio LGMP.dc.html" style="background:#F0503C;color:#ffffff;padding:11px 22px;border-radius:999px;box-shadow:0 4px 14px rgba(240,80,60,.35);transition:transform .2s,box-shadow .2s" style-hover="color:#ffffff;transform:translateY(-2px);box-shadow:0 8px 20px rgba(240,80,60,.45)">Hazte socio</a>
       </nav>
+      <details class="menu-movil">
+        <summary aria-label="Abrir menú"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></summary>
+        <div class="panel">
+            <a href="#asociacion">La Asociación</a>
+            <span class="sub">Actividades</span>
+            <a class="hijo" href="Actividades LGMP.dc.html">Actividades 2026</a>
+            <a class="hijo" href="Actividades LGMP.dc.html#eventos">Eventos</a>
+            <a class="hijo" href="Actividades LGMP.dc.html#recursos">Recursos para socios</a>
+            <a class="hijo" href="Actividades LGMP.dc.html#comunidad">Comunidad Online</a>
+            <a href="Socios LGMP.dc.html">Socios</a>
+            <a href="Podcast LGMP.dc.html">Podcast</a>
+            <a href="Contacto LGMP.dc.html">Contacto</a>
+            <a class="cta" href="Hazte Socio LGMP.dc.html">Hazte socio</a>
+        </div>
+      </details>
     </div>
   </header>
 
@@ -86,7 +137,7 @@
     <div style="max-width:1400px;margin:0 auto;padding:0 48px;display:flex;flex-direction:column;gap:18px">
       <details open="{{ true }}" data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden">
         <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;color:#1E2A4A">Quiénes somos<span aria-hidden="true" style="color:#F0503C;font-weight:900;font-size:24px;flex:none">+</span></summary>
-        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Somos una asociación sin ánimo de lucro, de la Región de Murcia, formada por jóvenes profesionales en activo de distintos sectores —consultoría, recursos humanos, finanzas, tecnología y emprendimiento— con experiencia nacional e internacional.</p>
+        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Somos jóvenes profesionales de la Región de Murcia. Trabajamos en consultoría, recursos humanos, finanzas, tecnología y emprendimiento, aquí y fuera de España.<br><br>Ninguno vive de esto. La Asociación no tiene ánimo de lucro y la sacamos adelante en los ratos libres, porque hace unos años éramos nosotros los que no sabíamos por dónde empezar.</p>
       </details>
       <details data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden">
         <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;color:#1E2A4A">¿Por qué una Asociación?<span aria-hidden="true" style="color:#F0503C;font-weight:900;font-size:24px;flex:none">+</span></summary>
