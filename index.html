@@ -30,12 +30,7 @@
   h1{animation:lgmpHeroUp .9s .1s cubic-bezier(.22,1,.36,1) both;font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(30px,5.4vw,54px);line-height:1.14;margin:0;color:#ffffff}
   h1 .destacado{color:#F0503C}
   .sub{animation:lgmpHeroUp 1s .22s cubic-bezier(.22,1,.36,1) both;font-size:clamp(17px,2vw,22px);line-height:1.6;color:rgba(255,255,255,.75);margin:22px 0 0}
-  .contador{animation:lgmpHeroUp 1s .34s cubic-bezier(.22,1,.36,1) both;display:flex;justify-content:center;gap:clamp(8px,2vw,14px);flex-wrap:nowrap;margin:52px 0 0}
-  .caja{flex:1 1 0;min-width:0;max-width:150px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:clamp(14px,3vw,22px) 6px;transition:transform .25s,background .25s}
-  .caja:hover{transform:translateY(-6px);background:rgba(255,255,255,.10)}
-  .caja .num{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(24px,7vw,48px);line-height:1;color:#F0503C;font-variant-numeric:tabular-nums}
-  .caja .lbl{font-family:'Nunito',sans-serif;font-weight:700;font-size:clamp(9px,2.2vw,12px);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:10px}
-  .aviso{animation:lgmpHeroUp 1s .46s cubic-bezier(.22,1,.36,1) both;margin:56px 0 0}
+  .aviso{animation:lgmpHeroUp 1s .34s cubic-bezier(.22,1,.36,1) both;margin:52px 0 0}
   .aviso p{font-size:16.5px;line-height:1.6;color:rgba(255,255,255,.75);margin:0 0 22px}
   /* ===== Formulario MailerLite embebido, adaptado a la marca =====
      Los selectores replican la cadena completa de MailerLite y se prefijan con
@@ -56,9 +51,9 @@
   html body #mlb2-43487611.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button.primary{cursor:pointer;font-family:'Nunito',sans-serif !important;font-weight:800 !important;font-size:17px !important;color:#ffffff !important;background-color:#F0503C !important;border:none !important;border-radius:999px !important;padding:15px 34px !important;height:auto !important;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s,box-shadow .2s}
   html body #mlb2-43487611.ml-form-embedContainer .ml-form-embedWrapper .ml-form-embedBody .ml-form-embedSubmit button:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(240,80,60,.5)}
   html body #mlb2-43487611.ml-form-embedContainer .ml-form-embedWrapper .ml-form-successBody .ml-form-successContent{color:#ffffff !important}
-  .pista{animation:lgmpHeroUp 1s .58s cubic-bezier(.22,1,.36,1) both;margin:64px 0 0;font-size:13.5px;color:rgba(255,255,255,.35)}
+  .pista{animation:lgmpHeroUp 1s .46s cubic-bezier(.22,1,.36,1) both;margin:64px 0 0;font-size:13.5px;color:rgba(255,255,255,.35)}
   @media (prefers-reduced-motion: reduce){
-    h1,.sub,.contador,.aviso,.pista{animation:none}
+    h1,.sub,.aviso,.pista{animation:none}
     .blob-1,.blob-2{animation:none}
   }
 </style>
@@ -71,13 +66,6 @@
   <h1>No podemos decirte qué es <span class="destacado">(todavía)</span>.<br>Pero hacía mucha falta algo así.</h1>
   <p class="sub">Algo está a punto de empezar en la Región de Murcia.</p>
 
-  <div class="contador" id="contador" role="timer" aria-label="Cuenta atrás">
-    <div class="caja"><div class="num" id="cd-dias">--</div><div class="lbl">Días</div></div>
-    <div class="caja"><div class="num" id="cd-horas">--</div><div class="lbl">Horas</div></div>
-    <div class="caja"><div class="num" id="cd-min">--</div><div class="lbl">Minutos</div></div>
-    <div class="caja"><div class="num" id="cd-seg">--</div><div class="lbl">Segundos</div></div>
-  </div>
-
   <div class="aviso">
     <p>Déjanos tu email y serás de los primeros en descubrirlo.</p>
     <div class="ml-embedded" data-form="tVANqC"></div>
@@ -86,31 +74,5 @@
   <p class="pista">© 2026 · Muy pronto en lageneracionmejorpreparada.com</p>
 </main>
 
-<script>
-  (function(){
-    // Lanzamiento: 1 de septiembre de 2026, 00:00 hora peninsular (CEST, UTC+2)
-    var objetivo = new Date('2026-09-01T00:00:00+02:00').getTime();
-    var elDias = document.getElementById('cd-dias'),
-        elHoras = document.getElementById('cd-horas'),
-        elMin = document.getElementById('cd-min'),
-        elSeg = document.getElementById('cd-seg');
-    function pad(n){ return n < 10 ? '0' + n : '' + n; }
-    function tick(){
-      var resta = objetivo - Date.now();
-      if (resta <= 0) {
-        elDias.textContent = '00'; elHoras.textContent = '00';
-        elMin.textContent = '00'; elSeg.textContent = '00';
-        clearInterval(intervalo);
-        return;
-      }
-      elDias.textContent = pad(Math.floor(resta / 86400000));
-      elHoras.textContent = pad(Math.floor(resta % 86400000 / 3600000));
-      elMin.textContent = pad(Math.floor(resta % 3600000 / 60000));
-      elSeg.textContent = pad(Math.floor(resta % 60000 / 1000));
-    }
-    tick();
-    var intervalo = setInterval(tick, 1000);
-  })();
-</script>
 </body>
 </html>
