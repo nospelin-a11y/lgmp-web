@@ -20,6 +20,14 @@
   summary::-webkit-details-marker{display:none}
   @keyframes lgmpHeroUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
   @keyframes lgmpFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  /* Tarjeta flotante con nombre y cargo al pasar por encima de una cara de la Junta */
+  .lgmp-cara{position:relative}
+  .lgmp-tip{position:absolute;left:50%;top:calc(100% + 14px);transform:translate(-50%,-6px);background:#182548;color:#ffffff;padding:11px 16px;border-radius:12px;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .22s,transform .22s;box-shadow:0 14px 32px rgba(30,42,74,.3);z-index:30;pointer-events:none;text-align:center}
+  .lgmp-tip::before{content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:7px solid transparent;border-bottom-color:#182548}
+  .lgmp-tip b{display:block;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;line-height:1.2}
+  .lgmp-tip i{display:block;font-style:normal;font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;margin-top:5px}
+  .lgmp-cara:hover .lgmp-tip,.lgmp-cara:focus-within .lgmp-tip{opacity:1;visibility:visible;transform:translate(-50%,0)}
+  @media (prefers-reduced-motion: reduce){.lgmp-tip{transition:none}}
 </style>
 </helmet>
 
@@ -58,8 +66,17 @@
       <p style="animation:lgmpHeroUp 1s .22s cubic-bezier(.22,1,.36,1) both;font-size:clamp(17px,2vw,21px);line-height:1.6;color:rgba(30,42,74,.75);margin:26px 0 0">Nacemos para unir las oportunidades y el talento.</p>
     </div>
     <div style="max-width:1400px;margin:0 auto;padding:0 48px 84px">
-      <div data-reveal="true" style="height:460px;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(30,42,74,.18)">
-        <image-slot id="hero-foto" shape="rect" placeholder="Foto del equipo o de un encuentro de la comunidad"></image-slot>
+      <div data-reveal="true" style="position:relative;overflow:hidden;border-radius:24px;background:#1E2A4A;box-shadow:0 24px 60px rgba(30,42,74,.18);padding:clamp(48px,6vw,80px) clamp(28px,5vw,64px);text-align:center">
+        <div aria-hidden="true" style="position:absolute;top:-150px;right:-110px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.3),rgba(240,80,60,0) 65%);animation:lgmpFloat 10s ease-in-out infinite"></div>
+        <div aria-hidden="true" style="position:absolute;bottom:-190px;left:-120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.1),rgba(255,255,255,0) 65%);animation:lgmpFloat 12s ease-in-out infinite"></div>
+        <div style="position:relative;max-width:820px;margin:0 auto">
+          <p style="font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;margin:0 0 16px">Presentación oficial</p>
+          <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(32px,5vw,56px);line-height:1.1;color:#ffffff;margin:0">1 de octubre</h2>
+          <p style="font-size:clamp(16px,2vw,20px);line-height:1.6;color:rgba(255,255,255,.78);margin:22px 0 0">Presentación + mesa redonda + networking con antiguos alumnos de la UMU.</p>
+          <div style="display:flex;justify-content:center;margin-top:34px">
+            <a href="presentacion.html" style="background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:16px 44px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-3px)">Apúntate</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -76,7 +93,7 @@
         <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Nacemos del proyecto <em>La Generación Mejor Preparada</em>, un podcast en el que jóvenes profesionales murcianos comparten su trayectoria profesional y académica para motivar a quienes vienen detrás. Hemos decidido convertir esa comunidad y esa conversación en una organización que acompañe de forma real a los jóvenes en uno de los momentos más difíciles de su vida: el salto de la universidad al mundo laboral.</p>
       </details>
       <details data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden">
-        <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;color:#1E2A4A">Misión de la Asociación<span aria-hidden="true" style="color:#F0503C;font-weight:900;font-size:24px;flex:none">+</span></summary>
+        <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;color:#1E2A4A">Propósito<span aria-hidden="true" style="color:#F0503C;font-weight:900;font-size:24px;flex:none">+</span></summary>
         <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Facilitar la transición al mundo laboral con mentorías, formación práctica y conexión con el tejido empresarial, para que los jóvenes empiecen su carrera con seguridad.</p>
       </details>
       <details data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden">
@@ -131,14 +148,14 @@
       <div data-reveal="true" style="text-align:left;margin:0 0 48px">
         <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.2vw,40px);line-height:1.12;color:#1E2A4A;margin:0">Junta Directiva</h2>
       </div>
-      <div style="display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:clamp(10px,1.8vw,26px);overflow-x:auto;padding:6px 0">
-        <div data-reveal="true" title="Juan Francisco López" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s" style-hover="transform:translateY(-6px)"><image-slot id="foto-presidente" shape="circle" placeholder="Foto" src="assets/equipo/juan-francisco-lopez.webp"></image-slot></div>
-        <div data-reveal="true" title="María del Mar López" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s" style-hover="transform:translateY(-6px)"><image-slot id="foto-secretaria" shape="circle" placeholder="Foto" src="assets/equipo/maria-del-mar-lopez.webp"></image-slot></div>
-        <div data-reveal="true" title="Juan Alberto Correas" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s" style-hover="transform:translateY(-6px)"><image-slot id="foto-tesorero" shape="circle" placeholder="Foto" src="assets/equipo/juan-alberto-correas.webp"></image-slot></div>
-        <div data-reveal="true" title="Raquel Martínez" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s" style-hover="transform:translateY(-6px)"><image-slot id="foto-vocal-raquel" shape="circle" placeholder="Foto" src="assets/equipo/raquel-martinez.webp"></image-slot></div>
-        <div data-reveal="true" title="Ester Gómez Quintero" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s" style-hover="transform:translateY(-6px)"><image-slot id="foto-vocal-ester" shape="circle" placeholder="Foto" src="assets/equipo/ester-gomez.webp"></image-slot></div>
-        <div data-reveal="true" title="Borja Villalgordo" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s" style-hover="transform:translateY(-6px)"><image-slot id="foto-vocal-borja" shape="circle" placeholder="Foto" src="assets/equipo/borja-villalgordo.webp"></image-slot></div>
-        <div data-reveal="true" title="Álvaro Morlán" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s" style-hover="transform:translateY(-6px)"><image-slot id="foto-vocal-alvaro" shape="circle" placeholder="Foto" src="assets/equipo/alvaro-morlan.webp"></image-slot></div>
+      <div style="display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:clamp(10px,1.8vw,26px);overflow-x:auto;padding:6px 0 96px">
+        <div class="lgmp-cara" data-reveal="true" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-presidente" shape="circle" placeholder="Foto" src="assets/equipo/juan-francisco-lopez.webp"></image-slot><span class="lgmp-tip"><b>Juan Francisco López</b><i>Presidente</i></span></div>
+        <div class="lgmp-cara" data-reveal="true" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-secretaria" shape="circle" placeholder="Foto" src="assets/equipo/maria-del-mar-lopez.webp"></image-slot><span class="lgmp-tip"><b>María del Mar López</b><i>Secretaria</i></span></div>
+        <div class="lgmp-cara" data-reveal="true" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-tesorero" shape="circle" placeholder="Foto" src="assets/equipo/juan-alberto-correas.webp"></image-slot><span class="lgmp-tip"><b>Juan Alberto Correas</b><i>Tesorero</i></span></div>
+        <div class="lgmp-cara" data-reveal="true" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-vocal-raquel" shape="circle" placeholder="Foto" src="assets/equipo/raquel-martinez.webp"></image-slot><span class="lgmp-tip"><b>Raquel Martínez</b><i>Vocal</i></span></div>
+        <div class="lgmp-cara" data-reveal="true" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-vocal-ester" shape="circle" placeholder="Foto" src="assets/equipo/ester-gomez.webp"></image-slot><span class="lgmp-tip"><b>Ester Gómez Quintero</b><i>Vocal</i></span></div>
+        <div class="lgmp-cara" data-reveal="true" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-vocal-borja" shape="circle" placeholder="Foto" src="assets/equipo/borja-villalgordo.webp"></image-slot><span class="lgmp-tip"><b>Borja Villalgordo</b><i>Vocal</i></span></div>
+        <div class="lgmp-cara" data-reveal="true" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-vocal-alvaro" shape="circle" placeholder="Foto" src="assets/equipo/alvaro-morlan.webp"></image-slot><span class="lgmp-tip"><b>Álvaro Morlán</b><i>Vocal</i></span></div>
       
       </div>
     </div>
@@ -152,7 +169,7 @@
       <p style="font-size:18px;line-height:1.65;color:rgba(255,255,255,.75);margin:20px 0 0">Únete a la comunidad y empieza tu carrera con seguridad, o colabora con nosotros como profesional o entidad.</p>
       <div style="display:flex;gap:16px;justify-content:flex-start;flex-wrap:wrap;margin-top:36px">
         <a href="Hazte Socio LGMP.dc.html" style="background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:16px 34px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-3px)">Hazte socio</a>
-        <a href="mailto:hola@lageneracionmejorpreparada.com" style="border:2px solid rgba(255,255,255,.4);color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:14px 32px;border-radius:999px;transition:background .2s" style-hover="background:rgba(255,255,255,.1);color:#ffffff">Escríbenos</a>
+        <a href="Contacto LGMP.dc.html" style="border:2px solid rgba(255,255,255,.4);color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:14px 32px;border-radius:999px;transition:background .2s" style-hover="background:rgba(255,255,255,.1);color:#ffffff">Escríbenos</a>
       </div>
       <p style="margin:26px 0 0;font-size:15px;color:rgba(255,255,255,.55)">hola@lageneracionmejorpreparada.com</p>
     </div>
