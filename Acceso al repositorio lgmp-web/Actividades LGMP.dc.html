@@ -33,38 +33,29 @@
   .menu-movil .panel a.hijo{padding-left:26px;font-weight:600;font-size:15.5px;color:rgba(30,42,74,.8)}
   .menu-movil .panel a.cta{margin-top:14px;background:#F0503C;color:#ffffff;text-align:center;border-radius:999px;padding:15px 12px;box-shadow:0 6px 18px rgba(240,80,60,.35)}
 
+
   /* ===== Adaptación a móvil =====
-     Toda la maqueta lleva el CSS en atributos style, así que las anulaciones
-     van por selector de atributo y necesitan !important. */
+     El runtime .dc reescribe los atributos style normalizándolos, así que los
+     selectores [style*="..."] no casan. Se marcan los contenedores con clase,
+     que sí sobrevive, y se anulan con !important sobre el estilo en línea. */
   @media (max-width:900px){
     .nav-escritorio{display:none !important}
     .menu-movil{display:block !important}
     header img{height:42px !important}
-
-    [style*="padding:14px 32px"]{padding:12px 18px !important}
-    [style*="padding:0 48px"]{padding-left:20px !important;padding-right:20px !important}
-    [style*="padding:110px 48px 72px"]{padding:64px 20px 44px !important}
-    [style*="padding:0 32px"]{padding-left:20px !important;padding-right:20px !important}
-    [style*="padding:96px 0"]{padding-top:56px !important;padding-bottom:56px !important}
-
-    [style*="grid-template-columns:repeat(4,1fr)"],
-    [style*="grid-template-columns:repeat(3,1fr)"],
-    [style*="grid-template-columns:repeat(2,1fr)"],
-    [style*="grid-template-columns:1fr 1fr"],
-    [style*="grid-template-columns:1.2fr 1fr"],
-    [style*="grid-template-columns:1fr 1.2fr"]{grid-template-columns:1fr !important}
-
-    [style*="gap:56px"]{gap:32px !important}
-    [style*="padding:34px 28px"],[style*="padding:28px 32px"],[style*="padding:40px 36px"]{padding:26px 22px !important}
+    .lg-cab{padding:12px 18px !important}
+    .lg-cont{padding-left:20px !important;padding-right:20px !important}
+    .lg-hero{padding:64px 20px 44px !important}
+    .lg-sec{padding-top:56px !important;padding-bottom:56px !important}
+    .lg-grid{grid-template-columns:1fr !important;gap:18px !important}
   }
-</style>
+  </style>
 </helmet>
 
 <div data-screen-label="Actividades LGMP" style="min-width:320px">
 
   <!-- ============ NAV ============ -->
   <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(30,42,74,.08)">
-    <div style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+    <div class="lg-cab" style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px">
       <a href="Home LGMP.dc.html" style="display:flex;align-items:center"><img src="assets/logo-light.png" alt="LGMP — Asociación la generación mejor preparada" style="height:52px;display:block"></a>
       <nav class="nav-escritorio" style="display:flex;align-items:center;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px">
         <a href="Home LGMP.dc.html#asociacion">La Asociación</a>
@@ -108,8 +99,8 @@
   </section>
 
   <!-- ============ EVENTOS ============ -->
-  <section id="eventos" style="background:#F4F6FA;padding:96px 0">
-    <div style="max-width:1400px;margin:0 auto;padding:0 48px">
+  <section class="lg-sec" id="eventos" style="background:#F4F6FA;padding:96px 0">
+    <div class="lg-cont" style="max-width:1400px;margin:0 auto;padding:0 48px">
       <div data-reveal="true" style="text-align:left;margin-bottom:48px">
         <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.4vw,42px);line-height:1.12;color:#1E2A4A;margin:0">Eventos de la Asociación</h2>
       </div>
@@ -130,12 +121,12 @@
   </section>
 
   <!-- ============ RECURSOS PARA SOCIOS ============ -->
-  <section id="recursos" style="background:#ffffff;padding:96px 0">
-    <div style="max-width:1400px;margin:0 auto;padding:0 48px">
+  <section class="lg-sec" id="recursos" style="background:#ffffff;padding:96px 0">
+    <div class="lg-cont" style="max-width:1400px;margin:0 auto;padding:0 48px">
       <div data-reveal="true" style="text-align:left;margin-bottom:48px">
         <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.4vw,42px);line-height:1.12;color:#1E2A4A;margin:0">Recursos para socios</h2>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <div class="lg-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
         <div data-reveal="true" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.06);border-radius:20px;padding:32px 28px;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-6px);box-shadow:0 18px 40px rgba(30,42,74,.12)">
           <div style="width:52px;height:52px;border-radius:14px;background:rgba(240,80,60,.12);color:#F0503C;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"></path><path d="M14 3v5h5"></path><path d="M9 13h6M9 17h6"></path></svg></div>
           <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;margin:18px 0 8px;color:#1E2A4A">Revisión de CV y optimización de perfil de LinkedIn</h3>
@@ -186,7 +177,7 @@
 
   <!-- ============ FOOTER ============ -->
   <footer style="background:#182548;padding:56px 0 32px;color:rgba(255,255,255,.7)">
-    <div style="max-width:1100px;margin:0 auto;padding:0 32px">
+    <div class="lg-cont" style="max-width:1100px;margin:0 auto;padding:0 32px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:32px">
         <img src="assets/logo-dark.png" alt="LGMP — Asociación la generación mejor preparada" style="height:64px;display:block">
         <nav style="display:flex;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px">

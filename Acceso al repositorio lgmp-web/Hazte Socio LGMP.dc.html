@@ -32,38 +32,29 @@
   .menu-movil .panel a.hijo{padding-left:26px;font-weight:600;font-size:15.5px;color:rgba(30,42,74,.8)}
   .menu-movil .panel a.cta{margin-top:14px;background:#F0503C;color:#ffffff;text-align:center;border-radius:999px;padding:15px 12px;box-shadow:0 6px 18px rgba(240,80,60,.35)}
 
+
   /* ===== Adaptación a móvil =====
-     Toda la maqueta lleva el CSS en atributos style, así que las anulaciones
-     van por selector de atributo y necesitan !important. */
+     El runtime .dc reescribe los atributos style normalizándolos, así que los
+     selectores [style*="..."] no casan. Se marcan los contenedores con clase,
+     que sí sobrevive, y se anulan con !important sobre el estilo en línea. */
   @media (max-width:900px){
     .nav-escritorio{display:none !important}
     .menu-movil{display:block !important}
     header img{height:42px !important}
-
-    [style*="padding:14px 32px"]{padding:12px 18px !important}
-    [style*="padding:0 48px"]{padding-left:20px !important;padding-right:20px !important}
-    [style*="padding:110px 48px 72px"]{padding:64px 20px 44px !important}
-    [style*="padding:0 32px"]{padding-left:20px !important;padding-right:20px !important}
-    [style*="padding:96px 0"]{padding-top:56px !important;padding-bottom:56px !important}
-
-    [style*="grid-template-columns:repeat(4,1fr)"],
-    [style*="grid-template-columns:repeat(3,1fr)"],
-    [style*="grid-template-columns:repeat(2,1fr)"],
-    [style*="grid-template-columns:1fr 1fr"],
-    [style*="grid-template-columns:1.2fr 1fr"],
-    [style*="grid-template-columns:1fr 1.2fr"]{grid-template-columns:1fr !important}
-
-    [style*="gap:56px"]{gap:32px !important}
-    [style*="padding:34px 28px"],[style*="padding:28px 32px"],[style*="padding:40px 36px"]{padding:26px 22px !important}
+    .lg-cab{padding:12px 18px !important}
+    .lg-cont{padding-left:20px !important;padding-right:20px !important}
+    .lg-hero{padding:64px 20px 44px !important}
+    .lg-sec{padding-top:56px !important;padding-bottom:56px !important}
+    .lg-grid{grid-template-columns:1fr !important;gap:18px !important}
   }
-</style>
+  </style>
 </helmet>
 
 <div data-screen-label="Hazte socio LGMP" style="min-width:320px">
 
   <!-- ============ NAV ============ -->
   <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(30,42,74,.08)">
-    <div style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px">
+    <div class="lg-cab" style="max-width:1200px;margin:0 auto;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px">
       <a href="Home LGMP.dc.html" style="display:flex;align-items:center"><img src="assets/logo-light.png" alt="LGMP — Asociación la generación mejor preparada" style="height:52px;display:block"></a>
       <nav class="nav-escritorio" style="display:flex;align-items:center;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:15px">
         <a href="Home LGMP.dc.html#asociacion">La Asociación</a>
@@ -110,12 +101,12 @@
   </section>
 
   <!-- ============ PERSONAS FÍSICAS ============ -->
-  <section id="tipos" style="background:#F4F6FA;padding:96px 0">
-    <div style="max-width:1400px;margin:0 auto;padding:0 48px">
+  <section class="lg-sec" id="tipos" style="background:#F4F6FA;padding:96px 0">
+    <div class="lg-cont" style="max-width:1400px;margin:0 auto;padding:0 48px">
       <div data-reveal="true" style="text-align:left;margin-bottom:48px">
         <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.4vw,42px);line-height:1.12;color:#1E2A4A;margin:0">Para personas físicas</h2>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px">
+      <div class="lg-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:28px">
         <div data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:22px;padding:40px 34px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-6px);box-shadow:0 18px 40px rgba(30,42,74,.14)">
           <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:24px;color:#1E2A4A;margin:0">Socios menores de 30 años</h3>
           <span style="display:inline-flex;align-items:center;gap:8px;background:#1E2A4A;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;padding:8px 18px;border-radius:999px">Descuento de bienvenida −50% · hasta el 31 de diciembre</span>
@@ -135,19 +126,19 @@
   <!-- ============ CONTADOR DE SOCIOS ============ -->
   <section style="background:#1E2A4A;padding:80px 0;position:relative;overflow:hidden">
     <div aria-hidden="true" style="position:absolute;top:-140px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.18),rgba(240,80,60,0) 65%);animation:lgmpFloat 10s ease-in-out infinite"></div>
-    <div data-counter="true" style="position:relative;max-width:1400px;margin:0 auto;padding:0 48px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap">
+    <div class="lg-cont" data-counter="true" style="position:relative;max-width:1400px;margin:0 auto;padding:0 48px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap">
       <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(32px,4.4vw,56px);line-height:1.1;text-transform:uppercase;color:#ffffff;margin:0;max-width:640px">Número actual de <span style="color:#F0503C">socios</span></h2>
       <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(90px,12vw,160px);line-height:1;color:#F0503C">{{ sociosCount }}</div>
     </div>
   </section>
 
   <!-- ============ PERSONAS JURÍDICAS ============ -->
-  <section style="background:#ffffff;padding:96px 0">
-    <div style="max-width:1400px;margin:0 auto;padding:0 48px">
+  <section class="lg-sec" style="background:#ffffff;padding:96px 0">
+    <div class="lg-cont" style="max-width:1400px;margin:0 auto;padding:0 48px">
       <div data-reveal="true" style="text-align:left;margin-bottom:48px">
         <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.4vw,42px);line-height:1.12;color:#1E2A4A;margin:0">Socios Honoríficos</h2>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px">
+      <div class="lg-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:24px">
         <div data-reveal="true" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.06);border-radius:22px;padding:38px 30px;display:flex;flex-direction:column;align-items:flex-start;gap:12px;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-6px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
           <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:22px;color:#1E2A4A;margin:0">Socios corporativos</h3>
           <p style="font-size:15.5px;line-height:1.65;color:rgba(30,42,74,.72);margin:0">Para empresas que quieren conectar con el talento joven de la Región y apoyar su desarrollo profesional.</p>
@@ -163,8 +154,8 @@
   </section>
 
   <!-- ============ ENTIDAD COLABORADORA ============ -->
-  <section style="background:#F4F6FA;padding:96px 0">
-    <div data-reveal="true" style="max-width:1400px;margin:0 auto;padding:0 48px;text-align:left">
+  <section class="lg-sec" style="background:#F4F6FA;padding:96px 0">
+    <div class="lg-cont" data-reveal="true" style="max-width:1400px;margin:0 auto;padding:0 48px;text-align:left">
       <span style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(20px,2.2vw,28px);letter-spacing:.12em;text-transform:uppercase;color:#F0503C">Entidad colaboradora</span>
       <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.4vw,42px);line-height:1.15;color:#1E2A4A;margin:14px 0 20px">Sé parte activa de la Asociación: únete como Entidad Colaboradora</h2>
       <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0">Organizaciones que creen en el talento joven como motor de futuro. Con su apoyo impulsan la actividad de la Asociación, obtienen <strong>visibilidad institucional</strong>, <strong>acceso a una red de jóvenes profesionales</strong> y la oportunidad de <strong>participar en iniciativas y actividades</strong> que conectan a su organización con la generación mejor preparada.</p>
@@ -173,9 +164,9 @@
   </section>
 
   <!-- ============ NEWSLETTER ============ -->
-  <section id="newsletter" style="background:#1E2A4A;padding:96px 0;position:relative;overflow:hidden">
+  <section class="lg-sec" id="newsletter" style="background:#1E2A4A;padding:96px 0;position:relative;overflow:hidden">
     <div aria-hidden="true" style="position:absolute;bottom:-180px;left:-140px;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.14),rgba(240,80,60,0) 65%);animation:lgmpFloat 11s ease-in-out infinite"></div>
-    <div data-reveal="true" style="position:relative;max-width:1400px;margin:0 auto;padding:0 48px;text-align:left;color:#ffffff">
+    <div class="lg-cont" data-reveal="true" style="position:relative;max-width:1400px;margin:0 auto;padding:0 48px;text-align:left;color:#ffffff">
       <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C">Newsletter</span>
       <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(26px,3.2vw,38px);line-height:1.15;margin:14px 0 28px;color:#ffffff">Acompáñanos: noticias y actividades de la Asociación en tu correo.</h2>
       <sc-if value="{{ nlSent }}" hint-placeholder-val="{{ false }}">
@@ -200,7 +191,7 @@
 
   <!-- ============ FOOTER ============ -->
   <footer style="background:#182548;padding:56px 0 32px;color:rgba(255,255,255,.7)">
-    <div style="max-width:1100px;margin:0 auto;padding:0 32px">
+    <div class="lg-cont" style="max-width:1100px;margin:0 auto;padding:0 32px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:32px">
         <img src="assets/logo-dark.png" alt="LGMP — Asociación la generación mejor preparada" style="height:64px;display:block">
         <nav style="display:flex;gap:26px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px">
