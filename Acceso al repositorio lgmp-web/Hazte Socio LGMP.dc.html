@@ -21,11 +21,14 @@
   @keyframes lgmpFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 
   /* ===== Menú de móvil ===== */
-  .menu-movil{display:none;position:static}
+  .menu-movil{display:none;position:relative}
+  /* Un hijo posicionado en absoluto escapa al ocultado nativo de <details>,
+     asi que el panel se oculta de forma explicita cuando el menu esta cerrado. */
+  .menu-movil:not([open]) .panel{display:none !important}
   .menu-movil>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:12px;border:1px solid rgba(30,42,74,.16);background:#ffffff;color:#1E2A4A}
   .menu-movil>summary::-webkit-details-marker{display:none}
   .menu-movil[open]>summary{background:#F0503C;color:#ffffff;border-color:#F0503C}
-  .menu-movil .panel{position:absolute;top:100%;left:0;right:0;background:#ffffff;border-bottom:1px solid rgba(30,42,74,.1);box-shadow:0 18px 40px rgba(30,42,74,.16);padding:12px 18px 20px;display:flex;flex-direction:column;gap:2px;z-index:70;max-height:78vh;overflow-y:auto}
+  .menu-movil .panel{position:absolute;top:calc(100% + 10px);right:0;left:auto;width:min(320px,calc(100vw - 36px));border-radius:16px;border:1px solid rgba(30,42,74,.1);background:#ffffff;box-shadow:0 18px 44px rgba(30,42,74,.2);padding:12px 14px 16px;display:flex;flex-direction:column;gap:2px;z-index:70;max-height:78vh;overflow-y:auto}
   .menu-movil .panel a{padding:13px 12px;border-radius:10px;font-family:'Nunito',sans-serif;font-weight:700;font-size:16.5px;color:#1E2A4A}
   .menu-movil .panel a:active{background:#F4F6FA}
   .menu-movil .panel .sub{font-family:'Nunito',sans-serif;font-weight:800;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;padding:16px 12px 4px}
