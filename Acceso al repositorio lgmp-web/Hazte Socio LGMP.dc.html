@@ -218,7 +218,7 @@
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;numSocios&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 87, &quot;min&quot;: 0, &quot;max&quot;: 10000, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Contenido&quot;}, &quot;motion&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;numSocios&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 7, &quot;min&quot;: 0, &quot;max&quot;: 10000, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Contenido&quot;}, &quot;motion&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;}}">
 class Component extends DCLogic {
   state = { count: 0, nlName: '', nlEmail: '', nlAccept: false, nlSent: false, nlError: null };
 
@@ -247,7 +247,7 @@ class Component extends DCLogic {
   startCounter() {
     if (this._counterStarted) return;
     this._counterStarted = true;
-    const target = Math.max(0, Math.round(this.props.numSocios ?? 87));
+    const target = Math.max(0, Math.round(this.props.numSocios ?? 7));
     const dur = 1800;
     const t0 = performance.now();
     const tick = (t) => {
@@ -262,7 +262,7 @@ class Component extends DCLogic {
   componentDidMount() {
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced || this.props.motion === false) {
-      this.setState({ count: Math.max(0, Math.round(this.props.numSocios ?? 87)) });
+      this.setState({ count: Math.max(0, Math.round(this.props.numSocios ?? 7)) });
     }
 
     this._timer = setTimeout(() => {
@@ -270,7 +270,7 @@ class Component extends DCLogic {
       const counterEl = document.querySelector('[data-counter]');
       if (counterEl) {
         if (reduced || this.props.motion === false) {
-          this.setState({ count: Math.max(0, Math.round(this.props.numSocios ?? 87)) });
+          this.setState({ count: Math.max(0, Math.round(this.props.numSocios ?? 7)) });
         } else {
           this._cio = new IntersectionObserver((entries) => {
             entries.forEach((en) => { if (en.isIntersecting) { this.startCounter(); this._cio.disconnect(); } });

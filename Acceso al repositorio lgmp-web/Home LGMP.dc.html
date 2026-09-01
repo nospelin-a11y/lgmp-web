@@ -62,6 +62,9 @@
     .lg-blob{display:none !important}
     .lg-footnav{flex-wrap:wrap !important;gap:12px 18px !important}
     .lgmp-tip{white-space:normal !important;max-width:170px}
+    /* La junta se despliega entera, sin scroll lateral: 4 + 3 caras. */
+    .lg-junta{flex-wrap:wrap !important;overflow:visible !important;gap:14px 12px !important;padding-bottom:16px !important}
+    .lg-junta .lgmp-cara{width:clamp(64px,19vw,88px) !important;height:clamp(64px,19vw,88px) !important}
   }
   </style>
 </helmet>
@@ -135,19 +138,19 @@
     <div class="lg-cont" style="max-width:1400px;margin:0 auto;padding:0 48px;display:flex;flex-direction:column;gap:18px">
       <details open="{{ true }}" data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden">
         <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;color:#1E2A4A">Quiénes somos<span aria-hidden="true" style="color:#F0503C;font-weight:900;font-size:24px;flex:none">+</span></summary>
-        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Somos jóvenes profesionales de la Región de Murcia. Trabajamos en consultoría, recursos humanos, finanzas, tecnología y emprendimiento, aquí y fuera de España.<br><br>Ninguno vive de esto. La Asociación no tiene ánimo de lucro y la sacamos adelante en los ratos libres, porque hace unos años éramos nosotros los que no sabíamos por dónde empezar.</p>
+        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Si haces cosas, pasan cosas. Estamos hartos de ver a gente con talento en trabajos que no le gustan, simplemente por desconocimiento. La idea de esta Asociación es ayudarlos, motivarlos y darles herramientas para que sigan creciendo.<br><br>Ninguno vive de esto, la Asociación no tiene ánimo de lucro, lo hacemos porque hace no muchos años éramos nosotros los que no sabíamos por dónde empezar.</p>
       </details>
       <details data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden">
         <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;color:#1E2A4A">¿Por qué una Asociación?<span aria-hidden="true" style="color:#F0503C;font-weight:900;font-size:24px;flex:none">+</span></summary>
-        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Nacemos del proyecto <em>La Generación Mejor Preparada</em>, un podcast en el que jóvenes profesionales murcianos comparten su trayectoria profesional y académica para motivar a quienes vienen detrás. Hemos decidido convertir esa comunidad y esa conversación en una organización que acompañe de forma real a los jóvenes en uno de los momentos más difíciles de su vida: el salto de la universidad al mundo laboral.</p>
+        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Nacemos del podcast <em>La Generación Mejor Preparada</em>, pero no queríamos quedarnos ahí. Queremos seguir creando una comunidad de gente con ganas y hacer proyectos mucho más grandes.</p>
       </details>
       <details data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden">
         <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;color:#1E2A4A">Propósito<span aria-hidden="true" style="color:#F0503C;font-weight:900;font-size:24px;flex:none">+</span></summary>
-        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Facilitar la transición al mundo laboral con mentorías, formación práctica y conexión con el tejido empresarial, para que los jóvenes empiecen su carrera con seguridad.</p>
+        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Desmentir estas dos afirmaciones: «No hay trabajo» y «No hay gente con ganas de trabajar».</p>
       </details>
       <details data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden">
         <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 28px;font-family:'Nunito',sans-serif;font-weight:800;font-size:21px;color:#1E2A4A">¿Qué hacemos?<span aria-hidden="true" style="color:#F0503C;font-weight:900;font-size:24px;flex:none">+</span></summary>
-        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Acompañamos a los jóvenes con mentoría y orientación, empleabilidad práctica (CV, LinkedIn, entrevistas, negociación salarial), exploración profesional, conexión con empresas de la Región, comunidad y contenido, apoyo al emprendimiento y formación continua.</p>
+        <p style="font-size:17px;line-height:1.7;color:rgba(30,42,74,.78);margin:0;padding:0 28px 26px">Acompañamos a los jóvenes con mentoría y orientación, empleabilidad práctica (CV, LinkedIn, entrevistas, negociación salarial), exploración profesional, conexión con empresas de la Región de Murcia, comunidad y contenido, apoyo al emprendimiento y formación continua.</p>
       </details>
     </div>
   </section>
@@ -197,7 +200,7 @@
       <div data-reveal="true" style="text-align:left;margin:0 0 48px">
         <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.2vw,40px);line-height:1.12;color:#1E2A4A;margin:0">Junta Directiva</h2>
       </div>
-      <div data-reveal="true" style="display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:clamp(10px,1.8vw,26px);overflow-x:auto;padding:6px 0 96px">
+      <div class="lg-junta" data-reveal="true" style="display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:clamp(10px,1.8vw,26px);padding:6px 0 96px">
         <div class="lgmp-cara" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-presidente" shape="circle" placeholder="Foto" src="assets/equipo/juan-francisco-lopez.webp"></image-slot><span class="lgmp-tip"><b>Juan Francisco López</b><i>Presidente</i></span></div>
         <div class="lgmp-cara" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-secretaria" shape="circle" placeholder="Foto" src="assets/equipo/maria-del-mar-lopez.webp"></image-slot><span class="lgmp-tip"><b>María del Mar López</b><i>Secretaria</i></span></div>
         <div class="lgmp-cara" tabindex="0" style="flex:0 0 auto;width:clamp(96px,11vw,150px);height:clamp(96px,11vw,150px);transition:transform .25s;outline:none" style-hover="transform:translateY(-6px)"><image-slot id="foto-tesorero" shape="circle" placeholder="Foto" src="assets/equipo/juan-alberto-correas.webp"></image-slot><span class="lgmp-tip"><b>Juan Alberto Correas</b><i>Tesorero</i></span></div>
