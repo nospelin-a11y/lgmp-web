@@ -61,10 +61,24 @@
     .lg-grid{grid-template-columns:1fr !important;gap:18px !important}
     .lg-blob{display:none !important}
     .lg-footnav{flex-wrap:wrap !important;gap:12px 18px !important}
-    .lgmp-tip{white-space:normal !important;max-width:170px}
-    /* La junta se despliega entera, sin scroll lateral: 4 + 3 caras. */
-    .lg-junta{flex-wrap:wrap !important;overflow:visible !important;gap:14px 12px !important;padding-bottom:16px !important}
-    .lg-junta .lgmp-cara{width:clamp(64px,19vw,88px) !important;height:clamp(64px,19vw,88px) !important}
+    /* ---- Junta Directiva en móvil ----
+       Sin scroll lateral y en tres columnas. La etiqueta deja de flotar: en
+       una pantalla táctil no hay hover, y flotando quedaba tapada por las
+       caras de la fila siguiente (la transform del hover crea un contexto de
+       apilamiento en la propia cara y encierra ahí su z-index). Pasa a texto
+       fijo bajo cada foto, siempre legible y sin solaparse con nada. */
+    .lg-junta{flex-wrap:wrap !important;overflow:visible !important;gap:26px 12px !important;padding-bottom:8px !important}
+    .lg-junta .lgmp-cara{width:calc((100% - 24px)/3) !important;height:auto !important;
+      display:flex !important;flex-direction:column !important;align-items:center !important;transform:none !important}
+    .lg-junta .lgmp-cara image-slot{display:block !important;flex:none !important;
+      width:clamp(72px,21vw,96px) !important;height:clamp(72px,21vw,96px) !important}
+    .lg-junta .lgmp-tip{position:static !important;opacity:1 !important;visibility:visible !important;
+      transform:none !important;background:transparent !important;box-shadow:none !important;
+      padding:9px 0 0 !important;max-width:none !important;white-space:normal !important;
+      color:#1E2A4A !important;text-align:center !important}
+    .lg-junta .lgmp-tip::before{display:none !important}
+    .lg-junta .lgmp-tip b{font-size:12.5px !important;line-height:1.25 !important}
+    .lg-junta .lgmp-tip i{font-size:9.5px !important;letter-spacing:.1em !important;margin-top:3px !important}
   }
   </style>
 </helmet>
