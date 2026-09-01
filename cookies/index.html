@@ -42,7 +42,7 @@
   <div class="hero">
     <p class="kicker">Información legal</p>
     <h1>Política de Cookies</h1>
-    <p class="fecha">Última actualización: 31 de agosto de 2026</p>
+    <p class="fecha">Última actualización: 1 de septiembre de 2026</p>
   </div>
 
   <div class="doc">
@@ -52,42 +52,53 @@
     <p>El artículo 22.2 de la Ley 34/2002 (LSSI-CE) se aplica por igual a todas ellas, por lo que en esta política te informamos tanto de las cookies como de cualquier otro dato que se almacene en tu equipo.</p>
 
     <h2>2. Qué utiliza esta web</h2>
-    <p>Este sitio <strong>no instala cookies propias</strong>. Tampoco utilizamos herramientas de analítica web ni de publicidad, ni elaboramos perfiles de navegación.</p>
-    <p>Sí se emplean servicios de terceros necesarios para el funcionamiento de la web, que almacenan la siguiente información:</p>
+    <p>Este sitio <strong>no instala cookies propias ni de terceros</strong>, y <strong>no guarda
+    ningún identificador en tu navegador</strong>. Tampoco hacemos publicidad ni elaboramos
+    perfiles de navegación.</p>
+    <p>Sí medimos las visitas, pero con una herramienta que funciona sin cookies y sin
+    identificar a nadie. Y se emplean servicios de terceros necesarios para que la web
+    funcione. Esto es todo:</p>
 
     <div class="tabla">
       <table>
         <thead>
-          <tr><th>Identificador</th><th>Tipo</th><th>Proveedor</th><th>Finalidad</th><th>Duración</th></tr>
+          <tr><th>Servicio</th><th>Qué hace</th><th>¿Guarda algo en tu equipo?</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td><code>ml_guid</code></td>
-            <td>localStorage · Analítica / seguimiento</td>
-            <td>MailerLite</td>
-            <td>Asigna un identificador anónimo a tu navegador para que MailerLite reconozca las visitas al formulario de suscripción y evite mostrarlo de forma repetida.</td>
-            <td>Persistente hasta que borres los datos del sitio</td>
+            <td><strong>Cloudflare Web Analytics</strong></td>
+            <td>Cuenta las visitas y de qué página vienen, para saber qué contenidos son útiles.
+            No usa cookies, no guarda identificadores y no rastrea a las personas entre sitios
+            web ni entre visitas.</td>
+            <td><strong>No</strong></td>
           </tr>
           <tr>
-            <td>—</td>
-            <td>Conexión a terceros</td>
-            <td>Google Fonts</td>
-            <td>Carga las tipografías con las que está escrita la web. No almacena información en tu equipo, pero implica que tu dirección IP se comunica a Google.</td>
-            <td>No aplica</td>
+            <td><strong>Google Fonts</strong></td>
+            <td>Carga las tipografías con las que está escrita la web.</td>
+            <td>No, pero tu dirección IP se comunica a Google al descargarlas.</td>
           </tr>
           <tr>
-            <td>—</td>
-            <td>Conexión a terceros</td>
-            <td>GitHub Pages</td>
-            <td>Servidor donde está alojada la web. Registra datos técnicos de conexión con fines de seguridad y funcionamiento.</td>
-            <td>No aplica</td>
+            <td><strong>GitHub Pages</strong></td>
+            <td>Servidor donde está alojada la web. Registra datos técnicos de conexión con
+            fines de seguridad y funcionamiento.</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>Web3Forms</strong></td>
+            <td>Procesa y nos hace llegar los formularios. Solo interviene cuando pulsas el
+            botón de enviar.</td>
+            <td>No</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div class="nota">
-      <p><strong>Sobre <code>ml_guid</code>:</strong> se trata de un identificador de seguimiento que no es estrictamente necesario para que la web funcione. Estamos trabajando en un sistema de consentimiento previo que permita aceptarlo o rechazarlo antes de que se almacene. Mientras tanto, puedes eliminarlo en cualquier momento borrando los datos de este sitio en tu navegador, siguiendo las instrucciones del apartado 4.</p>
+      <p><strong>Por eso esta web no te muestra un aviso de cookies.</strong> El artículo 22.2 de
+      la LSSI-CE exige pedir consentimiento antes de almacenar información en tu equipo. Como no
+      almacenamos nada que no sea imprescindible, no hay nada que consentir. Si algún día
+      añadimos una herramienta que sí lo requiera, verás el aviso antes de que se active y
+      actualizaremos esta política.</p>
     </div>
 
     <h2>3. Base jurídica</h2>
@@ -126,5 +137,7 @@
   </div>
 </footer>
 
+<!-- Cloudflare Web Analytics: analítica sin cookies, no requiere consentimiento -->
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "d88a51df730a44f1a2560b013dcca904"}'></script>
 </body>
 </html>
