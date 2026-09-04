@@ -26,6 +26,7 @@
 <meta name="theme-color" content="#1E2A4A">
 
 <script src="/support.js"></script>
+<script src="/lgmp-datos.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"NGO","@id":"https://lageneracionmejorpreparada.com/#organizacion","name":"Asociación La Generación Mejor Preparada","alternateName":"LGMP","url":"https://lageneracionmejorpreparada.com/","logo":"https://lageneracionmejorpreparada.com/assets/logo-light.webp","image":"https://lageneracionmejorpreparada.com/assets/og.jpg","email":"hola@lageneracionmejorpreparada.com","taxID":"G88948880","foundingDate":"2026-06-21","nonprofitStatus":"NonprofitANBI","description":"Asociación sin ánimo de lucro de la Región de Murcia que acompaña a los jóvenes en el salto de la universidad al mundo laboral.","address":{"@type":"PostalAddress","streetAddress":"Avenida Región de Murcia 89, Guadalupe","addressLocality":"Murcia","postalCode":"30107","addressRegion":"Región de Murcia","addressCountry":"ES"},"areaServed":{"@type":"AdministrativeArea","name":"Región de Murcia"},"sameAs":["https://open.spotify.com/show/71loMrrju6KJBK8F6sTqEg","https://www.youtube.com/@LaGeneracionMejorPreparada","https://www.instagram.com/lageneracionmejorpreparada/","https://www.tiktok.com/@lageneracionpodcast"]}]}</script>
 </head>
 <body>
@@ -206,9 +207,10 @@
         <div style="display:flex;flex-direction:column;gap:14px;text-align:left;max-width:640px">
           <input type="text" placeholder="Nombre" value="{{ nlName }}" onChange="{{ onNlName }}" style="background:#ffffff;border:none;border-radius:12px;padding:16px 18px;font-family:'Nunito Sans',sans-serif;font-size:16px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box">
           <input type="email" placeholder="Correo electrónico" value="{{ nlEmail }}" onChange="{{ onNlEmail }}" style="background:#ffffff;border:none;border-radius:12px;padding:16px 18px;font-family:'Nunito Sans',sans-serif;font-size:16px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box">
-          <label style="display:flex;align-items:center;gap:10px;font-size:14.5px;color:rgba(255,255,255,.75);cursor:pointer">
-            <input type="checkbox" checked="{{ nlAccept }}" onChange="{{ onNlAccept }}" style="width:18px;height:18px;accent-color:#F0503C">
-            Acepto recibir comunicaciones de la Asociación
+          <input type="text" id="trampaNewsletter" name="trampa" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0">
+          <label style="display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:rgba(255,255,255,.75);cursor:pointer">
+            <input type="checkbox" checked="{{ nlAccept }}" onChange="{{ onNlAccept }}" style="width:18px;height:18px;accent-color:#F0503C;flex:none;margin-top:2px">
+            <span>Acepto recibir comunicaciones de la Asociación y el tratamiento de mis datos conforme a la <a href="/privacidad/" target="_blank" rel="noopener" style="color:#ffffff;text-decoration:underline">Política de Privacidad</a>.</span>
           </label>
           <sc-if value="{{ nlError }}" hint-placeholder-val="{{ false }}">
             <div style="color:#FFB3A8;font-size:14.5px;font-weight:600">{{ nlError }}</div>
@@ -265,48 +267,59 @@ class Component extends DCLogic {
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return this.setState({ nlError: 'Escribe un correo electrónico válido.' });
         if (!this.state.nlAccept) return this.setState({ nlError: 'Debes aceptar recibir comunicaciones.' });
 
+        const trampa = (document.getElementById('trampaNewsletter') || {}).value || '';
+
         this.setState({ nlSending: true, nlError: null });
-        fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: 'bd66ee88-ebfb-4c8b-96b1-1106c4d1279b',
-            subject: 'Nueva alta en la newsletter',
-            from_name: 'Web LGMP',
-            Nombre: this.state.nlName.trim(),
-            Email: email,
-            'Acepta comunicaciones': 'Sí'
-          })
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.success) this.setState({ nlSent: true, nlSending: false });
-            else this.setState({ nlSending: false, nlError: 'No hemos podido apuntarte. Escríbenos a hola@lageneracionmejorpreparada.com.' });
-          })
-          .catch(() => this.setState({ nlSending: false, nlError: 'No hemos podido apuntarte. Revisa tu conexión o escríbenos a hola@lageneracionmejorpreparada.com.' }));
+        window.LGMP.enviar('newsletter', {
+          nombre: this.state.nlName.trim(),
+          email: email,
+          acepta_comunicaciones: true
+        }, trampa)
+          .then(() => this.setState({ nlSent: true, nlSending: false }))
+          .catch((err) => this.setState({ nlSending: false, nlError: err.message }));
       }
     };
+  }
+
+  /**
+   * Socios activos, contados en la base de datos con contar_socios(). Si
+   * Supabase no responde, se usa la prop `numSocios` como respaldo para que
+   * el bloque nunca se quede en cero.
+   */
+  objetivoSocios() {
+    if (!this._socios) {
+      const respaldo = Math.max(0, Math.round(this.props.numSocios ?? 7));
+      const consulta = window.LGMP ? window.LGMP.contarSocios() : Promise.resolve(null);
+      this._socios = consulta
+        // Un 0 significa que todavía no se ha cargado a nadie en la tabla,
+        // no que la Asociación no tenga socios: en ese caso, respaldo.
+        .then((n) => (typeof n === 'number' && n > 0 ? n : respaldo))
+        .catch(() => respaldo);
+    }
+    return this._socios;
   }
 
   startCounter() {
     if (this._counterStarted) return;
     this._counterStarted = true;
-    const target = Math.max(0, Math.round(this.props.numSocios ?? 7));
-    const dur = 1800;
-    const t0 = performance.now();
-    const tick = (t) => {
-      const p = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      this.setState({ count: Math.round(target * eased) });
-      if (p < 1) this._raf = requestAnimationFrame(tick);
-    };
-    this._raf = requestAnimationFrame(tick);
+    this.objetivoSocios().then((target) => {
+      if (this._desmontado) return;
+      const dur = 1800;
+      const t0 = performance.now();
+      const tick = (t) => {
+        const p = Math.min(1, (t - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        this.setState({ count: Math.round(target * eased) });
+        if (p < 1) this._raf = requestAnimationFrame(tick);
+      };
+      this._raf = requestAnimationFrame(tick);
+    });
   }
 
   componentDidMount() {
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced || this.props.motion === false) {
-      this.setState({ count: Math.max(0, Math.round(this.props.numSocios ?? 7)) });
+      this.objetivoSocios().then((n) => { if (!this._desmontado) this.setState({ count: n }); });
     }
 
     this._timer = setTimeout(() => {
@@ -314,7 +327,7 @@ class Component extends DCLogic {
       const counterEl = document.querySelector('[data-counter]');
       if (counterEl) {
         if (reduced || this.props.motion === false) {
-          this.setState({ count: Math.max(0, Math.round(this.props.numSocios ?? 7)) });
+          this.objetivoSocios().then((n) => { if (!this._desmontado) this.setState({ count: n }); });
         } else {
           this._cio = new IntersectionObserver((entries) => {
             entries.forEach((en) => { if (en.isIntersecting) { this.startCounter(); this._cio.disconnect(); } });
@@ -348,6 +361,7 @@ class Component extends DCLogic {
   }
 
   componentWillUnmount() {
+    this._desmontado = true;
     clearTimeout(this._timer);
     cancelAnimationFrame(this._raf);
     if (this._io) this._io.disconnect();

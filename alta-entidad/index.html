@@ -24,6 +24,7 @@
 <link rel="icon" href="/assets/favicon.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="/assets/favicon.png">
 <meta name="theme-color" content="#1E2A4A">
+<script src="/lgmp-datos.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -123,39 +124,36 @@
     </div>
 
     <form id="formEntidad" novalidate>
-      <input type="hidden" name="access_key" value="bd66ee88-ebfb-4c8b-96b1-1106c4d1279b">
-      <input type="hidden" name="subject" value="Nueva solicitud de alta — Entidad">
-      <input type="hidden" name="from_name" value="Web LGMP">
-      <input type="hidden" name="Origen" id="origen" value="No indicado">
-      <input type="checkbox" name="botcheck" class="oculto" tabindex="-1" autocomplete="off">
+      <input type="hidden" name="origen" id="origen" value="">
+      <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <fieldset>
         <legend>La entidad</legend>
 
         <div class="campo">
           <label for="entidad">Nombre de la entidad <span class="req">*</span></label>
-          <input type="text" id="entidad" name="Entidad" autocomplete="organization" required>
+          <input type="text" id="entidad" name="entidad" autocomplete="organization" required>
         </div>
 
         <div class="fila">
           <div class="campo">
             <label for="cif">CIF <span class="req">*</span></label>
-            <input type="text" id="cif" name="CIF" required>
+            <input type="text" id="cif" name="cif" required>
           </div>
           <div class="campo">
             <label for="municipio">Municipio</label>
-            <input type="text" id="municipio" name="Municipio" autocomplete="address-level2">
+            <input type="text" id="municipio" name="municipio" autocomplete="address-level2">
           </div>
         </div>
 
         <div class="fila">
           <div class="campo">
             <label for="sector">Sector o actividad</label>
-            <input type="text" id="sector" name="Sector" placeholder="Por ejemplo: consultoría, tecnología, educación…">
+            <input type="text" id="sector" name="sector" placeholder="Por ejemplo: consultoría, tecnología, educación…">
           </div>
           <div class="campo">
             <label for="web">Página web</label>
-            <input type="url" id="web" name="Web" placeholder="https://…">
+            <input type="url" id="web" name="web" placeholder="https://…">
           </div>
         </div>
       </fieldset>
@@ -166,22 +164,22 @@
         <div class="fila">
           <div class="campo">
             <label for="nombre">Nombre y apellidos <span class="req">*</span></label>
-            <input type="text" id="nombre" name="Persona de contacto" autocomplete="name" required>
+            <input type="text" id="nombre" name="contacto_nombre" autocomplete="name" required>
           </div>
           <div class="campo">
             <label for="cargo">Cargo <span class="req">*</span></label>
-            <input type="text" id="cargo" name="Cargo" autocomplete="organization-title" required>
+            <input type="text" id="cargo" name="contacto_cargo" autocomplete="organization-title" required>
           </div>
         </div>
 
         <div class="fila">
           <div class="campo">
             <label for="email">Correo electrónico <span class="req">*</span></label>
-            <input type="email" id="email" name="Email" autocomplete="email" required>
+            <input type="email" id="email" name="email" autocomplete="email" required>
           </div>
           <div class="campo">
             <label for="telefono">Teléfono <span class="req">*</span></label>
-            <input type="tel" id="telefono" name="Teléfono" autocomplete="tel" required>
+            <input type="tel" id="telefono" name="telefono" autocomplete="tel" required>
           </div>
         </div>
       </fieldset>
@@ -190,19 +188,19 @@
         <legend>Cómo queréis colaborar</legend>
         <p class="ayuda" style="margin-bottom:16px">Marca todo lo que os encaje. Nada es un compromiso cerrado: nos sirve para preparar la conversación.</p>
         <div class="opciones">
-          <label class="opcion"><input type="checkbox" name="Colaboración: mentorías" value="Sí"><span>Mentorías</span></label>
-          <label class="opcion"><input type="checkbox" name="Colaboración: ofertas de empleo" value="Sí"><span>Ofertas de empleo</span></label>
-          <label class="opcion"><input type="checkbox" name="Colaboración: prácticas" value="Sí"><span>Prácticas</span></label>
-          <label class="opcion"><input type="checkbox" name="Colaboración: patrocinio" value="Sí"><span>Patrocinio</span></label>
-          <label class="opcion"><input type="checkbox" name="Colaboración: cesión de espacio" value="Sí"><span>Cesión de espacio</span></label>
-          <label class="opcion"><input type="checkbox" name="Colaboración: ponencias" value="Sí"><span>Ponencias</span></label>
-          <label class="opcion"><input type="checkbox" name="Colaboración: podcast" value="Sí"><span>Podcast</span></label>
-          <label class="opcion"><input type="checkbox" name="Colaboración: otras" value="Sí"><span>Otras</span></label>
+          <label class="opcion"><input type="checkbox" name="colaboracion" value="mentorías"><span>Mentorías</span></label>
+          <label class="opcion"><input type="checkbox" name="colaboracion" value="ofertas de empleo"><span>Ofertas de empleo</span></label>
+          <label class="opcion"><input type="checkbox" name="colaboracion" value="prácticas"><span>Prácticas</span></label>
+          <label class="opcion"><input type="checkbox" name="colaboracion" value="patrocinio"><span>Patrocinio</span></label>
+          <label class="opcion"><input type="checkbox" name="colaboracion" value="cesión de espacio"><span>Cesión de espacio</span></label>
+          <label class="opcion"><input type="checkbox" name="colaboracion" value="ponencias"><span>Ponencias</span></label>
+          <label class="opcion"><input type="checkbox" name="colaboracion" value="podcast"><span>Podcast</span></label>
+          <label class="opcion"><input type="checkbox" name="colaboracion" value="otras"><span>Otras</span></label>
         </div>
 
         <div class="campo" style="margin-top:22px">
           <label for="mensaje">Cuéntanos más</label>
-          <textarea id="mensaje" name="Mensaje" placeholder="¿Qué os gustaría conseguir colaborando con la Asociación?"></textarea>
+          <textarea id="mensaje" name="mensaje" placeholder="¿Qué os gustaría conseguir colaborando con la Asociación?"></textarea>
         </div>
       </fieldset>
 
@@ -215,7 +213,7 @@
         </label>
 
         <label class="check">
-          <input type="checkbox" name="Acepta comunicaciones" value="Sí">
+          <input type="checkbox" name="acepta_comunicaciones">
           <span>Queremos recibir por correo las noticias y actividades de la Asociación.</span>
         </label>
 
@@ -243,13 +241,12 @@
 
   // Registra desde qué botón de Hazte Socio se ha llegado, sin preguntárselo
   // al usuario (?tipo=corporativo | institucional | colaboradora).
-  var etiquetas = {
-    corporativo:   'Socio corporativo',
-    institucional: 'Socio institucional',
-    colaboradora:  'Entidad colaboradora'
-  };
+  // Desde qué botón de Hazte Socio se ha llegado. Se guarda en la columna
+  // `origen`, que solo admite estos tres valores.
   var tipo = new URLSearchParams(location.search).get('tipo');
-  if (etiquetas[tipo]) document.getElementById('origen').value = etiquetas[tipo];
+  if (['corporativo', 'institucional', 'colaboradora'].indexOf(tipo) !== -1) {
+    document.getElementById('origen').value = tipo;
+  }
 
   function fallo(msg){
     error.textContent = msg;
@@ -274,27 +271,31 @@
     boton.disabled = true;
     boton.textContent = 'Enviando…';
 
-    var datos = Object.fromEntries(new FormData(form).entries());
-    datos['Acepta la política de privacidad'] = 'Sí';
+    var colaboracion = Array.prototype.slice
+      .call(form.querySelectorAll('input[name="colaboracion"]:checked'))
+      .map(function(c){ return c.value; });
 
-    fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(datos)
+    window.LGMP.enviar('alta-entidad', {
+      entidad:         form.entidad.value,
+      cif:             form.cif.value,
+      municipio:       form.municipio.value,
+      sector:          form.sector.value,
+      web:             form.web.value,
+      contacto_nombre: form.contacto_nombre.value,
+      contacto_cargo:  form.contacto_cargo.value,
+      email:           form.email.value,
+      telefono:        form.telefono.value,
+      colaboracion:    colaboracion,
+      mensaje:         form.mensaje.value,
+      origen:          form.origen.value,
+      acepta_comunicaciones: form.acepta_comunicaciones.checked
+    }, form.trampa.value)
+    .then(function(){
+      form.classList.add('oculto');
+      exito.classList.remove('oculto');
+      exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
     })
-    .then(function(r){ return r.json(); })
-    .then(function(res){
-      if (res.success) {
-        form.classList.add('oculto');
-        exito.classList.remove('oculto');
-        exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        fallo('No hemos podido enviar la solicitud. Escríbenos a hola@lageneracionmejorpreparada.com y lo resolvemos.');
-      }
-    })
-    .catch(function(){
-      fallo('No hemos podido enviar la solicitud. Revisad la conexión o escribidnos a hola@lageneracionmejorpreparada.com.');
-    });
+    .catch(function(err){ fallo(err.message); });
   });
 })();
 </script>

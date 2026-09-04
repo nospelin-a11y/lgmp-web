@@ -26,6 +26,7 @@
 <meta name="theme-color" content="#1E2A4A">
 
 <script src="/support.js"></script>
+<script src="/lgmp-datos.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"NGO","@id":"https://lageneracionmejorpreparada.com/#organizacion","name":"Asociación La Generación Mejor Preparada","alternateName":"LGMP","url":"https://lageneracionmejorpreparada.com/","logo":"https://lageneracionmejorpreparada.com/assets/logo-light.webp","image":"https://lageneracionmejorpreparada.com/assets/og.jpg","email":"hola@lageneracionmejorpreparada.com","taxID":"G88948880","foundingDate":"2026-06-21","nonprofitStatus":"NonprofitANBI","description":"Asociación sin ánimo de lucro de la Región de Murcia que acompaña a los jóvenes en el salto de la universidad al mundo laboral.","address":{"@type":"PostalAddress","streetAddress":"Avenida Región de Murcia 89, Guadalupe","addressLocality":"Murcia","postalCode":"30107","addressRegion":"Región de Murcia","addressCountry":"ES"},"areaServed":{"@type":"AdministrativeArea","name":"Región de Murcia"},"sameAs":["https://open.spotify.com/show/71loMrrju6KJBK8F6sTqEg","https://www.youtube.com/@LaGeneracionMejorPreparada","https://www.instagram.com/lageneracionmejorpreparada/","https://www.tiktok.com/@lageneracionpodcast"]}]}</script>
 </head>
 <body>
@@ -152,9 +153,14 @@
               <input type="tel" placeholder="Teléfono" value="{{ fPhone }}" onChange="{{ onPhone }}" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:15px 16px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box">
             </div>
             <textarea placeholder="Mensaje" rows="{{ 5 }}" value="{{ fMsg }}" onChange="{{ onMsg }}" style="background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:15px 16px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;box-sizing:border-box;resize:vertical"></textarea>
-            <label style="display:flex;align-items:center;gap:10px;font-size:14.5px;color:rgba(30,42,74,.7);cursor:pointer">
-              <input type="checkbox" checked="{{ fAccept }}" onChange="{{ onAccept }}" style="width:18px;height:18px;accent-color:#F0503C">
-              Acepto recibir comunicaciones de la Asociación
+            <input type="text" id="trampaContacto" name="trampa" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0">
+            <label style="display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:rgba(30,42,74,.7);cursor:pointer">
+              <input type="checkbox" checked="{{ fRgpd }}" onChange="{{ onRgpd }}" style="width:18px;height:18px;accent-color:#F0503C;flex:none;margin-top:2px">
+              <span>He leído y acepto la <a href="/privacidad/" target="_blank" rel="noopener" style="color:#F0503C;font-weight:700">Política de Privacidad</a> y el tratamiento de mis datos para responder a mi mensaje.</span>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;font-size:14.5px;color:rgba(30,42,74,.7);cursor:pointer">
+              <input type="checkbox" checked="{{ fAccept }}" onChange="{{ onAccept }}" style="width:18px;height:18px;accent-color:#F0503C;flex:none;margin-top:2px">
+              <span>Quiero recibir por correo las noticias y actividades de la Asociación.</span>
             </label>
             <sc-if value="{{ fError }}" hint-placeholder-val="{{ false }}">
               <div style="color:#C4341F;font-size:14.5px;font-weight:600">{{ fError }}</div>
@@ -191,7 +197,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;motion&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;}}">
 class Component extends DCLogic {
-  state = { fName: '', fSurname: '', fEmail: '', fPhone: '', fMsg: '', fAccept: false, sent: false, sending: false, fError: null };
+  state = { fName: '', fSurname: '', fEmail: '', fPhone: '', fMsg: '', fRgpd: false, fAccept: false, sent: false, sending: false, fError: null };
 
   renderVals() {
     return {
@@ -202,6 +208,7 @@ class Component extends DCLogic {
       fEmail: this.state.fEmail,
       fPhone: this.state.fPhone,
       fMsg: this.state.fMsg,
+      fRgpd: this.state.fRgpd,
       fAccept: this.state.fAccept,
       fError: this.state.fError,
       btnLabel: this.state.sending ? 'Enviando…' : 'Enviar',
@@ -210,6 +217,7 @@ class Component extends DCLogic {
       onEmail: (e) => this.setState({ fEmail: e.target.value, fError: null }),
       onPhone: (e) => this.setState({ fPhone: e.target.value, fError: null }),
       onMsg: (e) => this.setState({ fMsg: e.target.value, fError: null }),
+      onRgpd: (e) => this.setState({ fRgpd: e.target.checked, fError: null }),
       onAccept: (e) => this.setState({ fAccept: e.target.checked, fError: null }),
       onSubmit: () => {
         if (this.state.sending) return;
@@ -219,30 +227,21 @@ class Component extends DCLogic {
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return this.setState({ fError: 'Escribe un correo electrónico válido.' });
         if (phone.replace(/\D/g, '').length < 9) return this.setState({ fError: 'Escribe un teléfono válido.' });
         if (!this.state.fMsg.trim()) return this.setState({ fError: 'Escribe tu mensaje.' });
-        if (!this.state.fAccept) return this.setState({ fError: 'Debes aceptar recibir comunicaciones.' });
+        if (!this.state.fRgpd) return this.setState({ fError: 'Debes aceptar la Política de Privacidad para continuar.' });
+
+        const trampa = (document.getElementById('trampaContacto') || {}).value || '';
 
         this.setState({ sending: true, fError: null });
-        fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: 'bd66ee88-ebfb-4c8b-96b1-1106c4d1279b',
-            subject: 'Nuevo mensaje desde el formulario de contacto',
-            from_name: 'Web LGMP',
-            Nombre: this.state.fName.trim(),
-            Apellido: this.state.fSurname.trim(),
-            Email: email,
-            'Teléfono': phone,
-            Mensaje: this.state.fMsg.trim(),
-            'Acepta comunicaciones': 'Sí'
-          })
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.success) this.setState({ sent: true, sending: false });
-            else this.setState({ sending: false, fError: 'No hemos podido enviar tu mensaje. Escríbenos a hola@lageneracionmejorpreparada.com y lo resolvemos.' });
-          })
-          .catch(() => this.setState({ sending: false, fError: 'No hemos podido enviar tu mensaje. Revisa tu conexión o escríbenos a hola@lageneracionmejorpreparada.com.' }));
+        window.LGMP.enviar('contacto', {
+          nombre: this.state.fName.trim(),
+          apellido: this.state.fSurname.trim(),
+          email: email,
+          telefono: phone,
+          mensaje: this.state.fMsg.trim(),
+          acepta_comunicaciones: this.state.fAccept
+        }, trampa)
+          .then(() => this.setState({ sent: true, sending: false }))
+          .catch((err) => this.setState({ sending: false, fError: err.message }));
       }
     };
   }

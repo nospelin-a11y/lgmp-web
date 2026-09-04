@@ -1,0 +1,10 @@
+# La carpeta SUPABASE/ es documentación de trabajo y se queda en local.
+# Dentro puede haber claves secretas del proyecto: nunca debe subirse.
+SUPABASE/
+*API KEY*
+*.env
+
+# Notas de trabajo que tampoco se publican
+CLAUDE.md
+PLAN-LANZAMIENTO.md
+fotos-para-web/
