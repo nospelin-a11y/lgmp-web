@@ -14,14 +14,15 @@
 (function () {
   'use strict';
 
-  var SUPABASE_URL      = 'PEGA_AQUI_EL_PROJECT_URL';   // https://xxxxxxxx.supabase.co
-  var SUPABASE_ANON_KEY = 'PEGA_AQUI_LA_CLAVE_ANON';
+  var SUPABASE_URL      = 'https://cegicdvznbvbemqoftod.supabase.co';
+  var SUPABASE_ANON_KEY = 'PEGA_AQUI_LA_CLAVE_PUBLICA';
 
   var CORREO = 'hola@lageneracionmejorpreparada.com';
-  var SIN_CONFIGURAR = SUPABASE_URL.indexOf('PEGA_AQUI') === 0;
+  var SIN_CONFIGURAR = SUPABASE_URL.indexOf('PEGA_AQUI') === 0 ||
+                       SUPABASE_ANON_KEY.indexOf('PEGA_AQUI') === 0;
 
   if (SIN_CONFIGURAR) {
-    console.error('[LGMP] Falta configurar SUPABASE_URL y SUPABASE_ANON_KEY en /lgmp-datos.js');
+    console.error('[LGMP] Falta configurar SUPABASE_URL o SUPABASE_ANON_KEY en /lgmp-datos.js');
   }
 
   function cabeceras() {

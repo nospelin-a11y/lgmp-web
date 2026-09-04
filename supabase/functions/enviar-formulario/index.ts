@@ -7,7 +7,12 @@
 //  de datos: por eso todo pasa por aquí.
 //
 //  Variables de entorno (Supabase → Edge Functions → Secrets):
-//    SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY → automáticas
+//    SUPABASE_URL     automática
+//    CLAVE_SECRETA    la clave secreta del proyecto (sb_secret_…). Se usa esta
+//                     si está puesta; si no, la SUPABASE_SERVICE_ROLE_KEY que
+//                     inyecta Supabase. Ponerla evita sorpresas en proyectos
+//                     con el formato nuevo de claves, donde las antiguas
+//                     pueden estar desactivadas.
 //    RESEND_API_KEY   secreta, la de Resend con permiso de solo envío
 //    AVISOS_PARA      opcional · destinatarios separados por comas
 //    REMITENTE        opcional · "Nombre <correo@dominio>" verificado en Resend
@@ -15,8 +20,19 @@
 // =====================================================================
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-const ANON_KEY     = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+const SERVICE_ROLE = Deno.env.get('CLAVE_SECRETA') ??
+                     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+
+// Claves públicas admitidas. Ojo: esto NO es seguridad. La clave pública viaja
+// en el HTML de una web abierta, así que cualquiera la tiene; solo sirve para
+// filtrar el ruido de fondo de internet. Lo que de verdad protege es el
+// honeypot, el límite por IP y que la escritura pase siempre por aquí.
+const CLAVES_PUBLICAS = [
+  Deno.env.get('CLAVE_PUBLICA'),
+  Deno.env.get('SUPABASE_PUBLISHABLE_KEY'),
+  Deno.env.get('SUPABASE_ANON_KEY'),
+].filter((c): c is string => !!c);
+
 const RESEND_KEY   = Deno.env.get('RESEND_API_KEY') ?? '';
 const AVISOS_PARA  = (Deno.env.get('AVISOS_PARA') ?? 'hola@lageneracionmejorpreparada.com')
                        .split(',').map((s) => s.trim()).filter(Boolean);
@@ -84,6 +100,14 @@ function opcion(v: unknown, permitidas: string[]): string | null {
 
 function escapar(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function claveAdmitida(clave: string): boolean {
+  if (!clave) return false;
+  if (CLAVES_PUBLICAS.includes(clave)) return true;
+  // Formato nuevo de claves: la publishable es pública y cambia al rotarla,
+  // así que no se compara contra una lista fija.
+  return /^sb_publishable_[A-Za-z0-9_-]+$/.test(clave);
 }
 
 class ErrorValidacion extends Error {}
@@ -385,10 +409,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cabecerasCors(origen) });
   if (req.method !== 'POST') return responder({ ok: false, error: 'Método no permitido.' }, 405, origen);
 
-  // La clave anon es pública, pero exigirla filtra el ruido de fondo de internet.
   const clave = req.headers.get('apikey') ??
                 (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
-  if (ANON_KEY && clave !== ANON_KEY) {
+  if (!claveAdmitida(clave)) {
     return responder({ ok: false, error: 'Petición no autorizada.' }, 401, origen);
   }
 
