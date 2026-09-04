@@ -15,7 +15,7 @@
   'use strict';
 
   var SUPABASE_URL      = 'https://cegicdvznbvbemqoftod.supabase.co';
-  var SUPABASE_ANON_KEY = 'PEGA_AQUI_LA_CLAVE_PUBLICA';
+  var SUPABASE_ANON_KEY = 'sb_publishable_hyev91V4OhpAo79Ox7vqBg_LU_Mfzbh';
 
   var CORREO = 'hola@lageneracionmejorpreparada.com';
   var SIN_CONFIGURAR = SUPABASE_URL.indexOf('PEGA_AQUI') === 0 ||
