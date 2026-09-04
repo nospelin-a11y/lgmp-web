@@ -291,7 +291,9 @@ class Component extends DCLogic {
       const respaldo = Math.max(0, Math.round(this.props.numSocios ?? 7));
       const consulta = window.LGMP ? window.LGMP.contarSocios() : Promise.resolve(null);
       this._socios = consulta
-        .then((n) => (typeof n === 'number' ? n : respaldo))
+        // Un 0 significa que todavía no se ha cargado a nadie en la tabla,
+        // no que la Asociación no tenga socios: en ese caso, respaldo.
+        .then((n) => (typeof n === 'number' && n > 0 ? n : respaldo))
         .catch(() => respaldo);
     }
     return this._socios;
