@@ -22,17 +22,26 @@
   .acceso p.sub{text-align:center;color:rgba(30,42,74,.7);font-size:15px;margin:0 0 26px}
 
   label{font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;display:block;margin-bottom:7px}
-  input[type=email],input[type=password],input[type=search],input[type=text]{
+  input[type=email],input[type=password],input[type=search],input[type=text],input[type=url],
+  input[type=date],input[type=number],textarea,select.campo{
     width:100%;background:#F4F6FA;border:1px solid rgba(30,42,74,.12);border-radius:12px;
     padding:13px 15px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none}
-  input:focus{border-color:#F0503C;background:#ffffff}
+  textarea{min-height:96px;resize:vertical}
+  input:focus,textarea:focus,select.campo:focus{border-color:#F0503C;background:#ffffff}
   .campo{margin-bottom:16px}
+  .ayuda{font-size:13px;color:rgba(30,42,74,.6);margin:6px 0 0}
+  .check{display:flex;align-items:center;gap:10px;font-size:14.5px;cursor:pointer;margin-bottom:14px}
+  .check input{width:19px;height:19px;accent-color:#F0503C;cursor:pointer}
+  .check label{margin:0;font-weight:600}
 
   .btn{background:#F0503C;color:#ffffff;border:none;cursor:pointer;font-family:'Nunito',sans-serif;
-       font-weight:800;font-size:16px;padding:14px 28px;border-radius:999px;width:100%;
+       font-weight:800;font-size:16px;padding:14px 28px;border-radius:999px;
        box-shadow:0 8px 24px rgba(240,80,60,.35);transition:transform .2s}
   .btn:hover{transform:translateY(-2px)}
   .btn:disabled{opacity:.6;cursor:wait;transform:none}
+  .btn.ancho{width:100%}
+  .btn.gris{background:#ffffff;color:#1E2A4A;border:1px solid rgba(30,42,74,.2);box-shadow:none}
+  .btn.rojo{background:#ffffff;color:#C4341F;border:1px solid rgba(196,52,31,.35);box-shadow:none}
   .aviso{background:rgba(240,80,60,.1);color:#C4341F;border-radius:12px;padding:12px 14px;
          font-size:14.5px;font-weight:600;margin-bottom:16px}
 
@@ -56,19 +65,23 @@
   .dato .pend{font-size:12.5px;font-weight:700;color:#1E2A4A;margin-top:4px}
 
   /* ---- Pestañas ---- */
-  .pestanas{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .grupo{margin-bottom:14px}
+  .grupo .etiqueta{font-family:'Nunito',sans-serif;font-weight:800;font-size:11.5px;letter-spacing:.14em;
+                   text-transform:uppercase;color:rgba(30,42,74,.45);margin-bottom:8px}
+  .pestanas{display:flex;gap:8px;flex-wrap:wrap}
   .pestana{background:#ffffff;border:1px solid rgba(30,42,74,.1);cursor:pointer;
            font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:#1E2A4A;
            padding:11px 18px;border-radius:999px}
   .pestana.activa{background:#1E2A4A;color:#ffffff;border-color:#1E2A4A}
-  .pestana .cuenta{opacity:.6;margin-left:6px}
 
-  /* ---- Barra de herramientas ---- */
+  /* ---- Herramientas ---- */
   .herramientas{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
   .herramientas input[type=search]{max-width:340px}
-  .csv{background:#ffffff;border:1px solid rgba(30,42,74,.18);cursor:pointer;font-family:'Nunito',sans-serif;
-       font-weight:700;font-size:14px;padding:12px 20px;border-radius:999px;color:#1E2A4A}
+  .csv,.nuevo{cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;
+              padding:12px 20px;border-radius:999px}
+  .csv{background:#ffffff;border:1px solid rgba(30,42,74,.18);color:#1E2A4A}
   .csv:hover{border-color:#F0503C;color:#F0503C}
+  .nuevo{background:#F0503C;border:none;color:#ffffff;box-shadow:0 6px 18px rgba(240,80,60,.3)}
 
   /* ---- Tabla ---- */
   .marco{background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden}
@@ -76,12 +89,14 @@
   table{border-collapse:collapse;width:100%;min-width:820px;font-size:14.5px}
   th{text-align:left;padding:14px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;
      letter-spacing:.06em;text-transform:uppercase;color:#F0503C;border-bottom:2px solid rgba(30,42,74,.1);
-     white-space:nowrap;background:#ffffff;position:sticky;top:0}
+     white-space:nowrap;background:#ffffff}
   td{padding:13px 16px;border-bottom:1px solid rgba(30,42,74,.07);vertical-align:top;line-height:1.5}
   tr:last-child td{border-bottom:none}
+  tr.fila{cursor:pointer}
   tr.fila:hover{background:#F4F6FA}
   .recorte{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
   .vacio{padding:44px 20px;text-align:center;color:rgba(30,42,74,.6)}
+  .cargando{padding:44px;text-align:center;color:rgba(30,42,74,.6)}
 
   .marca{cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:12.5px;
          padding:6px 13px;border-radius:999px;border:1px solid rgba(30,42,74,.2);background:#ffffff;
@@ -89,19 +104,20 @@
   .marca.si{background:#1E2A4A;border-color:#1E2A4A;color:#ffffff}
   select.estado{font-family:'Nunito',sans-serif;font-weight:700;font-size:12.5px;padding:6px 10px;
                 border-radius:999px;border:1px solid rgba(30,42,74,.2);background:#ffffff;color:#1E2A4A;cursor:pointer}
+  .pastilla{display:inline-block;font-family:'Nunito',sans-serif;font-weight:700;font-size:11.5px;
+            padding:4px 11px;border-radius:999px;background:#F4F6FA;color:rgba(30,42,74,.65);white-space:nowrap}
+  .pastilla.viva{background:rgba(240,80,60,.12);color:#C4341F}
 
-  /* ---- Detalle ---- */
+  /* ---- Ventana ---- */
   .fondo{position:fixed;inset:0;background:rgba(24,37,72,.55);display:flex;align-items:center;
          justify-content:center;padding:20px;z-index:60}
-  .ficha{background:#ffffff;border-radius:22px;max-width:620px;width:100%;max-height:86vh;overflow-y:auto;padding:32px}
+  .ficha{background:#ffffff;border-radius:22px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;padding:32px}
   .ficha h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:21px;margin:0 0 20px}
   .ficha dl{display:grid;grid-template-columns:auto 1fr;gap:10px 20px;margin:0}
   .ficha dt{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;color:#F0503C;white-space:nowrap}
   .ficha dd{margin:0;font-size:14.5px;line-height:1.55;word-break:break-word}
-  .cerrar{margin-top:24px;background:#1E2A4A;color:#ffffff;border:none;cursor:pointer;
-          font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 26px;border-radius:999px}
-
-  .cargando{padding:44px;text-align:center;color:rgba(30,42,74,.6)}
+  .acciones{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px;align-items:center}
+  .acciones .btn{font-size:15px;padding:12px 26px}
 
   @media (max-width:640px){
     main{padding:18px 14px 60px}
@@ -129,7 +145,7 @@
         <label for="clave">Contraseña</label>
         <input type="password" id="clave" autocomplete="current-password" required>
       </div>
-      <button type="submit" class="btn" id="btnEntrar">Entrar</button>
+      <button type="submit" class="btn ancho" id="btnEntrar">Entrar</button>
     </form>
   </div>
 </div>
@@ -146,10 +162,18 @@
 
   <main>
     <div class="resumen" id="resumen"></div>
-    <div class="pestanas" id="pestanas"></div>
+    <div class="grupo">
+      <div class="etiqueta">Lo que llega de la web</div>
+      <div class="pestanas" id="pestEntradas"></div>
+    </div>
+    <div class="grupo">
+      <div class="etiqueta">Contenido que podéis editar</div>
+      <div class="pestanas" id="pestContenido"></div>
+    </div>
     <div class="herramientas">
       <input type="search" id="buscar" placeholder="Buscar…" autocomplete="off">
       <button class="csv" id="btnCsv">Descargar CSV</button>
+      <button class="nuevo oculto" id="btnNuevo">+ Añadir</button>
     </div>
     <div class="marco">
       <div class="scroll" id="contenido"><div class="cargando">Cargando…</div></div>
@@ -157,41 +181,96 @@
   </main>
 </div>
 
-<div id="detalle"></div>
+<div id="ventana"></div>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-const URL_SB  = 'https://cegicdvznbvbemqoftod.supabase.co';
-const CLAVE   = 'sb_publishable_hyev91V4OhpAo79Ox7vqBg_LU_Mfzbh';
+const URL_SB = 'https://cegicdvznbvbemqoftod.supabase.co';
+const CLAVE  = 'sb_publishable_hyev91V4OhpAo79Ox7vqBg_LU_Mfzbh';
 const sb = createClient(URL_SB, CLAVE);
 
-/* Qué se enseña de cada tabla. `campos` son los que salen en la tabla;
-   la ficha de detalle enseña todo lo que traiga la fila. */
-const SECCIONES = [
-  { id:'contactos', titulo:'Contactos', tabla:'contactos',
+/* ---------------------------------------------------------------
+   Lo que llega de la web: se lee y se marca, no se crea ni se borra.
+   --------------------------------------------------------------- */
+const ENTRADAS = [
+  { id:'contactos', titulo:'Contactos', tabla:'contactos', orden:'creado_en',
     campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['mensaje','Mensaje']],
     marca:{ campo:'atendido', tipo:'bool', si:'Atendido', no:'Pendiente' },
     pendiente:r => !r.atendido },
-  { id:'evento', titulo:'Inscritos al evento', tabla:'inscripciones_evento',
+  { id:'evento', titulo:'Inscritos al evento', tabla:'inscripciones_evento', orden:'creado_en',
     campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['perfil','Perfil']],
     marca:{ campo:'asistio', tipo:'bool', si:'Asistió', no:'—' } },
-  { id:'socios', titulo:'Altas de socio', tabla:'altas_socio',
+  { id:'altas', titulo:'Altas de socio', tabla:'altas_socio', orden:'creado_en',
     campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['tramo','Cuota'],['municipio','Municipio']],
     marca:{ campo:'estado', tipo:'lista', opciones:['pendiente','aceptado','rechazado'] },
     pendiente:r => r.estado === 'pendiente' },
-  { id:'entidades', titulo:'Altas de entidad', tabla:'altas_entidad',
+  { id:'entidades', titulo:'Altas de entidad', tabla:'altas_entidad', orden:'creado_en',
     campos:[['entidad','Entidad'],['contacto_nombre','Contacto'],['email','Email'],['telefono','Teléfono'],['origen','Tipo']],
     marca:{ campo:'estado', tipo:'lista', opciones:['pendiente','aceptado','rechazado'] },
     pendiente:r => r.estado === 'pendiente' },
-  { id:'newsletter', titulo:'Newsletter', tabla:'newsletter',
+  { id:'newsletter', titulo:'Newsletter', tabla:'newsletter', orden:'creado_en',
     campos:[['nombre','Nombre'],['email','Email']] }
 ];
 
+/* ---------------------------------------------------------------
+   Contenido editable. `form` describe el formulario de alta/edición.
+   --------------------------------------------------------------- */
+const CONTENIDO = [
+  { id:'socios', titulo:'Socios', tabla:'socios', orden:'orden', asc:true, editable:true,
+    campos:[['nombre','Nombre'],['cargo_asociacion','Cargo'],['cargo_profesional','Puesto'],
+            ['empresa','Empresa'],['publicar','En la web'],['activo','Cuenta']],
+    form:[
+      { c:'nombre', t:'Nombre', tipo:'text', req:true, ayuda:'Como quiere aparecer publicado.' },
+      { c:'cargo_asociacion', t:'Cargo en la Asociación', tipo:'text', ayuda:'Presidente, Secretaria, Tesorero o Vocal. Vacío si es socio sin cargo.' },
+      { c:'cargo_profesional', t:'Puesto profesional', tipo:'text' },
+      { c:'empresa', t:'Empresa', tipo:'text' },
+      { c:'linkedin', t:'LinkedIn', tipo:'url' },
+      { c:'twitter', t:'Twitter / X', tipo:'url' },
+      { c:'foto_url', t:'Foto', tipo:'text', ayuda:'Ruta o dirección de la imagen. Ej.: /assets/equipo/socios/nombre.webp' },
+      { c:'orden', t:'Orden', tipo:'number', ayuda:'Menor número, más arriba.' },
+      { c:'es_junta', t:'Es de la Junta Directiva', tipo:'bool' },
+      { c:'publicar', t:'Aparece en la web', tipo:'bool', ayuda:'Solo si ha dado su consentimiento por escrito.' },
+      { c:'activo', t:'Cuenta para el número de socios', tipo:'bool' }
+    ] },
+  { id:'eventos', titulo:'Eventos', tabla:'eventos', orden:'fecha', asc:false, editable:true,
+    campos:[['fecha','Fecha'],['titulo','Título'],['lugar','Lugar'],['publicado','Publicado']],
+    form:[
+      { c:'titulo', t:'Título', tipo:'text', req:true },
+      { c:'fecha', t:'Fecha', tipo:'date', req:true },
+      { c:'hora', t:'Hora', tipo:'text', ayuda:'Texto libre. Ej.: 18:30' },
+      { c:'lugar', t:'Lugar', tipo:'text' },
+      { c:'descripcion', t:'Descripción', tipo:'textarea' },
+      { c:'url_inscripcion', t:'Enlace de inscripción', tipo:'text', ayuda:'Ej.: /presentacion/' },
+      { c:'publicado', t:'Publicado', tipo:'bool' }
+    ] },
+  { id:'noticias', titulo:'Noticias', tabla:'noticias', orden:'fecha', asc:false, editable:true,
+    campos:[['fecha','Fecha'],['categoria','Categoría'],['titulo','Título'],['publicado','Publicado']],
+    form:[
+      { c:'titulo', t:'Título', tipo:'text', req:true },
+      { c:'fecha', t:'Fecha', tipo:'date', req:true },
+      { c:'categoria', t:'Categoría', tipo:'text', ayuda:'Ej.: Prensa, Actividad, Comunidad' },
+      { c:'resumen', t:'Resumen', tipo:'textarea' },
+      { c:'url', t:'Enlace', tipo:'url' },
+      { c:'imagen_url', t:'Imagen', tipo:'text' },
+      { c:'publicado', t:'Publicado', tipo:'bool' }
+    ] },
+  { id:'redes', titulo:'Números de redes', tabla:'redes_metricas', orden:'red', asc:true,
+    editable:true, clave:'red', crear:false, borrar:false,
+    campos:[['red','Red'],['seguidores','Seguidores'],['impresiones','Impresiones'],['actualizado_en','Actualizado']],
+    form:[
+      { c:'seguidores', t:'Seguidores', tipo:'number' },
+      { c:'impresiones', t:'Impresiones o visualizaciones', tipo:'number' }
+    ] }
+];
+
+const TODAS = ENTRADAS.concat(CONTENIDO);
 const $ = s => document.querySelector(s);
-let seccionActiva = SECCIONES[0];
+let activa = ENTRADAS[0];
 let filas = [];
 let filtro = '';
+
+const clave = s => s.clave || 'id';
 
 /* ---------------- Acceso ---------------- */
 
@@ -206,32 +285,26 @@ $('#formAcceso').addEventListener('submit', async ev => {
   errorAcceso('');
   const btn = $('#btnEntrar');
   btn.disabled = true; btn.textContent = 'Entrando…';
-
   const { error } = await sb.auth.signInWithPassword({
-    email: $('#email').value.trim(),
-    password: $('#clave').value
-  });
-
+    email: $('#email').value.trim(), password: $('#clave').value });
   btn.disabled = false; btn.textContent = 'Entrar';
   if (error) {
     errorAcceso(error.message === 'Invalid login credentials'
-      ? 'Correo o contraseña incorrectos.'
-      : error.message);
+      ? 'Correo o contraseña incorrectos.' : error.message);
     return;
   }
   arrancar();
 });
 
 $('#btnSalir').addEventListener('click', async () => {
-  await sb.auth.signOut();
-  location.reload();
+  await sb.auth.signOut(); location.reload();
 });
 
 async function arrancar(){
   const { data:{ session } } = await sb.auth.getSession();
   if (!session) { $('#acceso').classList.remove('oculto'); return; }
 
-  // Estar autenticado no basta: hay que estar en la tabla `junta`.
+  // Estar autenticado no basta: hay que figurar en la tabla `junta`.
   const { data: esJunta } = await sb.rpc('es_junta');
   if (!esJunta) {
     await sb.auth.signOut();
@@ -248,148 +321,221 @@ async function arrancar(){
   await cargarSeccion();
 }
 
-/* ---------------- Datos ---------------- */
-
-async function cargarResumen(){
-  const cajas = await Promise.all(SECCIONES.map(async s => {
-    const { data, error } = await sb.from(s.tabla).select('*');
-    if (error) return { s, total:'–', pend:0 };
-    const pend = s.pendiente ? data.filter(s.pendiente).length : 0;
-    return { s, total:data.length, pend };
-  }));
-  $('#resumen').innerHTML = cajas.map(c => `
-    <div class="dato">
-      <div class="n">${c.total}</div>
-      <div class="t">${c.s.titulo}</div>
-      ${c.pend ? `<div class="pend">${c.pend} sin revisar</div>` : ''}
-    </div>`).join('');
-}
+/* ---------------- Navegación ---------------- */
 
 function pintarPestanas(){
-  $('#pestanas').innerHTML = SECCIONES.map(s =>
-    `<button class="pestana ${s.id===seccionActiva.id?'activa':''}" data-id="${s.id}">${s.titulo}</button>`
-  ).join('');
-  $('#pestanas').querySelectorAll('.pestana').forEach(b => {
-    b.addEventListener('click', () => {
-      seccionActiva = SECCIONES.find(s => s.id === b.dataset.id);
-      filtro = ''; $('#buscar').value = '';
-      pintarPestanas(); cargarSeccion();
-    });
-  });
+  const html = lista => lista.map(s =>
+    `<button class="pestana ${s.id===activa.id?'activa':''}" data-id="${s.id}">${s.titulo}</button>`).join('');
+  $('#pestEntradas').innerHTML  = html(ENTRADAS);
+  $('#pestContenido').innerHTML = html(CONTENIDO);
+  document.querySelectorAll('.pestana').forEach(b => b.addEventListener('click', () => {
+    activa = TODAS.find(s => s.id === b.dataset.id);
+    filtro = ''; $('#buscar').value = '';
+    pintarPestanas(); cargarSeccion();
+  }));
+}
+
+async function cargarResumen(){
+  const cajas = await Promise.all(ENTRADAS.map(async s => {
+    const { data, error } = await sb.from(s.tabla).select('*');
+    if (error) return { s, total:'–', pend:0 };
+    return { s, total:data.length, pend: s.pendiente ? data.filter(s.pendiente).length : 0 };
+  }));
+  const { data: nSocios } = await sb.rpc('contar_socios');
+  $('#resumen').innerHTML = cajas.map(c => `
+    <div class="dato"><div class="n">${c.total}</div><div class="t">${c.s.titulo}</div>
+    ${c.pend ? `<div class="pend">${c.pend} sin revisar</div>` : ''}</div>`).join('')
+    + `<div class="dato"><div class="n">${nSocios ?? '–'}</div><div class="t">Socios activos</div>
+       <div class="pend">es el número que sale en la web</div></div>`;
 }
 
 async function cargarSeccion(){
   $('#contenido').innerHTML = '<div class="cargando">Cargando…</div>';
-  const { data, error } = await sb.from(seccionActiva.tabla)
-    .select('*').order('creado_en', { ascending:false });
+  $('#btnNuevo').classList.toggle('oculto', !(activa.editable && activa.crear !== false));
+  const { data, error } = await sb.from(activa.tabla).select('*')
+    .order(activa.orden, { ascending: activa.asc === true });
   if (error) {
-    $('#contenido').innerHTML = `<div class="vacio">No se han podido cargar los datos.<br><small>${error.message}</small></div>`;
+    $('#contenido').innerHTML = `<div class="vacio">No se han podido cargar los datos.<br><small>${escapar(error.message)}</small></div>`;
     return;
   }
   filas = data;
   pintarTabla();
 }
 
-const fecha = v => v ? new Date(v).toLocaleDateString('es-ES',
-  { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+/* ---------------- Utilidades ---------------- */
 
-const escapar = t => String(t ?? '').replace(/[&<>"]/g, c =>
-  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const escapar = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fechaHora = v => v ? new Date(v).toLocaleDateString('es-ES',
+  { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+const soloFecha = v => v ? new Date(v + 'T00:00:00').toLocaleDateString('es-ES',
+  { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+
+function celda(r, c){
+  const v = r[c];
+  if (typeof v === 'boolean')
+    return `<span class="pastilla ${v?'viva':''}">${v ? 'Sí' : 'No'}</span>`;
+  if (c === 'fecha') return soloFecha(v);
+  if (c.endsWith('_en')) return fechaHora(v);
+  if (typeof v === 'number') return v.toLocaleString('es-ES');
+  return `<span class="recorte">${escapar(v)}</span>`;
+}
 
 function visibles(){
   if (!filtro) return filas;
   const q = filtro.toLowerCase();
-  return filas.filter(r => Object.values(r).some(v =>
-    String(v ?? '').toLowerCase().includes(q)));
+  return filas.filter(r => Object.values(r).some(v => String(v ?? '').toLowerCase().includes(q)));
 }
 
+/* ---------------- Tabla ---------------- */
+
 function pintarTabla(){
-  const s = seccionActiva;
-  const datos = visibles();
+  const s = activa, datos = visibles();
   if (!datos.length) {
     $('#contenido').innerHTML = `<div class="vacio">${filtro ? 'Nada coincide con la búsqueda.' : 'Todavía no hay nada aquí.'}</div>`;
     return;
   }
-
-  const cabecera = ['<th>Fecha</th>']
-    .concat(s.campos.map(c => `<th>${c[1]}</th>`))
-    .concat(s.marca ? ['<th></th>'] : []).join('');
+  const primeraFecha = s.editable ? [] : ['<th>Fecha</th>'];
+  const cabecera = primeraFecha.concat(s.campos.map(c => `<th>${c[1]}</th>`))
+                               .concat(s.marca ? ['<th></th>'] : []).join('');
 
   const cuerpo = datos.map(r => {
-    const celdas = [`<td>${fecha(r.creado_en)}</td>`].concat(
-      s.campos.map(c => `<td><span class="recorte">${escapar(r[c[0]])}</span></td>`));
+    const cs = (s.editable ? [] : [`<td>${fechaHora(r.creado_en)}</td>`])
+      .concat(s.campos.map(c => `<td>${celda(r, c[0])}</td>`));
     if (s.marca) {
-      if (s.marca.tipo === 'bool') {
-        celdas.push(`<td><button class="marca ${r[s.marca.campo]?'si':''}" data-id="${r.id}" data-campo="${s.marca.campo}" data-valor="${!r[s.marca.campo]}">${r[s.marca.campo]?s.marca.si:s.marca.no}</button></td>`);
-      } else {
-        celdas.push(`<td><select class="estado" data-id="${r.id}" data-campo="${s.marca.campo}">` +
-          s.marca.opciones.map(o => `<option value="${o}" ${r[s.marca.campo]===o?'selected':''}>${o}</option>`).join('') +
-          `</select></td>`);
-      }
+      const v = r[s.marca.campo];
+      cs.push(s.marca.tipo === 'bool'
+        ? `<td><button class="marca ${v?'si':''}" data-k="${escapar(r[clave(s)])}" data-campo="${s.marca.campo}" data-valor="${!v}">${v?s.marca.si:s.marca.no}</button></td>`
+        : `<td><select class="estado" data-k="${escapar(r[clave(s)])}" data-campo="${s.marca.campo}">`
+          + s.marca.opciones.map(o => `<option value="${o}" ${v===o?'selected':''}>${o}</option>`).join('')
+          + `</select></td>`);
     }
-    return `<tr class="fila" data-id="${r.id}">${celdas.join('')}</tr>`;
+    return `<tr class="fila" data-k="${escapar(r[clave(s)])}">${cs.join('')}</tr>`;
   }).join('');
 
   $('#contenido').innerHTML = `<table><thead><tr>${cabecera}</tr></thead><tbody>${cuerpo}</tbody></table>`;
 
-  $('#contenido').querySelectorAll('tr.fila').forEach(tr => {
-    tr.addEventListener('click', ev => {
-      if (ev.target.closest('button, select')) return;
-      verFicha(filas.find(f => String(f.id) === tr.dataset.id));
-    });
-  });
+  $('#contenido').querySelectorAll('tr.fila').forEach(tr => tr.addEventListener('click', ev => {
+    if (ev.target.closest('button, select')) return;
+    const r = filas.find(f => String(f[clave(s)]) === tr.dataset.k);
+    s.editable ? editar(r) : verFicha(r);
+  }));
   $('#contenido').querySelectorAll('.marca').forEach(b =>
-    b.addEventListener('click', () => guardar(b.dataset.id, b.dataset.campo, b.dataset.valor === 'true')));
+    b.addEventListener('click', () => guardarCampo(b.dataset.k, b.dataset.campo, b.dataset.valor === 'true')));
   $('#contenido').querySelectorAll('.estado').forEach(sel =>
-    sel.addEventListener('change', () => guardar(sel.dataset.id, sel.dataset.campo, sel.value)));
+    sel.addEventListener('change', () => guardarCampo(sel.dataset.k, sel.dataset.campo, sel.value)));
 }
 
-async function guardar(id, campo, valor){
-  const { error } = await sb.from(seccionActiva.tabla)
-    .update({ [campo]: valor }).eq('id', id);
+async function guardarCampo(k, campo, valor){
+  const { error } = await sb.from(activa.tabla).update({ [campo]: valor }).eq(clave(activa), k);
   if (error) { alert('No se ha podido guardar: ' + error.message); return; }
-  const f = filas.find(x => String(x.id) === String(id));
+  const f = filas.find(x => String(x[clave(activa)]) === String(k));
   if (f) f[campo] = valor;
-  pintarTabla();
-  cargarResumen();
+  pintarTabla(); cargarResumen();
 }
 
-/* ---------------- Ficha ---------------- */
+/* ---------------- Ficha de solo lectura ---------------- */
 
 const ETIQUETAS = {
-  creado_en:'Recibido', nombre:'Nombre', apellido:'Apellido', email:'Email',
-  telefono:'Teléfono', mensaje:'Mensaje', municipio:'Municipio', tramo:'Cuota',
-  situacion:'Situación', sector:'Estudios o sector', linkedin:'LinkedIn',
-  como_conocio:'Cómo nos conoció', expectativas:'Qué espera', estado:'Estado',
-  acepta_comunicaciones:'Acepta comunicaciones', atendido:'Atendido',
-  entidad:'Entidad', cif:'CIF', web:'Web', contacto_nombre:'Persona de contacto',
-  contacto_cargo:'Cargo', colaboracion:'Colaboración', origen:'Tipo de alta',
-  evento:'Evento', perfil:'Perfil', anio_graduacion:'Año de graduación',
-  comentario:'Comentario', asistio:'Asistió', notas_internas:'Notas internas',
-  baja_en:'Baja'
+  creado_en:'Recibido', nombre:'Nombre', apellido:'Apellido', email:'Email', telefono:'Teléfono',
+  mensaje:'Mensaje', municipio:'Municipio', tramo:'Cuota', situacion:'Situación',
+  sector:'Estudios o sector', linkedin:'LinkedIn', como_conocio:'Cómo nos conoció',
+  expectativas:'Qué espera', estado:'Estado', acepta_comunicaciones:'Acepta comunicaciones',
+  atendido:'Atendido', entidad:'Entidad', cif:'CIF', web:'Web', contacto_nombre:'Persona de contacto',
+  contacto_cargo:'Cargo', colaboracion:'Colaboración', origen:'Tipo de alta', evento:'Evento',
+  perfil:'Perfil', anio_graduacion:'Año de graduación', comentario:'Comentario', asistio:'Asistió',
+  notas_internas:'Notas internas', baja_en:'Baja'
 };
+
+function abrir(html){
+  $('#ventana').innerHTML = `<div class="fondo"><div class="ficha">${html}</div></div>`;
+  $('#ventana .fondo').addEventListener('click', e => {
+    if (e.target.classList.contains('fondo')) cerrar();
+  });
+}
+const cerrar = () => { $('#ventana').innerHTML = ''; };
 
 function verFicha(r){
   if (!r) return;
-  const filas = Object.entries(r)
+  const cuerpo = Object.entries(r)
     .filter(([k,v]) => k !== 'id' && v !== null && v !== '' && !(Array.isArray(v) && !v.length))
     .map(([k,v]) => {
-      let texto = Array.isArray(v) ? v.join(', ')
-                : typeof v === 'boolean' ? (v ? 'Sí' : 'No')
-                : k.endsWith('_en') ? fecha(v) : String(v);
-      if (k === 'email')    texto = `<a href="mailto:${escapar(v)}">${escapar(v)}</a>`;
-      else if (k === 'telefono') texto = `<a href="tel:${escapar(v)}">${escapar(v)}</a>`;
-      else if (k === 'linkedin' || k === 'web') texto = `<a href="${escapar(v)}" target="_blank" rel="noopener">${escapar(v)}</a>`;
-      else texto = escapar(texto);
-      return `<dt>${ETIQUETAS[k] || k}</dt><dd>${texto}</dd>`;
+      let t = Array.isArray(v) ? v.join(', ')
+            : typeof v === 'boolean' ? (v ? 'Sí' : 'No')
+            : k.endsWith('_en') ? fechaHora(v) : String(v);
+      if (k === 'email') t = `<a href="mailto:${escapar(v)}">${escapar(v)}</a>`;
+      else if (k === 'telefono') t = `<a href="tel:${escapar(v)}">${escapar(v)}</a>`;
+      else if (k === 'linkedin' || k === 'web') t = `<a href="${escapar(v)}" target="_blank" rel="noopener">${escapar(v)}</a>`;
+      else t = escapar(t);
+      return `<dt>${ETIQUETAS[k] || k}</dt><dd>${t}</dd>`;
     }).join('');
+  abrir(`<h2>${escapar(r.nombre || r.entidad || 'Detalle')}</h2><dl>${cuerpo}</dl>
+         <div class="acciones"><button class="btn" id="vCerrar">Cerrar</button></div>`);
+  $('#vCerrar').addEventListener('click', cerrar);
+}
 
-  $('#detalle').innerHTML =
-    `<div class="fondo"><div class="ficha"><h2>${escapar(r.nombre || r.entidad || 'Detalle')}</h2>
-     <dl>${filas}</dl><button class="cerrar">Cerrar</button></div></div>`;
-  const cerrar = () => { $('#detalle').innerHTML = ''; };
-  $('#detalle .cerrar').addEventListener('click', cerrar);
-  $('#detalle .fondo').addEventListener('click', e => { if (e.target.classList.contains('fondo')) cerrar(); });
+/* ---------------- Alta y edición ---------------- */
+
+$('#btnNuevo').addEventListener('click', () => editar(null));
+
+function editar(fila){
+  const s = activa;
+  if (!s.editable) return;
+  const nuevo = !fila;
+
+  const campos = s.form.map(f => {
+    const v = fila ? fila[f.c] : (f.tipo === 'bool' ? false : '');
+    const ayuda = f.ayuda ? `<p class="ayuda">${f.ayuda}</p>` : '';
+    if (f.tipo === 'bool')
+      return `<div class="check"><input type="checkbox" id="f_${f.c}" ${v?'checked':''}>
+              <label for="f_${f.c}">${f.t}</label></div>${ayuda}`;
+    if (f.tipo === 'textarea')
+      return `<div class="campo"><label for="f_${f.c}">${f.t}</label>
+              <textarea id="f_${f.c}">${escapar(v)}</textarea>${ayuda}</div>`;
+    return `<div class="campo"><label for="f_${f.c}">${f.t}${f.req?' *':''}</label>
+            <input type="${f.tipo}" id="f_${f.c}" value="${escapar(v)}">${ayuda}</div>`;
+  }).join('');
+
+  const titulo = nuevo ? 'Añadir en ' + s.titulo.toLowerCase()
+                       : escapar(fila.nombre || fila.titulo || fila.red || 'Editar');
+  const borrar = (!nuevo && s.borrar !== false)
+    ? '<button class="btn rojo" id="vBorrar">Borrar</button>' : '';
+
+  abrir(`<h2>${titulo}</h2><div id="vError" class="aviso oculto"></div>${campos}
+         <div class="acciones"><button class="btn" id="vGuardar">Guardar</button>
+         <button class="btn gris" id="vCancelar">Cancelar</button>${borrar}</div>`);
+
+  $('#vCancelar').addEventListener('click', cerrar);
+  if (borrar) $('#vBorrar').addEventListener('click', async () => {
+    if (!confirm('¿Seguro que quieres borrarlo? No se puede deshacer.')) return;
+    const { error } = await sb.from(s.tabla).delete().eq(clave(s), fila[clave(s)]);
+    if (error) { alert('No se ha podido borrar: ' + error.message); return; }
+    cerrar(); cargarSeccion(); cargarResumen();
+  });
+
+  $('#vGuardar').addEventListener('click', async () => {
+    const datos = {};
+    for (const f of s.form) {
+      const el = document.getElementById('f_' + f.c);
+      let v = f.tipo === 'bool' ? el.checked : el.value.trim();
+      if (f.req && (v === '' || v === null)) {
+        const e = $('#vError'); e.textContent = 'Falta rellenar: ' + f.t; e.classList.remove('oculto');
+        el.focus(); return;
+      }
+      if (f.tipo === 'number') v = v === '' ? null : Number(v);
+      else if (f.tipo !== 'bool' && v === '') v = null;
+      datos[f.c] = v;
+    }
+    const btn = $('#vGuardar'); btn.disabled = true; btn.textContent = 'Guardando…';
+    const q = nuevo ? sb.from(s.tabla).insert(datos)
+                    : sb.from(s.tabla).update(datos).eq(clave(s), fila[clave(s)]);
+    const { error } = await q;
+    btn.disabled = false; btn.textContent = 'Guardar';
+    if (error) {
+      const e = $('#vError'); e.textContent = 'No se ha podido guardar: ' + error.message;
+      e.classList.remove('oculto'); return;
+    }
+    cerrar(); cargarSeccion(); cargarResumen();
+  });
 }
 
 /* ---------------- CSV ---------------- */
@@ -398,18 +544,17 @@ $('#btnCsv').addEventListener('click', () => {
   const datos = visibles();
   if (!datos.length) return;
   const cols = Object.keys(datos[0]);
-  const celda = v => {
+  const c = v => {
     const t = Array.isArray(v) ? v.join(' | ') : String(v ?? '');
-    return /[";\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    return /[";\n]/.test(t) ? '"' + t.replace(/"/g,'""') + '"' : t;
   };
-  // Punto y coma y BOM: así Excel en español lo abre bien de un doble clic.
+  // Punto y coma y BOM: así Excel en español lo abre de un doble clic.
   const csv = '﻿' + [cols.join(';')]
-    .concat(datos.map(r => cols.map(c => celda(r[c])).join(';'))).join('\r\n');
+    .concat(datos.map(r => cols.map(x => c(r[x])).join(';'))).join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8;' }));
-  a.download = `lgmp-${seccionActiva.id}-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  a.download = `lgmp-${activa.id}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
 });
 
 $('#buscar').addEventListener('input', e => { filtro = e.target.value.trim(); pintarTabla(); });
