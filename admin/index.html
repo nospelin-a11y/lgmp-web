@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel · La Generación Mejor Preparada</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#F4F6FA;font-family:'Nunito Sans',sans-serif;color:#1E2A4A;-webkit-font-smoothing:antialiased}
+  a{color:#F0503C}
+  .oculto{display:none !important}
+
+  /* ---- Acceso ---- */
+  .acceso{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#1E2A4A}
+  .acceso .caja{width:100%;max-width:400px;background:#ffffff;border-radius:24px;padding:40px 34px}
+  .acceso img{height:46px;display:block;margin:0 auto 26px}
+  .acceso h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;margin:0 0 6px;text-align:center}
+  .acceso p.sub{text-align:center;color:rgba(30,42,74,.7);font-size:15px;margin:0 0 26px}
+
+  label{font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;display:block;margin-bottom:7px}
+  input[type=email],input[type=password],input[type=search],input[type=text]{
+    width:100%;background:#F4F6FA;border:1px solid rgba(30,42,74,.12);border-radius:12px;
+    padding:13px 15px;font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none}
+  input:focus{border-color:#F0503C;background:#ffffff}
+  .campo{margin-bottom:16px}
+
+  .btn{background:#F0503C;color:#ffffff;border:none;cursor:pointer;font-family:'Nunito',sans-serif;
+       font-weight:800;font-size:16px;padding:14px 28px;border-radius:999px;width:100%;
+       box-shadow:0 8px 24px rgba(240,80,60,.35);transition:transform .2s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn:disabled{opacity:.6;cursor:wait;transform:none}
+  .aviso{background:rgba(240,80,60,.1);color:#C4341F;border-radius:12px;padding:12px 14px;
+         font-size:14.5px;font-weight:600;margin-bottom:16px}
+
+  /* ---- Cabecera ---- */
+  header{background:#182548;padding:14px 0;position:sticky;top:0;z-index:40}
+  header .cont{max-width:1500px;margin:0 auto;padding:0 22px;display:flex;align-items:center;
+               justify-content:space-between;gap:16px;flex-wrap:wrap}
+  header img{height:38px;display:block}
+  header .quien{color:rgba(255,255,255,.65);font-size:13.5px;margin-left:auto;margin-right:14px}
+  .salir{background:transparent;border:1px solid rgba(255,255,255,.3);color:#ffffff;cursor:pointer;
+         font-family:'Nunito',sans-serif;font-weight:700;font-size:13.5px;padding:9px 18px;border-radius:999px}
+  .salir:hover{background:rgba(255,255,255,.1)}
+
+  main{max-width:1500px;margin:0 auto;padding:26px 22px 70px}
+
+  /* ---- Resumen ---- */
+  .resumen{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px}
+  .dato{background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;padding:20px 22px}
+  .dato .n{font-family:'Nunito',sans-serif;font-weight:900;font-size:34px;line-height:1;color:#F0503C}
+  .dato .t{font-size:13.5px;color:rgba(30,42,74,.7);margin-top:8px}
+  .dato .pend{font-size:12.5px;font-weight:700;color:#1E2A4A;margin-top:4px}
+
+  /* ---- Pestañas ---- */
+  .pestanas{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .pestana{background:#ffffff;border:1px solid rgba(30,42,74,.1);cursor:pointer;
+           font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:#1E2A4A;
+           padding:11px 18px;border-radius:999px}
+  .pestana.activa{background:#1E2A4A;color:#ffffff;border-color:#1E2A4A}
+  .pestana .cuenta{opacity:.6;margin-left:6px}
+
+  /* ---- Barra de herramientas ---- */
+  .herramientas{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .herramientas input[type=search]{max-width:340px}
+  .csv{background:#ffffff;border:1px solid rgba(30,42,74,.18);cursor:pointer;font-family:'Nunito',sans-serif;
+       font-weight:700;font-size:14px;padding:12px 20px;border-radius:999px;color:#1E2A4A}
+  .csv:hover{border-color:#F0503C;color:#F0503C}
+
+  /* ---- Tabla ---- */
+  .marco{background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:18px;overflow:hidden}
+  .scroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;min-width:820px;font-size:14.5px}
+  th{text-align:left;padding:14px 16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;
+     letter-spacing:.06em;text-transform:uppercase;color:#F0503C;border-bottom:2px solid rgba(30,42,74,.1);
+     white-space:nowrap;background:#ffffff;position:sticky;top:0}
+  td{padding:13px 16px;border-bottom:1px solid rgba(30,42,74,.07);vertical-align:top;line-height:1.5}
+  tr:last-child td{border-bottom:none}
+  tr.fila:hover{background:#F4F6FA}
+  .recorte{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+  .vacio{padding:44px 20px;text-align:center;color:rgba(30,42,74,.6)}
+
+  .marca{cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:12.5px;
+         padding:6px 13px;border-radius:999px;border:1px solid rgba(30,42,74,.2);background:#ffffff;
+         color:rgba(30,42,74,.7);white-space:nowrap}
+  .marca.si{background:#1E2A4A;border-color:#1E2A4A;color:#ffffff}
+  select.estado{font-family:'Nunito',sans-serif;font-weight:700;font-size:12.5px;padding:6px 10px;
+                border-radius:999px;border:1px solid rgba(30,42,74,.2);background:#ffffff;color:#1E2A4A;cursor:pointer}
+
+  /* ---- Detalle ---- */
+  .fondo{position:fixed;inset:0;background:rgba(24,37,72,.55);display:flex;align-items:center;
+         justify-content:center;padding:20px;z-index:60}
+  .ficha{background:#ffffff;border-radius:22px;max-width:620px;width:100%;max-height:86vh;overflow-y:auto;padding:32px}
+  .ficha h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:21px;margin:0 0 20px}
+  .ficha dl{display:grid;grid-template-columns:auto 1fr;gap:10px 20px;margin:0}
+  .ficha dt{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;color:#F0503C;white-space:nowrap}
+  .ficha dd{margin:0;font-size:14.5px;line-height:1.55;word-break:break-word}
+  .cerrar{margin-top:24px;background:#1E2A4A;color:#ffffff;border:none;cursor:pointer;
+          font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 26px;border-radius:999px}
+
+  .cargando{padding:44px;text-align:center;color:rgba(30,42,74,.6)}
+
+  @media (max-width:640px){
+    main{padding:18px 14px 60px}
+    .ficha{padding:24px 20px}
+    .ficha dl{grid-template-columns:1fr;gap:2px}
+    .ficha dd{margin-bottom:12px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= ACCESO ================= -->
+<div id="acceso" class="acceso">
+  <div class="caja">
+    <img src="/assets/logo-light.webp" alt="La Generación Mejor Preparada">
+    <h1>Panel de la Asociación</h1>
+    <p class="sub">Solo para la Junta Directiva</p>
+    <div id="errorAcceso" class="aviso oculto"></div>
+    <form id="formAcceso">
+      <div class="campo">
+        <label for="email">Correo</label>
+        <input type="email" id="email" autocomplete="username" required>
+      </div>
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <input type="password" id="clave" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn" id="btnEntrar">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= PANEL ================= -->
+<div id="app" class="oculto">
+  <header>
+    <div class="cont">
+      <img src="/assets/logo-dark.webp" alt="LGMP">
+      <span class="quien" id="quien"></span>
+      <button class="salir" id="btnSalir">Salir</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="resumen" id="resumen"></div>
+    <div class="pestanas" id="pestanas"></div>
+    <div class="herramientas">
+      <input type="search" id="buscar" placeholder="Buscar…" autocomplete="off">
+      <button class="csv" id="btnCsv">Descargar CSV</button>
+    </div>
+    <div class="marco">
+      <div class="scroll" id="contenido"><div class="cargando">Cargando…</div></div>
+    </div>
+  </main>
+</div>
+
+<div id="detalle"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const URL_SB  = 'https://cegicdvznbvbemqoftod.supabase.co';
+const CLAVE   = 'sb_publishable_hyev91V4OhpAo79Ox7vqBg_LU_Mfzbh';
+const sb = createClient(URL_SB, CLAVE);
+
+/* Qué se enseña de cada tabla. `campos` son los que salen en la tabla;
+   la ficha de detalle enseña todo lo que traiga la fila. */
+const SECCIONES = [
+  { id:'contactos', titulo:'Contactos', tabla:'contactos',
+    campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['mensaje','Mensaje']],
+    marca:{ campo:'atendido', tipo:'bool', si:'Atendido', no:'Pendiente' },
+    pendiente:r => !r.atendido },
+  { id:'evento', titulo:'Inscritos al evento', tabla:'inscripciones_evento',
+    campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['perfil','Perfil']],
+    marca:{ campo:'asistio', tipo:'bool', si:'Asistió', no:'—' } },
+  { id:'socios', titulo:'Altas de socio', tabla:'altas_socio',
+    campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['tramo','Cuota'],['municipio','Municipio']],
+    marca:{ campo:'estado', tipo:'lista', opciones:['pendiente','aceptado','rechazado'] },
+    pendiente:r => r.estado === 'pendiente' },
+  { id:'entidades', titulo:'Altas de entidad', tabla:'altas_entidad',
+    campos:[['entidad','Entidad'],['contacto_nombre','Contacto'],['email','Email'],['telefono','Teléfono'],['origen','Tipo']],
+    marca:{ campo:'estado', tipo:'lista', opciones:['pendiente','aceptado','rechazado'] },
+    pendiente:r => r.estado === 'pendiente' },
+  { id:'newsletter', titulo:'Newsletter', tabla:'newsletter',
+    campos:[['nombre','Nombre'],['email','Email']] }
+];
+
+const $ = s => document.querySelector(s);
+let seccionActiva = SECCIONES[0];
+let filas = [];
+let filtro = '';
+
+/* ---------------- Acceso ---------------- */
+
+function errorAcceso(msg){
+  const e = $('#errorAcceso');
+  e.textContent = msg;
+  e.classList.toggle('oculto', !msg);
+}
+
+$('#formAcceso').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  errorAcceso('');
+  const btn = $('#btnEntrar');
+  btn.disabled = true; btn.textContent = 'Entrando…';
+
+  const { error } = await sb.auth.signInWithPassword({
+    email: $('#email').value.trim(),
+    password: $('#clave').value
+  });
+
+  btn.disabled = false; btn.textContent = 'Entrar';
+  if (error) {
+    errorAcceso(error.message === 'Invalid login credentials'
+      ? 'Correo o contraseña incorrectos.'
+      : error.message);
+    return;
+  }
+  arrancar();
+});
+
+$('#btnSalir').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+async function arrancar(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if (!session) { $('#acceso').classList.remove('oculto'); return; }
+
+  // Estar autenticado no basta: hay que estar en la tabla `junta`.
+  const { data: esJunta } = await sb.rpc('es_junta');
+  if (!esJunta) {
+    await sb.auth.signOut();
+    $('#acceso').classList.remove('oculto');
+    errorAcceso('Esta cuenta no tiene acceso al panel. Habla con el presidente.');
+    return;
+  }
+
+  $('#acceso').classList.add('oculto');
+  $('#app').classList.remove('oculto');
+  $('#quien').textContent = session.user.email;
+  pintarPestanas();
+  await cargarResumen();
+  await cargarSeccion();
+}
+
+/* ---------------- Datos ---------------- */
+
+async function cargarResumen(){
+  const cajas = await Promise.all(SECCIONES.map(async s => {
+    const { data, error } = await sb.from(s.tabla).select('*');
+    if (error) return { s, total:'–', pend:0 };
+    const pend = s.pendiente ? data.filter(s.pendiente).length : 0;
+    return { s, total:data.length, pend };
+  }));
+  $('#resumen').innerHTML = cajas.map(c => `
+    <div class="dato">
+      <div class="n">${c.total}</div>
+      <div class="t">${c.s.titulo}</div>
+      ${c.pend ? `<div class="pend">${c.pend} sin revisar</div>` : ''}
+    </div>`).join('');
+}
+
+function pintarPestanas(){
+  $('#pestanas').innerHTML = SECCIONES.map(s =>
+    `<button class="pestana ${s.id===seccionActiva.id?'activa':''}" data-id="${s.id}">${s.titulo}</button>`
+  ).join('');
+  $('#pestanas').querySelectorAll('.pestana').forEach(b => {
+    b.addEventListener('click', () => {
+      seccionActiva = SECCIONES.find(s => s.id === b.dataset.id);
+      filtro = ''; $('#buscar').value = '';
+      pintarPestanas(); cargarSeccion();
+    });
+  });
+}
+
+async function cargarSeccion(){
+  $('#contenido').innerHTML = '<div class="cargando">Cargando…</div>';
+  const { data, error } = await sb.from(seccionActiva.tabla)
+    .select('*').order('creado_en', { ascending:false });
+  if (error) {
+    $('#contenido').innerHTML = `<div class="vacio">No se han podido cargar los datos.<br><small>${error.message}</small></div>`;
+    return;
+  }
+  filas = data;
+  pintarTabla();
+}
+
+const fecha = v => v ? new Date(v).toLocaleDateString('es-ES',
+  { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+
+const escapar = t => String(t ?? '').replace(/[&<>"]/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+function visibles(){
+  if (!filtro) return filas;
+  const q = filtro.toLowerCase();
+  return filas.filter(r => Object.values(r).some(v =>
+    String(v ?? '').toLowerCase().includes(q)));
+}
+
+function pintarTabla(){
+  const s = seccionActiva;
+  const datos = visibles();
+  if (!datos.length) {
+    $('#contenido').innerHTML = `<div class="vacio">${filtro ? 'Nada coincide con la búsqueda.' : 'Todavía no hay nada aquí.'}</div>`;
+    return;
+  }
+
+  const cabecera = ['<th>Fecha</th>']
+    .concat(s.campos.map(c => `<th>${c[1]}</th>`))
+    .concat(s.marca ? ['<th></th>'] : []).join('');
+
+  const cuerpo = datos.map(r => {
+    const celdas = [`<td>${fecha(r.creado_en)}</td>`].concat(
+      s.campos.map(c => `<td><span class="recorte">${escapar(r[c[0]])}</span></td>`));
+    if (s.marca) {
+      if (s.marca.tipo === 'bool') {
+        celdas.push(`<td><button class="marca ${r[s.marca.campo]?'si':''}" data-id="${r.id}" data-campo="${s.marca.campo}" data-valor="${!r[s.marca.campo]}">${r[s.marca.campo]?s.marca.si:s.marca.no}</button></td>`);
+      } else {
+        celdas.push(`<td><select class="estado" data-id="${r.id}" data-campo="${s.marca.campo}">` +
+          s.marca.opciones.map(o => `<option value="${o}" ${r[s.marca.campo]===o?'selected':''}>${o}</option>`).join('') +
+          `</select></td>`);
+      }
+    }
+    return `<tr class="fila" data-id="${r.id}">${celdas.join('')}</tr>`;
+  }).join('');
+
+  $('#contenido').innerHTML = `<table><thead><tr>${cabecera}</tr></thead><tbody>${cuerpo}</tbody></table>`;
+
+  $('#contenido').querySelectorAll('tr.fila').forEach(tr => {
+    tr.addEventListener('click', ev => {
+      if (ev.target.closest('button, select')) return;
+      verFicha(filas.find(f => String(f.id) === tr.dataset.id));
+    });
+  });
+  $('#contenido').querySelectorAll('.marca').forEach(b =>
+    b.addEventListener('click', () => guardar(b.dataset.id, b.dataset.campo, b.dataset.valor === 'true')));
+  $('#contenido').querySelectorAll('.estado').forEach(sel =>
+    sel.addEventListener('change', () => guardar(sel.dataset.id, sel.dataset.campo, sel.value)));
+}
+
+async function guardar(id, campo, valor){
+  const { error } = await sb.from(seccionActiva.tabla)
+    .update({ [campo]: valor }).eq('id', id);
+  if (error) { alert('No se ha podido guardar: ' + error.message); return; }
+  const f = filas.find(x => String(x.id) === String(id));
+  if (f) f[campo] = valor;
+  pintarTabla();
+  cargarResumen();
+}
+
+/* ---------------- Ficha ---------------- */
+
+const ETIQUETAS = {
+  creado_en:'Recibido', nombre:'Nombre', apellido:'Apellido', email:'Email',
+  telefono:'Teléfono', mensaje:'Mensaje', municipio:'Municipio', tramo:'Cuota',
+  situacion:'Situación', sector:'Estudios o sector', linkedin:'LinkedIn',
+  como_conocio:'Cómo nos conoció', expectativas:'Qué espera', estado:'Estado',
+  acepta_comunicaciones:'Acepta comunicaciones', atendido:'Atendido',
+  entidad:'Entidad', cif:'CIF', web:'Web', contacto_nombre:'Persona de contacto',
+  contacto_cargo:'Cargo', colaboracion:'Colaboración', origen:'Tipo de alta',
+  evento:'Evento', perfil:'Perfil', anio_graduacion:'Año de graduación',
+  comentario:'Comentario', asistio:'Asistió', notas_internas:'Notas internas',
+  baja_en:'Baja'
+};
+
+function verFicha(r){
+  if (!r) return;
+  const filas = Object.entries(r)
+    .filter(([k,v]) => k !== 'id' && v !== null && v !== '' && !(Array.isArray(v) && !v.length))
+    .map(([k,v]) => {
+      let texto = Array.isArray(v) ? v.join(', ')
+                : typeof v === 'boolean' ? (v ? 'Sí' : 'No')
+                : k.endsWith('_en') ? fecha(v) : String(v);
+      if (k === 'email')    texto = `<a href="mailto:${escapar(v)}">${escapar(v)}</a>`;
+      else if (k === 'telefono') texto = `<a href="tel:${escapar(v)}">${escapar(v)}</a>`;
+      else if (k === 'linkedin' || k === 'web') texto = `<a href="${escapar(v)}" target="_blank" rel="noopener">${escapar(v)}</a>`;
+      else texto = escapar(texto);
+      return `<dt>${ETIQUETAS[k] || k}</dt><dd>${texto}</dd>`;
+    }).join('');
+
+  $('#detalle').innerHTML =
+    `<div class="fondo"><div class="ficha"><h2>${escapar(r.nombre || r.entidad || 'Detalle')}</h2>
+     <dl>${filas}</dl><button class="cerrar">Cerrar</button></div></div>`;
+  const cerrar = () => { $('#detalle').innerHTML = ''; };
+  $('#detalle .cerrar').addEventListener('click', cerrar);
+  $('#detalle .fondo').addEventListener('click', e => { if (e.target.classList.contains('fondo')) cerrar(); });
+}
+
+/* ---------------- CSV ---------------- */
+
+$('#btnCsv').addEventListener('click', () => {
+  const datos = visibles();
+  if (!datos.length) return;
+  const cols = Object.keys(datos[0]);
+  const celda = v => {
+    const t = Array.isArray(v) ? v.join(' | ') : String(v ?? '');
+    return /[";\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  };
+  // Punto y coma y BOM: así Excel en español lo abre bien de un doble clic.
+  const csv = '﻿' + [cols.join(';')]
+    .concat(datos.map(r => cols.map(c => celda(r[c])).join(';'))).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8;' }));
+  a.download = `lgmp-${seccionActiva.id}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+$('#buscar').addEventListener('input', e => { filtro = e.target.value.trim(); pintarTabla(); });
+
+arrancar();
+</script>
+</body>
+</html>
