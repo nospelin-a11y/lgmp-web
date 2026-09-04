@@ -24,6 +24,7 @@
 <link rel="icon" href="/assets/favicon.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="/assets/favicon.png">
 <meta name="theme-color" content="#1E2A4A">
+<script src="/lgmp-datos.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -129,33 +130,30 @@
     </div>
 
     <form id="formEvento" novalidate>
-      <input type="hidden" name="access_key" value="bd66ee88-ebfb-4c8b-96b1-1106c4d1279b">
-      <input type="hidden" name="subject" value="Nueva inscripción — Presentación 1 de octubre">
-      <input type="hidden" name="from_name" value="Web LGMP">
-      <input type="checkbox" name="botcheck" class="oculto" tabindex="-1" autocomplete="off">
+      <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <fieldset>
         <legend>Apúntate</legend>
 
         <div class="campo">
           <label for="nombre">Nombre y apellidos <span class="req">*</span></label>
-          <input type="text" id="nombre" name="Nombre" autocomplete="name" required>
+          <input type="text" id="nombre" name="nombre" autocomplete="name" required>
         </div>
 
         <div class="fila">
           <div class="campo">
             <label for="email">Correo electrónico <span class="req">*</span></label>
-            <input type="email" id="email" name="Email" autocomplete="email" required>
+            <input type="email" id="email" name="email" autocomplete="email" required>
           </div>
           <div class="campo">
             <label for="telefono">Teléfono <span class="req">*</span></label>
-            <input type="tel" id="telefono" name="Teléfono" autocomplete="tel" required>
+            <input type="tel" id="telefono" name="telefono" autocomplete="tel" required>
           </div>
         </div>
 
         <div class="campo">
           <label for="perfil">¿Con qué te identificas? <span class="req">*</span></label>
-          <select id="perfil" name="Perfil" required>
+          <select id="perfil" name="perfil" required>
             <option value="">Selecciona una opción</option>
             <option>Estudiante de la UMU</option>
             <option>Antiguo alumno de la UMU</option>
@@ -169,17 +167,17 @@
         <div class="fila">
           <div class="campo">
             <label for="sector">Estudios o sector profesional</label>
-            <input type="text" id="sector" name="Estudios o sector" placeholder="ADE, Derecho, Ingeniería…">
+            <input type="text" id="sector" name="sector" placeholder="ADE, Derecho, Ingeniería…">
           </div>
           <div class="campo">
             <label for="anio">Año de graduación</label>
-            <input type="text" id="anio" name="Año de graduación" placeholder="2024" inputmode="numeric">
+            <input type="text" id="anio" name="anio_graduacion" placeholder="2024" inputmode="numeric">
           </div>
         </div>
 
         <div class="campo">
           <label for="origen">¿Cómo te has enterado?</label>
-          <select id="origen" name="Cómo se enteró">
+          <select id="origen" name="como_conocio">
             <option value="">Selecciona una opción</option>
             <option>El podcast</option>
             <option>Redes sociales</option>
@@ -192,7 +190,7 @@
 
         <div class="campo">
           <label for="comentario">¿Quieres contarnos algo?</label>
-          <textarea id="comentario" name="Comentario" placeholder="Opcional. Si vienes con alguien o tienes alguna duda, dínoslo aquí."></textarea>
+          <textarea id="comentario" name="comentario" placeholder="Opcional. Si vienes con alguien o tienes alguna duda, dínoslo aquí."></textarea>
         </div>
       </fieldset>
 
@@ -205,7 +203,7 @@
         </label>
 
         <label class="check">
-          <input type="checkbox" id="marketing" name="Acepta comunicaciones" value="Sí">
+          <input type="checkbox" id="marketing" name="acepta_comunicaciones">
           <span>Quiero recibir información sobre la Asociación, sus actividades y cómo asociarme.</span>
         </label>
 
@@ -259,29 +257,24 @@
     boton.disabled = true;
     boton.textContent = 'Apuntándote…';
 
-    var datos = Object.fromEntries(new FormData(form).entries());
-    datos['Evento'] = 'Presentación oficial · 1 de octubre de 2026';
-    datos['Acepta la política de privacidad'] = 'Sí';
-    if (!datos['Acepta comunicaciones']) datos['Acepta comunicaciones'] = 'No';
-
-    fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(datos)
+    window.LGMP.enviar('inscripcion-evento', {
+      evento:          'Presentación oficial · 1 de octubre de 2026',
+      nombre:          form.nombre.value,
+      email:           form.email.value,
+      telefono:        form.telefono.value,
+      perfil:          form.perfil.value,
+      sector:          form.sector.value,
+      anio_graduacion: form.anio_graduacion.value,
+      como_conocio:    form.como_conocio.value,
+      comentario:      form.comentario.value,
+      acepta_comunicaciones: form.acepta_comunicaciones.checked
+    }, form.trampa.value)
+    .then(function(){
+      form.classList.add('oculto');
+      exito.classList.remove('oculto');
+      exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
     })
-    .then(function(r){ return r.json(); })
-    .then(function(res){
-      if (res.success) {
-        form.classList.add('oculto');
-        exito.classList.remove('oculto');
-        exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        fallo('No hemos podido apuntarte. Escríbenos a hola@lageneracionmejorpreparada.com y te apuntamos a mano.');
-      }
-    })
-    .catch(function(){
-      fallo('No hemos podido apuntarte. Revisa tu conexión o escríbenos a hola@lageneracionmejorpreparada.com.');
-    });
+    .catch(function(err){ fallo(err.message); });
   });
 })();
 </script>

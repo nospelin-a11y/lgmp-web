@@ -24,6 +24,7 @@
 <link rel="icon" href="/assets/favicon.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="/assets/favicon.png">
 <meta name="theme-color" content="#1E2A4A">
+<script src="/lgmp-datos.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -133,33 +134,30 @@
     </div>
 
     <form id="formAlta" novalidate>
-      <input type="hidden" name="access_key" value="bd66ee88-ebfb-4c8b-96b1-1106c4d1279b">
-      <input type="hidden" name="subject" value="Nueva solicitud de alta — Socio (persona física)">
-      <input type="hidden" name="from_name" value="Web LGMP">
-      <input type="checkbox" name="botcheck" class="oculto" tabindex="-1" autocomplete="off">
+      <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
 
       <fieldset>
         <legend>Tus datos</legend>
 
         <div class="campo">
           <label for="nombre">Nombre y apellidos <span class="req">*</span></label>
-          <input type="text" id="nombre" name="Nombre y apellidos" autocomplete="name" required>
+          <input type="text" id="nombre" name="nombre" autocomplete="name" required>
         </div>
 
         <div class="fila">
           <div class="campo">
             <label for="email">Correo electrónico <span class="req">*</span></label>
-            <input type="email" id="email" name="Email" autocomplete="email" required>
+            <input type="email" id="email" name="email" autocomplete="email" required>
           </div>
           <div class="campo">
             <label for="telefono">Teléfono <span class="req">*</span></label>
-            <input type="tel" id="telefono" name="Teléfono" autocomplete="tel" required>
+            <input type="tel" id="telefono" name="telefono" autocomplete="tel" required>
           </div>
         </div>
 
         <div class="campo">
           <label for="municipio">Municipio <span class="req">*</span></label>
-          <input type="text" id="municipio" name="Municipio" autocomplete="address-level2" required>
+          <input type="text" id="municipio" name="municipio" autocomplete="address-level2" required>
         </div>
       </fieldset>
 
@@ -167,7 +165,7 @@
         <legend>Tu cuota</legend>
         <div class="tramos">
           <label class="tramo">
-            <input type="radio" name="Tramo de edad" value="Menor de 30 años — 7,50 € / año" required>
+            <input type="radio" name="tramo" value="menor30" required>
             <span>
               <span class="t">Menos de 30 años</span>
               <span class="c"><s>15 €</s>7,50 €</span>
@@ -175,7 +173,7 @@
             </span>
           </label>
           <label class="tramo">
-            <input type="radio" name="Tramo de edad" value="30 años o más — 15 € / año">
+            <input type="radio" name="tramo" value="mayor30">
             <span>
               <span class="t">30 años o más</span>
               <span class="c"><s>30 €</s>15 €</span>
@@ -191,7 +189,7 @@
 
         <div class="campo">
           <label for="situacion">Situación actual <span class="req">*</span></label>
-          <select id="situacion" name="Situación actual" required>
+          <select id="situacion" name="situacion" required>
             <option value="">Selecciona una opción</option>
             <option>Estudiante</option>
             <option>Recién graduado o graduada</option>
@@ -204,17 +202,17 @@
 
         <div class="campo">
           <label for="sector">Estudios o sector profesional</label>
-          <input type="text" id="sector" name="Estudios o sector profesional" placeholder="Por ejemplo: ADE, Derecho, Ingeniería Informática, Marketing…">
+          <input type="text" id="sector" name="sector" placeholder="Por ejemplo: ADE, Derecho, Ingeniería Informática, Marketing…">
         </div>
 
         <div class="campo">
           <label for="linkedin">LinkedIn</label>
-          <input type="url" id="linkedin" name="LinkedIn" placeholder="https://www.linkedin.com/in/…">
+          <input type="url" id="linkedin" name="linkedin" placeholder="https://www.linkedin.com/in/…">
         </div>
 
         <div class="campo">
           <label for="conocido">¿Cómo nos conociste?</label>
-          <select id="conocido" name="Cómo nos conoció">
+          <select id="conocido" name="como_conocio">
             <option value="">Selecciona una opción</option>
             <option>El podcast</option>
             <option>Redes sociales</option>
@@ -227,7 +225,7 @@
 
         <div class="campo">
           <label for="espera">¿Qué esperas de la Asociación?</label>
-          <textarea id="espera" name="Qué espera de la Asociación" placeholder="Cuéntanos en qué te gustaría que te ayudemos. Nos sirve para orientar las actividades."></textarea>
+          <textarea id="espera" name="expectativas" placeholder="Cuéntanos en qué te gustaría que te ayudemos. Nos sirve para orientar las actividades."></textarea>
         </div>
       </fieldset>
 
@@ -240,7 +238,7 @@
         </label>
 
         <label class="check">
-          <input type="checkbox" name="Acepta comunicaciones" value="Sí">
+          <input type="checkbox" name="acepta_comunicaciones">
           <span>Quiero recibir por correo las noticias y actividades de la Asociación.</span>
         </label>
 
@@ -269,7 +267,7 @@
   // Preselecciona el tramo de edad según el botón desde el que se llega
   // (Hazte Socio enlaza con ?tramo=menor30 y ?tramo=mayor30).
   var tramo = new URLSearchParams(location.search).get('tramo');
-  var radios = form.querySelectorAll('input[name="Tramo de edad"]');
+  var radios = form.querySelectorAll('input[name="tramo"]');
   if (tramo === 'menor30') radios[0].checked = true;
   if (tramo === 'mayor30') radios[1].checked = true;
 
@@ -289,7 +287,7 @@
                                                         return fallo('Escribe un correo electrónico válido.');
     if (form.telefono.value.replace(/\D/g,'').length < 9) return fallo('Escribe un teléfono válido.');
     if (!form.municipio.value.trim())                   return fallo('Dinos de qué municipio eres.');
-    if (!form.querySelector('input[name="Tramo de edad"]:checked'))
+    if (!form.querySelector('input[name="tramo"]:checked'))
                                                         return fallo('Selecciona tu tramo de edad.');
     if (!form.situacion.value)                          return fallo('Selecciona tu situación actual.');
     if (!document.getElementById('rgpd').checked)       return fallo('Debes aceptar la Política de Privacidad para continuar.');
@@ -297,27 +295,25 @@
     boton.disabled = true;
     boton.textContent = 'Enviando…';
 
-    var datos = Object.fromEntries(new FormData(form).entries());
-    datos['Acepta la política de privacidad'] = 'Sí';
-
-    fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(datos)
+    window.LGMP.enviar('alta-socio', {
+      nombre:       form.nombre.value,
+      email:        form.email.value,
+      telefono:     form.telefono.value,
+      municipio:    form.municipio.value,
+      tramo:        form.querySelector('input[name="tramo"]:checked').value,
+      situacion:    form.situacion.value,
+      sector:       form.sector.value,
+      linkedin:     form.linkedin.value,
+      como_conocio: form.como_conocio.value,
+      expectativas: form.expectativas.value,
+      acepta_comunicaciones: form.acepta_comunicaciones.checked
+    }, form.trampa.value)
+    .then(function(){
+      form.classList.add('oculto');
+      exito.classList.remove('oculto');
+      exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
     })
-    .then(function(r){ return r.json(); })
-    .then(function(res){
-      if (res.success) {
-        form.classList.add('oculto');
-        exito.classList.remove('oculto');
-        exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        fallo('No hemos podido enviar tu solicitud. Escríbenos a hola@lageneracionmejorpreparada.com y lo resolvemos.');
-      }
-    })
-    .catch(function(){
-      fallo('No hemos podido enviar tu solicitud. Revisa tu conexión o escríbenos a hola@lageneracionmejorpreparada.com.');
-    });
+    .catch(function(err){ fallo(err.message); });
   });
 })();
 </script>

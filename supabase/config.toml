@@ -1,0 +1,12 @@
+# Configuración del CLI de Supabase para el proyecto LGMP.
+#
+# Al desplegar se indica el proyecto de verdad con --project-ref:
+#   supabase functions deploy enviar-formulario --project-ref <ref> --no-verify-jwt
+#
+# verify_jwt = false a propósito: la comprobación de la clave anon la hace
+# la propia función (así el preflight CORS del navegador nunca se rechaza).
+
+project_id = "lgmp"
+
+[functions.enviar-formulario]
+verify_jwt = false
