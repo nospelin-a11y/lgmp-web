@@ -1,0 +1,52 @@
+# Regenera las páginas de eventos y noticias a partir de Supabase.
+#
+# Se dispara de tres formas:
+#   1. Desde el panel, al pulsar "Publicar cambios" (repository_dispatch)
+#   2. A mano, desde la pestaña Actions de GitHub
+#   3. Cada noche, por si alguien se olvida de publicar
+#
+# Escribe HTML de verdad en el repositorio para que el contenido siga
+# estando en la página que recibe Google, no cargado luego por JavaScript.
+
+name: Generar páginas
+
+on:
+  repository_dispatch:
+    types: [publicar]
+  workflow_dispatch:
+  schedule:
+    - cron: '7 * * * *'   # cada hora, por si nadie pulsa Publicar
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generar-paginas
+  cancel-in-progress: false
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generar
+        run: node scripts/generar.mjs
+
+      - name: Publicar si algo ha cambiado
+        run: |
+          git config user.name  "Panel LGMP"
+          git config user.email "hola@lageneracionmejorpreparada.com"
+          if git diff --quiet; then
+            echo "Nada que publicar."
+            exit 0
+          fi
+          git add -A
+          git commit -m "Regenerar páginas de eventos y noticias
+
+          Generado por scripts/generar.mjs desde los datos de Supabase."
+          git push

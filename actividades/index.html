@@ -135,17 +135,19 @@
         <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,3.4vw,42px);line-height:1.12;color:#1E2A4A;margin:0">Eventos de la Asociación</h2>
       </div>
       <div style="display:flex;flex-direction:column;gap:18px">
-        <div data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,42,74,.12)">
+        <!--LGMP:EVENTOS:INICIO-->
+        <a href="/eventos/presentacion-oficial-de-la-asociacion/" data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;transition:transform .25s,box-shadow .25s;color:#1E2A4A" style-hover="transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,42,74,.12);color:#1E2A4A">
           <div style="flex:none;width:84px;height:84px;border-radius:16px;background:#1E2A4A;color:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Nunito',sans-serif">
             <span style="font-weight:900;font-size:28px;line-height:1">1</span>
-            <span style="font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7)">Oct</span>
+            <span style="font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7)">oct</span>
           </div>
           <div style="flex:1;min-width:240px">
             <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A;margin:0 0 6px">Presentación oficial de la Asociación</h3>
-            <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">Presentación + mesa redonda + networking con antiguos alumnos de la UMU. Te escribimos con el sitio y la hora en cuanto te apuntes.</p>
+            <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">Murcia · Presentación + mesa redonda + networking con antiguos alumnos de la UMU.</p>
           </div>
-          <a href="/presentacion/" style="flex:none;background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 24px;border-radius:999px;box-shadow:0 6px 18px rgba(240,80,60,.35);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-2px)">Apúntate</a>
-        </div>
+          <span style="flex:none;background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 24px;border-radius:999px;box-shadow:0 6px 18px rgba(240,80,60,.35)">Ver más</span>
+        </a>
+      <!--LGMP:EVENTOS:FIN-->
       </div>
     </div>
   </section>
@@ -200,9 +202,12 @@
     </div>
   </section>
 
-  <!-- ============ NOTICIAS ============ -->
-  <!-- Sección de noticias retirada el 31 ago 2026: no hay noticias reales todavía.
-       El marcado original está en el historial de git. -->
+  <!-- ============ NOTICIAS ============
+       El contenido lo genera scripts/generar.mjs a partir de la tabla
+       `noticias` de Supabase. No editar a mano entre las marcas: se
+       sobrescribe en cada publicación. La sección entera desaparece si no
+       hay ninguna noticia publicada. -->
+  <!--LGMP:NOTICIAS:INICIO--><!--LGMP:NOTICIAS:FIN-->
   
 
   <!-- ============ FOOTER ============ -->
