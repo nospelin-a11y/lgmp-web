@@ -3,23 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alta de socio · La Generación Mejor Preparada</title>
-<meta name="description" content="Solicita tu alta como socio de la Asociación La Generación Mejor Preparada. Cuota desde 7,50 € al año para menores de 30.">
-<link rel="canonical" href="https://lageneracionmejorpreparada.com/alta-socio/">
-<meta name="robots" content="index, follow">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Asociacion La Generacion Mejor Preparada">
-<meta property="og:locale" content="es_ES">
-<meta property="og:title" content="Alta de socio · La Generación Mejor Preparada">
-<meta property="og:description" content="Solicita tu alta como socio de la Asociación La Generación Mejor Preparada. Cuota desde 7,50 € al año para menores de 30.">
-<meta property="og:url" content="https://lageneracionmejorpreparada.com/alta-socio/">
-<meta property="og:image" content="https://lageneracionmejorpreparada.com/assets/og.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Alta de socio · La Generación Mejor Preparada">
-<meta name="twitter:description" content="Solicita tu alta como socio de la Asociación La Generación Mejor Preparada. Cuota desde 7,50 € al año para menores de 30.">
-<meta name="twitter:image" content="https://lageneracionmejorpreparada.com/assets/og.jpg">
+<title>Completa tu alta · La Generación Mejor Preparada</title>
+<meta name="description" content="Último paso para completar tu alta como socio de la Asociación La Generación Mejor Preparada.">
+<meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/assets/favicon.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="/assets/favicon.png">
@@ -115,141 +101,58 @@
 <header class="cab">
   <div class="cont">
     <img src="/assets/logo-dark.webp" alt="Asociación La Generación Mejor Preparada">
-    <a class="volver" href="/hazte-socio/">← Volver</a>
+    <a class="volver" href="/">Ir a la web</a>
   </div>
 </header>
 
 <main>
   <div class="hero">
-    <p class="kicker">Solicitud de alta</p>
-    <h1>Únete a <span class="destacado">La Generación Mejor Preparada</span>.</h1>
-    <p>Rellena este formulario y nos pondremos en contacto contigo para completar el alta. Se tarda menos de dos minutos.</p>
+    <p class="kicker">Último paso</p>
+    <h1>Completa tu <span class="destacado">alta</span>.</h1>
+    <p id="saludo">Solo necesitamos tu DNI y tu conformidad. Es un minuto.</p>
   </div>
 
   <div class="tarjeta">
 
-    <div id="exito" class="exito oculto">
-      <h2>¡Bienvenido a la Asociación!</h2>
-      <p>Hemos recibido tu solicitud y te hemos mandado un correo de confirmación. La Junta la revisa en los próximos días y te escribimos con los siguientes pasos.</p>
+    <div id="cargando" class="exito"><p>Comprobando tu enlace…</p></div>
+
+    <div id="invalido" class="exito oculto">
+      <h2>Este enlace no funciona</h2>
+      <p id="invalidoTexto">Puede que ya no sea válido. Escríbenos a <a href="mailto:hola@lageneracionmejorpreparada.com">hola@lageneracionmejorpreparada.com</a> y lo resolvemos.</p>
     </div>
 
-    <form id="formAlta" novalidate>
+    <div id="exito" class="exito oculto">
+      <h2>¡Listo, gracias!</h2>
+      <p>Ya tenemos tus datos. En cuanto recibamos la transferencia de la cuota te mandamos tu número de socio y la invitación a la comunidad.</p>
+    </div>
+
+    <form id="formCompletar" class="oculto" novalidate>
       <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p id="yaCompletado" class="ayuda oculto" style="margin-bottom:18px">Ya nos habías mandado estos datos. Si los envías de nuevo, sustituyen a los anteriores.</p>
 
       <fieldset>
         <legend>Tus datos</legend>
-
         <div class="campo">
-          <label for="nombre">Nombre y apellidos <span class="req">*</span></label>
-          <input type="text" id="nombre" name="nombre" autocomplete="name" required>
-        </div>
-
-        <div class="fila">
-          <div class="campo">
-            <label for="email">Correo electrónico <span class="req">*</span></label>
-            <input type="email" id="email" name="email" autocomplete="email" required>
-          </div>
-          <div class="campo">
-            <label for="telefono">Teléfono <span class="req">*</span></label>
-            <input type="tel" id="telefono" name="telefono" autocomplete="tel" required>
-          </div>
-        </div>
-
-        <div class="fila">
-          <div class="campo">
-            <label for="municipio">Municipio <span class="req">*</span></label>
-            <input type="text" id="municipio" name="municipio" autocomplete="address-level2" required>
-          </div>
-          <div class="campo">
-            <label for="fecha_nacimiento">Fecha de nacimiento <span class="req">*</span></label>
-            <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" autocomplete="bday" min="1920-01-01" required>
-          </div>
+          <label for="dni">DNI o NIE <span class="req">*</span></label>
+          <input type="text" id="dni" name="dni" autocomplete="off" placeholder="12345678Z" maxlength="12" required>
+          <p class="ayuda">Número y letra, sin espacios. Lo necesitamos para el Libro de Registro de Socios.</p>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Tu cuota</legend>
-        <div class="tramos">
-          <label class="tramo">
-            <input type="radio" name="tramo" value="menor30" required>
-            <span>
-              <span class="t">Menos de 30 años</span>
-              <span class="c"><s>15 €</s>7,50 €</span>
-              <span class="d">cuota anual · −50 % de bienvenida</span>
-            </span>
-          </label>
-          <label class="tramo">
-            <input type="radio" name="tramo" value="mayor30">
-            <span>
-              <span class="t">30 años o más</span>
-              <span class="c"><s>30 €</s>15 €</span>
-              <span class="d">cuota anual · −50 % de bienvenida</span>
-            </span>
-          </label>
-        </div>
-        <p class="ayuda" style="margin-top:14px">El descuento de bienvenida se aplica a las altas realizadas hasta el 31 de diciembre.</p>
-      </fieldset>
-
-      <fieldset>
-        <legend>Tu momento profesional</legend>
-
-        <div class="campo">
-          <label for="situacion">Situación actual <span class="req">*</span></label>
-          <select id="situacion" name="situacion" required>
-            <option value="">Selecciona una opción</option>
-            <option>Estudiante</option>
-            <option>Recién graduado o graduada</option>
-            <option>Trabajando</option>
-            <option>Buscando empleo</option>
-            <option>Emprendiendo</option>
-            <option>Otra</option>
-          </select>
-        </div>
-
-        <div class="campo">
-          <label for="sector">Estudios o sector profesional</label>
-          <input type="text" id="sector" name="sector" placeholder="Por ejemplo: ADE, Derecho, Ingeniería Informática, Marketing…">
-        </div>
-
-        <div class="campo">
-          <label for="linkedin">LinkedIn</label>
-          <input type="url" id="linkedin" name="linkedin" placeholder="https://www.linkedin.com/in/…">
-        </div>
-
-        <div class="campo">
-          <label for="conocido">¿Cómo nos conociste?</label>
-          <select id="conocido" name="como_conocio">
-            <option value="">Selecciona una opción</option>
-            <option>El podcast</option>
-            <option>Redes sociales</option>
-            <option>Me lo contó alguien</option>
-            <option>Un evento</option>
-            <option>Prensa</option>
-            <option>Otro</option>
-          </select>
-        </div>
-
-        <div class="campo">
-          <label for="espera">¿Qué esperas de la Asociación?</label>
-          <textarea id="espera" name="expectativas" placeholder="Cuéntanos en qué te gustaría que te ayudemos. Nos sirve para orientar las actividades."></textarea>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Protección de datos</legend>
-
+        <legend>Tu conformidad</legend>
         <label class="check">
-          <input type="checkbox" id="rgpd" required>
-          <span>He leído y acepto la <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a> y el tratamiento de mis datos para gestionar mi alta como socio. <span class="req">*</span></span>
+          <input type="checkbox" id="acepta_estatutos" required>
+          <span>Declaro que soy mayor de edad, que mis datos son ciertos y que acepto los estatutos de la Asociación (si quieres leerlos, pídenoslos en hola@lageneracionmejorpreparada.com). <span class="req">*</span></span>
         </label>
-
         <label class="check">
-          <input type="checkbox" name="acepta_comunicaciones">
-          <span>Quiero recibir por correo las noticias y actividades de la Asociación.</span>
+          <input type="checkbox" id="acepta_imagen">
+          <span>Acepto aparecer en la web de la Asociación, en la página de socios, con mi nombre y mi foto. Puedo retirarlo cuando quiera escribiendo a hola@lageneracionmejorpreparada.com.</span>
         </label>
+        <p class="ayuda" style="margin:4px 0 18px">Tratamos tus datos según nuestra <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a>.</p>
 
         <p id="error" class="error oculto"></p>
-        <button type="submit" id="enviar" class="btn">Enviar solicitud</button>
+        <button type="submit" id="enviar" class="btn">Completar mi alta</button>
       </fieldset>
     </form>
   </div>
@@ -265,81 +168,72 @@
 
 <script>
 (function(){
-  var form   = document.getElementById('formAlta');
-  var exito  = document.getElementById('exito');
-  var error  = document.getElementById('error');
-  var boton  = document.getElementById('enviar');
+  var token   = new URLSearchParams(location.search).get('t') || '';
+  var form    = document.getElementById('formCompletar');
+  var error   = document.getElementById('error');
+  var boton   = document.getElementById('enviar');
+  var ver     = function(id){ document.getElementById(id).classList.remove('oculto'); };
+  var ocultar = function(id){ document.getElementById(id).classList.add('oculto'); };
 
-  // Preselecciona el tramo de edad según el botón desde el que se llega
-  // (Hazte Socio enlaza con ?tramo=menor30 y ?tramo=mayor30).
-  var tramo = new URLSearchParams(location.search).get('tramo');
-  var radios = form.querySelectorAll('input[name="tramo"]');
-  if (tramo === 'menor30') radios[0].checked = true;
-  if (tramo === 'mayor30') radios[1].checked = true;
+  function invalido(msg){
+    ocultar('cargando');
+    if (msg) document.getElementById('invalidoTexto').textContent = msg;
+    ver('invalido');
+  }
 
-  // Al poner la fecha de nacimiento, se marca solo el tramo de cuota que toca.
-  form.fecha_nacimiento.max = new Date().toISOString().slice(0, 10);
-  form.fecha_nacimiento.addEventListener('change', function(){
-    var v = form.fecha_nacimiento.value;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
-    var h = new Date(), q = v.split('-').map(Number);
-    var e = h.getFullYear() - q[0] - ((h.getMonth()+1 < q[1] || (h.getMonth()+1 === q[1] && h.getDate() < q[2])) ? 1 : 0);
-    radios[e < 30 ? 0 : 1].checked = true;
-  });
+  if (!/^[0-9a-f-]{36}$/i.test(token)) { invalido(); return; }
+
+  window.LGMP.llamar('consultar-alta', { token: token })
+    .then(function(r){
+      ocultar('cargando');
+      var nombre = String(r.nombre || '').split(' ')[0];
+      if (nombre) document.getElementById('saludo').textContent =
+        'Hola, ' + nombre + '. Solo necesitamos tu DNI y tu conformidad. Es un minuto.';
+      if (r.completado) ver('yaCompletado');
+      form.classList.remove('oculto');
+    })
+    .catch(function(err){ invalido(err.message); });
+
+  function letraOk(v){
+    var m = v.match(/^([XYZ]?)(\d{7,8})([A-Z])$/);
+    if (!m) return false;
+    if (!m[1] && m[2].length !== 8) return false;
+    if (m[1] && m[2].length !== 7) return false;
+    var n = Number(({X:'0',Y:'1',Z:'2'}[m[1]] || '') + m[2]);
+    return 'TRWAGMYFPDXBNJZSQVHLCKE'[n % 23] === m[3];
+  }
 
   function fallo(msg){
     error.textContent = msg;
     error.classList.remove('oculto');
     boton.disabled = false;
-    boton.textContent = 'Enviar solicitud';
+    boton.textContent = 'Completar mi alta';
   }
 
   form.addEventListener('submit', function(ev){
     ev.preventDefault();
     error.classList.add('oculto');
-
-    if (!form.nombre.value.trim())                      return fallo('Escribe tu nombre y apellidos.');
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.value.trim()))
-                                                        return fallo('Escribe un correo electrónico válido.');
-    if (form.telefono.value.replace(/\D/g,'').length < 9) return fallo('Escribe un teléfono válido.');
-    if (!form.municipio.value.trim())                   return fallo('Dinos de qué municipio eres.');
-    var nac = form.fecha_nacimiento.value;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(nac))                return fallo('Escribe tu fecha de nacimiento.');
-    var hoy = new Date(), p = nac.split('-').map(Number);
-    var anios = hoy.getFullYear() - p[0] - ((hoy.getMonth()+1 < p[1] || (hoy.getMonth()+1 === p[1] && hoy.getDate() < p[2])) ? 1 : 0);
-    if (anios < 18)                                     return fallo('De momento solo pueden hacerse socias las personas mayores de edad.');
-    if (!form.querySelector('input[name="tramo"]:checked'))
-                                                        return fallo('Selecciona tu tramo de edad.');
-    if (!form.situacion.value)                          return fallo('Selecciona tu situación actual.');
-    if (!document.getElementById('rgpd').checked)       return fallo('Debes aceptar la Política de Privacidad para continuar.');
+    var dni = form.dni.value.toUpperCase().replace(/[\s.-]/g, '');
+    if (!letraOk(dni)) return fallo('Revisa el DNI o NIE: número y letra, sin espacios.');
+    if (!document.getElementById('acepta_estatutos').checked)
+      return fallo('Para completar el alta tienes que marcar la declaración.');
 
     boton.disabled = true;
     boton.textContent = 'Enviando…';
-
-    window.LGMP.enviar('alta-socio', {
-      nombre:       form.nombre.value,
-      email:        form.email.value,
-      telefono:     form.telefono.value,
-      municipio:    form.municipio.value,
-      fecha_nacimiento: nac,
-      tramo:        form.querySelector('input[name="tramo"]:checked').value,
-      situacion:    form.situacion.value,
-      sector:       form.sector.value,
-      linkedin:     form.linkedin.value,
-      como_conocio: form.como_conocio.value,
-      expectativas: form.expectativas.value,
-      acepta_comunicaciones: form.acepta_comunicaciones.checked
+    window.LGMP.llamar('completar-alta', {
+      token: token,
+      dni: dni,
+      acepta_estatutos: true,
+      acepta_imagen: document.getElementById('acepta_imagen').checked
     }, form.trampa.value)
     .then(function(){
       form.classList.add('oculto');
-      exito.classList.remove('oculto');
-      exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      ver('exito');
+      document.getElementById('exito').scrollIntoView({ behavior: 'smooth', block: 'center' });
     })
     .catch(function(err){ fallo(err.message); });
   });
 })();
 </script>
-<!-- Cloudflare Web Analytics: analítica sin cookies, no requiere consentimiento -->
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "d88a51df730a44f1a2560b013dcca904"}'></script>
 </body>
 </html>

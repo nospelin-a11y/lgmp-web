@@ -17,6 +17,11 @@
 //    AVISOS_PARA      opcional · destinatarios separados por comas
 //    REMITENTE        opcional · "Nombre <correo@dominio>" verificado en Resend
 //    LIMITE_POR_HORA  opcional · envíos por IP y hora (por defecto 5)
+//    REMITENTE_SOCIOS opcional · remitente de los correos que recibe quien
+//                     pide el alta. Por defecto, hola@lageneracionmejorpreparada.com
+//
+//  Además de guardar formularios, atiende el enlace "Completar mi alta"
+//  del correo de pago (tipos `consultar-alta` y `completar-alta`).
 // =====================================================================
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
@@ -38,6 +43,8 @@ const AVISOS_PARA  = (Deno.env.get('AVISOS_PARA') ?? 'hola@lageneracionmejorprep
                        .split(',').map((s) => s.trim()).filter(Boolean);
 const REMITENTE    = Deno.env.get('REMITENTE') ?? 'Web LGMP <web@lageneracionmejorpreparada.com>';
 const LIMITE_HORA  = Number(Deno.env.get('LIMITE_POR_HORA') ?? '5');
+const REMITENTE_SOCIOS = Deno.env.get('REMITENTE_SOCIOS') ??
+                     'La Generación Mejor Preparada <hola@lageneracionmejorpreparada.com>';
 
 const ORIGENES_OK = [
   'https://lageneracionmejorpreparada.com',
@@ -91,6 +98,35 @@ function emailValido(v: string | null): v is string {
 
 function telefonoValido(v: string | null): v is string {
   return !!v && v.replace(/\D/g, '').length >= 9;
+}
+
+/** Fecha AAAA-MM-DD real. Devuelve la misma cadena o null. */
+function fechaValida(v: unknown): string | null {
+  const s = txt(v, 10);
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const d = new Date(s + 'T00:00:00Z');
+  return isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== s ? null : s;
+}
+
+/** Años cumplidos hoy (hora de Madrid, aproximada con la fecha UTC). */
+function edad(fecha: string): number {
+  const [a, m, d] = fecha.split('-').map(Number);
+  const hoy = new Date();
+  let e = hoy.getUTCFullYear() - a;
+  if (hoy.getUTCMonth() + 1 < m || (hoy.getUTCMonth() + 1 === m && hoy.getUTCDate() < d)) e--;
+  return e;
+}
+
+/** DNI o NIE español con su letra de control. Devuelve el documento normalizado. */
+function dniValido(v: unknown): string | null {
+  const s = (txt(v, 20) ?? '').toUpperCase().replace(/[\s.-]/g, '');
+  const m = s.match(/^([XYZ]?)(\d{7,8})([A-Z])$/);
+  if (!m) return null;
+  if (!m[1] && m[2].length !== 8) return null;   // DNI: 8 cifras
+  if (m[1] && m[2].length !== 7) return null;    // NIE: letra + 7 cifras
+  const prefijo = ({ X: '0', Y: '1', Z: '2' } as Record<string, string>)[m[1]] ?? '';
+  const numero = Number(prefijo + m[2]);
+  return 'TRWAGMYFPDXBNJZSQVHLCKE'[numero % 23] === m[3] ? s : null;
 }
 
 function opcion(v: unknown, permitidas: string[]): string | null {
@@ -204,6 +240,55 @@ async function avisar(asunto: string, resumen: [string, string][], responderA?: 
   if (!r.ok) console.error('Resend falló:', r.status, await r.text());
 }
 
+/**
+ * Correo para la persona que ha rellenado el formulario (no para la junta).
+ * `parrafos` es texto plano: cada elemento, un párrafo.
+ */
+async function escribirA(para: string, asunto: string, titulo: string, parrafos: string[]) {
+  if (!RESEND_KEY) { console.warn('RESEND_API_KEY sin configurar: no se envía el acuse.'); return; }
+  const cuerpo = parrafos.map((p) =>
+    `<p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#1E2A4A">${escapar(p).replace(/\n/g, '<br>')}</p>`).join('');
+  const html =
+    '<div style="background:#F4F6FA;padding:28px">' +
+      '<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #E6EAF2">' +
+        '<div style="background:#182548;padding:22px 26px">' +
+          '<p style="margin:0;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;font-weight:700">La Generación Mejor Preparada</p>' +
+          `<h1 style="margin:6px 0 0;font-family:Arial,sans-serif;font-size:21px;color:#ffffff">${escapar(titulo)}</h1>` +
+        '</div>' +
+        `<div style="padding:26px 26px 12px">${cuerpo}</div>` +
+        '<p style="margin:0;padding:16px 26px;font-family:Arial,sans-serif;font-size:12.5px;color:#6B7590;background:#F4F6FA">' +
+          'Asociación La Generación Mejor Preparada · Murcia · lageneracionmejorpreparada.com<br>' +
+          'Recibes este correo porque has solicitado el alta como socio. Si no has sido tú, responde a este correo y lo borramos.' +
+        '</p>' +
+      '</div>' +
+    '</div>';
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: REMITENTE_SOCIOS, to: [para], reply_to: CORREO_LGMP,
+      subject: asunto, html, text: parrafos.join('\n\n'),
+    }),
+  });
+  if (!r.ok) console.error('Resend (acuse) falló:', r.status, await r.text());
+}
+
+/** Llama a una función de la base de datos con la clave secreta. */
+async function rpc(nombre: string, args: Record<string, unknown>) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${nombre}`, {
+    method: 'POST',
+    headers: {
+      apikey: SERVICE_ROLE,
+      Authorization: `Bearer ${SERVICE_ROLE}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(args),
+  });
+  const cuerpo = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(`rpc ${nombre} (${r.status}): ${JSON.stringify(cuerpo)}`);
+  return cuerpo;
+}
+
 // ------------------------------------------------- Definición de formularios
 
 type Preparado = {
@@ -213,6 +298,7 @@ type Preparado = {
   asunto: string;
   resumen: [string, string][];
   responderA?: string | null;
+  acuse?: { para: string; nombre: string };   // correo de "hemos recibido tu solicitud"
 };
 
 const TRAMOS: Record<string, string> = {
@@ -299,6 +385,7 @@ function preparar(tipo: string, d: Record<string, unknown>): Preparado {
     const telefono = txt(d.telefono, 40);
     const municipio = txt(d.municipio, 80);
     const tramo = opcion(d.tramo, ['menor30', 'mayor30']);
+    const nacimiento = fechaValida(d.fecha_nacimiento);
     const situacion = txt(d.situacion, 80);
     const sector = txt(d.sector, 120);
     const linkedin = txt(d.linkedin, 300);
@@ -310,21 +397,30 @@ function preparar(tipo: string, d: Record<string, unknown>): Preparado {
     exigir(telefonoValido(telefono), 'Escribe un teléfono válido.');
     exigir(municipio, 'Dinos de qué municipio eres.');
     exigir(tramo, 'Selecciona tu tramo de edad.');
+    exigir(nacimiento, 'Escribe tu fecha de nacimiento.');
+    const anios = edad(nacimiento);
+    exigir(anios >= 18, 'De momento solo pueden hacerse socias las personas mayores de edad.');
+    exigir(anios <= 110, 'Revisa tu fecha de nacimiento.');
     exigir(situacion, 'Selecciona tu situación actual.');
     return {
       tabla: 'altas_socio',
       fila: {
-        nombre, email, telefono, municipio, tramo, situacion, sector, linkedin,
+        nombre, email, telefono, municipio, tramo, fecha_nacimiento: nacimiento,
+        situacion, sector, linkedin,
         como_conocio: como, expectativas, acepta_comunicaciones: comunicaciones,
       },
       asunto: `Nueva solicitud de alta · ${nombre}`,
       responderA: email,
+      acuse: { para: email, nombre },
       resumen: [
         ['Nombre', nombre],
         ['Email', email],
         ['Teléfono', telefono],
         ['Municipio', municipio],
+        ['Fecha de nacimiento', `${nacimiento.split('-').reverse().join('/')} (${anios} años)`],
         ['Cuota', TRAMOS[tramo]],
+        ...((tramo === 'menor30') !== (anios < 30)
+          ? [['⚠️ Revisar cuota', 'La edad no cuadra con el tramo elegido.'] as [string, string]] : []),
         ['Situación', situacion],
         ['Estudios o sector', sector ?? '—'],
         ['LinkedIn', linkedin ?? '—'],
@@ -429,6 +525,45 @@ Deno.serve(async (req) => {
   const tipo = txt(cuerpo.tipo, 40) ?? '';
   const datos = (cuerpo.datos ?? {}) as Record<string, unknown>;
 
+  // ---- Enlace "Completar mi alta" del correo de pago ----
+  if (tipo === 'consultar-alta' || tipo === 'completar-alta') {
+    const token = txt(datos.token, 40) ?? '';
+    if (!/^[0-9a-f-]{36}$/i.test(token)) {
+      return responder({ ok: false, error: 'El enlace no es válido. Escríbenos a ' + CORREO_LGMP + '.' }, 400, origen);
+    }
+    try {
+      if (tipo === 'consultar-alta') {
+        const filas = await rpc('consultar_alta', { p_token: token });
+        const f = Array.isArray(filas) ? filas[0] : null;
+        if (!f) return responder({ ok: false, error: 'Este enlace ya no es válido. Escríbenos a ' + CORREO_LGMP + '.' }, 404, origen);
+        return responder({ ok: true, nombre: f.nombre, completado: f.completado }, 200, origen);
+      }
+      const dni = dniValido(datos.dni);
+      if (!dni) return responder({ ok: false, error: 'Revisa el DNI o NIE: número y letra, sin espacios.' }, 400, origen);
+      if (!bool(datos.acepta_estatutos)) {
+        return responder({ ok: false, error: 'Para completar el alta tienes que marcar la declaración.' }, 400, origen);
+      }
+      const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim();
+      if (await limiteSuperado(ip, tipo)) {
+        return responder({ ok: false, error: `Demasiados intentos. Espera un rato o escríbenos a ${CORREO_LGMP}.` }, 429, origen);
+      }
+      const imagen = bool(datos.acepta_imagen);
+      const filas = await rpc('completar_alta', { p_token: token, p_dni: dni, p_imagen: imagen });
+      const f = Array.isArray(filas) ? filas[0] : null;
+      try {
+        await avisar(`Datos de alta completados · ${f?.nombre ?? ''}`, [
+          ['Nombre', f?.nombre ?? '—'],
+          ['DNI / NIE', 'Recibido (se ve en el panel)'],
+          ['Acepta aparecer en la web', imagen ? 'Sí' : 'No'],
+        ]);
+      } catch (e) { console.error('Aviso de completar-alta:', e); }
+      return responder({ ok: true }, 200, origen);
+    } catch (e) {
+      console.error('Completar alta:', e);
+      return responder({ ok: false, error: 'No hemos podido guardar tus datos. Escríbenos a ' + CORREO_LGMP + '.' }, 500, origen);
+    }
+  }
+
   let preparado: Preparado;
   try {
     preparado = preparar(tipo, datos);
@@ -460,6 +595,22 @@ Deno.serve(async (req) => {
     await avisar(preparado.asunto, preparado.resumen, preparado.responderA);
   } catch (e) {
     console.error('Error al avisar por correo:', e);
+  }
+
+  // Acuse para quien pide el alta de socio. También best-effort.
+  if (preparado.acuse) {
+    try {
+      const nombre = preparado.acuse.nombre.split(' ')[0];
+      await escribirA(preparado.acuse.para, 'Hemos recibido tu solicitud de alta', 'Hemos recibido tu solicitud', [
+        `Hola, ${nombre}:`,
+        'Gracias por querer formar parte de la Asociación La Generación Mejor Preparada.',
+        'Hemos recibido tu solicitud de alta. La Junta Directiva la revisa en los próximos días y te escribimos a este correo con los siguientes pasos.',
+        'Si tienes cualquier duda, responde a este correo.',
+        'Un abrazo,\nLa Junta de LGMP',
+      ]);
+    } catch (e) {
+      console.error('Error al enviar el acuse:', e);
+    }
   }
 
   return responder({ ok: true }, 200, origen);

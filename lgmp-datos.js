@@ -71,6 +71,31 @@
   }
 
   /**
+   * Como enviar(), pero devuelve la respuesta completa de la función.
+   * La usa /completar-alta/ para leer el nombre de quien abre el enlace.
+   * @returns {Promise<object>}
+   */
+  function llamar(tipo, datos, trampa) {
+    if (SIN_CONFIGURAR) {
+      return Promise.reject(new Error('No disponible ahora mismo. Escríbenos a ' + CORREO + '.'));
+    }
+    return fetch(SUPABASE_URL + '/functions/v1/enviar-formulario', {
+      method: 'POST',
+      headers: cabeceras(),
+      body: JSON.stringify({ tipo: tipo, datos: datos, trampa: trampa || '' })
+    })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (cuerpo) {
+          if (r.ok && cuerpo && cuerpo.ok) return cuerpo;
+          throw new Error((cuerpo && cuerpo.error) ||
+            'No hemos podido completar la operación. Escríbenos a ' + CORREO + '.');
+        });
+      }, function () {
+        throw new Error('No hemos podido conectar. Revisa tu conexión o escríbenos a ' + CORREO + '.');
+      });
+  }
+
+  /**
    * Número de socios activos, desde la función contar_socios() de la base
    * de datos. Si falla, devuelve null y quien llama decide qué enseñar.
    * @returns {Promise<number|null>}
@@ -92,6 +117,7 @@
     configurado: !SIN_CONFIGURAR,
     correo: CORREO,
     enviar: enviar,
+    llamar: llamar,
     contarSocios: contarSocios
   };
 })();

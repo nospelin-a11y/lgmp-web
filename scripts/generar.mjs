@@ -7,6 +7,7 @@
      /eventos/<slug>/index.html
      /noticias/<slug>/index.html
      /actividades/index.html      (listados, entre las marcas LGMP:)
+     /socios/index.html           (tarjetas de los socios marcados "WEB: SÍ")
      /sitemap.xml
 
    Se hace así, y no leyendo la base de datos desde el navegador, para que
@@ -46,6 +47,40 @@ async function traer(tabla, orden) {
   });
   if (!r.ok) throw new Error(`${tabla}: HTTP ${r.status} ${await r.text()}`);
   return r.json();
+}
+
+/* Socios que salen en la web. Solo se piden las columnas públicas: el resto
+   (email, teléfono, DNI…) la base de datos no se lo da a la clave pública. */
+async function traerSocios() {
+  const cols = 'id,nombre,cargo_asociacion,cargo_profesional,empresa,linkedin,foto_url,orden';
+  const r = await fetch(`${URL_SB}/rest/v1/socios?select=${cols}&publicar=eq.true&order=orden.asc,id.asc`, {
+    headers: { apikey: CLAVE, Authorization: 'Bearer ' + CLAVE }
+  });
+  if (!r.ok) throw new Error(`socios: HTTP ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+const aId = t => String(t ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const ICONO_LINKEDIN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM.5 8.5h4V23h-4V8.5zM8.5 8.5h3.83v1.98h.05c.53-1 1.83-2.06 3.77-2.06 4.03 0 4.78 2.66 4.78 6.11V23h-4v-6.66c0-1.59-.03-3.63-2.21-3.63-2.22 0-2.56 1.73-2.56 3.52V23h-4V8.5z"/></svg>';
+
+function tarjetaSocio(s) {
+  const linkedin = /^https:\/\//.test(s.linkedin || '')
+    ? `<a href="${e(s.linkedin)}" target="_blank" rel="noopener" aria-label="LinkedIn de ${e(s.nombre)}" style="flex:0 0 auto;background:#1E2A4A;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:999px" style-hover="background:#F0503C;color:#ffffff">${ICONO_LINKEDIN}</a>`
+    : '';
+  const puesto = [s.cargo_profesional, s.empresa].filter(Boolean).join(' · ');
+  return `
+        <div data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s" style-hover="transform:translateY(-6px);box-shadow:0 18px 40px rgba(30,42,74,.14)">
+          <div style="height:300px"><image-slot id="socio-${aId((s.foto_url || '').split('/').pop().replace(/\.[a-z]+$/i, '').replace(/-\d{10,}$/, '')) || aId(s.nombre)}" shape="rect" placeholder="Foto del socio"${s.foto_url ? ` src="${e(s.foto_url)}"` : ''}></image-slot></div>
+          <div style="padding:24px 24px 28px;display:flex;flex-direction:column;gap:6px;text-align:left">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A;margin:0">${e(s.nombre)}</h3>${linkedin}
+            </div>
+            <p style="font-family:'Nunito',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:#F0503C;margin:0">${e(s.cargo_asociacion || 'Socio')}</p>${puesto ? `
+            <p style="font-size:14.5px;line-height:1.5;color:rgba(30,42,74,.65);margin:2px 0 0">${e(puesto)}</p>` : ''}
+          </div>
+        </div>`;
 }
 
 /* ---------------------------------------------------------------------
@@ -214,7 +249,7 @@ function seccionNoticias(noticias) {
 function entreMarcas(html, marca, contenido) {
   const ini = `<!--LGMP:${marca}:INICIO-->`, fin = `<!--LGMP:${marca}:FIN-->`;
   const a = html.indexOf(ini), b = html.indexOf(fin);
-  if (a < 0 || b < 0) throw new Error(`Faltan las marcas ${marca} en actividades/index.html`);
+  if (a < 0 || b < 0) throw new Error(`Faltan las marcas ${marca}`);
   return html.slice(0, a + ini.length) + contenido + html.slice(b);
 }
 
@@ -285,6 +320,18 @@ async function main() {
                    : '\n        <p style="font-size:16px;color:rgba(30,42,74,.7);margin:0">Estamos preparando las próximas actividades. Te las contamos en cuanto haya fecha.</p>\n      ');
   html = entreMarcas(html, 'NOTICIAS', seccionNoticias(noticias));
   await writeFile(act, html);
+
+  // Página de socios. Si la consulta viniera vacía (fallo o nadie marcado),
+  // se deja la página como está para no publicar una lista en blanco.
+  const socios = await traerSocios();
+  if (socios.length) {
+    const rutaSocios = join(RAIZ, 'socios', 'index.html');
+    const htmlSocios = entreMarcas(await readFile(rutaSocios, 'utf8'), 'SOCIOS',
+      '\n' + socios.map(tarjetaSocio).join('').replace(/^\n/, '') + '\n');
+    await writeFile(rutaSocios, htmlSocios);
+  } else {
+    console.warn('No hay socios marcados para la web: /socios/ se deja como estaba.');
+  }
 
   // Sitemap
   const FIJAS = ['/', '/actividades/', '/socios/', '/podcast/', '/hazte-socio/', '/contacto/',

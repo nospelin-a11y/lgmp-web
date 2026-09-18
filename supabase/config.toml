@@ -10,3 +10,8 @@ project_id = "lgmp"
 
 [functions.enviar-formulario]
 verify_jwt = false
+
+# Botones del panel que mandan correo. También sin verify_jwt de plataforma:
+# la función comprueba ella misma la sesión y que la persona esté en `junta`.
+[functions.panel-acciones]
+verify_jwt = false

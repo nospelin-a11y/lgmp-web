@@ -144,6 +144,49 @@
     .ficha dl{grid-template-columns:1fr;gap:2px}
     .ficha dd{margin-bottom:12px}
   }
+
+  /* ---- Registro de socios (fase 5) ---- */
+  .vistas{display:flex;gap:6px;flex-wrap:wrap}
+  .vista{background:#ffffff;border:1px solid rgba(30,42,74,.14);cursor:pointer;font-family:'Nunito',sans-serif;
+         font-weight:700;font-size:13px;color:#1E2A4A;padding:8px 14px;border-radius:999px}
+  .vista.activa{background:#F0503C;border-color:#F0503C;color:#ffffff}
+  .contador{font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px;color:#1E2A4A;margin-left:auto}
+  .contador .n{color:#F0503C;font-size:18px}
+  .explica{background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:14px;padding:12px 16px;
+           font-size:14px;line-height:1.55;color:rgba(30,42,74,.75);margin-bottom:14px}
+  th.orden{cursor:pointer;user-select:none}
+  th.orden:hover{color:#1E2A4A}
+  th .flecha{display:inline-block;width:12px;margin-left:4px;color:#1E2A4A}
+  tr.filtros th{padding:8px 10px;background:#F4F6FA;border-bottom:1px solid rgba(30,42,74,.1);text-transform:none;letter-spacing:0}
+  tr.filtros input,tr.filtros select{width:100%;min-width:90px;background:#ffffff;border:1px solid rgba(30,42,74,.14);
+       border-radius:8px;padding:6px 8px;font-family:'Nunito Sans',sans-serif;font-size:13px;color:#1E2A4A;outline:none}
+  tr.filtros input:focus,tr.filtros select:focus{border-color:#F0503C}
+  tr.filtros .rango{display:flex;flex-direction:column;gap:4px}
+  tr.filtros .rango input{min-width:120px}
+  td.sel,th.sel{width:38px;padding-right:0}
+  td.sel input,th.sel input{width:17px;height:17px;accent-color:#F0503C;cursor:pointer}
+  .accion{cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;padding:7px 14px;
+          border-radius:999px;border:none;background:#F0503C;color:#ffffff;white-space:nowrap}
+  .accion.sec{background:#1E2A4A}
+  .accion:disabled{opacity:.55;cursor:wait}
+  .pastilla.ok{background:rgba(31,122,77,.12);color:#1F7A4D}
+  .pastilla.aviso{background:rgba(214,140,0,.15);color:#8A5A00}
+  .pastilla.mal{background:rgba(196,52,31,.12);color:#C4341F}
+  .marca:disabled{opacity:.45;cursor:not-allowed}
+  .ficha h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;
+            color:rgba(30,42,74,.5);margin:24px 0 12px}
+  .ficha h3:first-of-type{margin-top:4px}
+  .dos{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  .alerta{background:rgba(214,140,0,.13);color:#7A4F00;border-radius:12px;padding:10px 14px;font-size:14px;
+          font-weight:600;margin-bottom:10px}
+  .bien{background:rgba(31,122,77,.1);color:#1F6B45;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;margin-bottom:10px}
+  .foto{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+  .foto img{width:72px;height:72px;border-radius:14px;object-fit:cover;background:#F4F6FA}
+  .aviso-web{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1E2A4A;color:#ffffff;
+             font-weight:600;font-size:14.5px;padding:13px 22px;border-radius:999px;z-index:80;max-width:92vw;
+             box-shadow:0 10px 30px rgba(24,37,72,.3)}
+  .destinatarios{font-size:13.5px;color:rgba(30,42,74,.7);margin:-8px 0 16px}
+  @media (max-width:640px){ .dos{grid-template-columns:1fr} .contador{margin-left:0} }
 </style>
 </head>
 <body>
@@ -182,17 +225,26 @@
   <main>
     <div class="resumen" id="resumen"></div>
     <div class="grupo">
+      <div class="etiqueta">Socios</div>
+      <div class="pestanas" id="pestSocios"></div>
+    </div>
+    <div class="grupo">
       <div class="etiqueta">Lo que llega de la web</div>
       <div class="pestanas" id="pestEntradas"></div>
     </div>
     <div class="grupo">
-      <div class="etiqueta">Contenido que podéis editar</div>
+      <div class="etiqueta">Contenido de la web</div>
       <div class="pestanas" id="pestContenido"></div>
     </div>
+    <div id="explica" class="explica oculto"></div>
     <div class="herramientas">
+      <div class="vistas oculto" id="vistas"></div>
       <input type="search" id="buscar" placeholder="Buscar…" autocomplete="off">
-      <button class="csv" id="btnCsv">Descargar CSV</button>
+      <button class="csv" id="btnExcel">Exportar a Excel</button>
+      <button class="csv oculto" id="btnCorreo">Enviar correo</button>
+      <button class="csv" id="btnLimpiar">Quitar filtros</button>
       <button class="nuevo oculto" id="btnNuevo">+ Añadir</button>
+      <span class="contador oculto" id="contador"></span>
     </div>
     <div class="marco">
       <div class="scroll" id="contenido"><div class="cargando">Cargando…</div></div>
@@ -210,51 +262,126 @@ const URL_SB = 'https://cegicdvznbvbemqoftod.supabase.co';
 const CLAVE  = 'sb_publishable_hyev91V4OhpAo79Ox7vqBg_LU_Mfzbh';
 const sb = createClient(URL_SB, CLAVE);
 
-/* ---------------------------------------------------------------
-   Lo que llega de la web: se lee y se marca, no se crea ni se borra.
-   --------------------------------------------------------------- */
-const ENTRADAS = [
-  { id:'contactos', titulo:'Contactos', tabla:'contactos', orden:'creado_en',
-    campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['mensaje','Mensaje']],
-    marca:{ campo:'atendido', tipo:'bool', si:'Atendido', no:'Pendiente' },
-    pendiente:r => !r.atendido },
-  { id:'evento', titulo:'Inscritos al evento', tabla:'inscripciones_evento', orden:'creado_en',
-    campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['perfil','Perfil']],
-    marca:{ campo:'asistio', tipo:'bool', si:'Asistió', no:'—' } },
-  { id:'altas', titulo:'Altas de socio', tabla:'altas_socio', orden:'creado_en',
-    campos:[['nombre','Nombre'],['email','Email'],['telefono','Teléfono'],['tramo','Cuota'],['municipio','Municipio']],
-    marca:{ campo:'estado', tipo:'lista', opciones:['pendiente','aceptado','rechazado'] },
-    pendiente:r => r.estado === 'pendiente' },
-  { id:'entidades', titulo:'Altas de entidad', tabla:'altas_entidad', orden:'creado_en',
-    campos:[['entidad','Entidad'],['contacto_nombre','Contacto'],['email','Email'],['telefono','Teléfono'],['origen','Tipo']],
-    marca:{ campo:'estado', tipo:'lista', opciones:['pendiente','aceptado','rechazado'] },
-    pendiente:r => r.estado === 'pendiente' },
-  { id:'newsletter', titulo:'Newsletter', tabla:'newsletter', orden:'creado_en',
-    campos:[['nombre','Nombre'],['email','Email']] }
-];
+/* =================================================================
+   Textos y formatos comunes
+   ================================================================= */
 
-/* ---------------------------------------------------------------
-   Contenido editable. `form` describe el formulario de alta/edición.
-   --------------------------------------------------------------- */
-const CONTENIDO = [
-  { id:'socios', titulo:'Socios', tabla:'socios', orden:'orden', asc:true, editable:true,
-    campos:[['nombre','Nombre'],['cargo_asociacion','Cargo'],['cargo_profesional','Puesto'],
-            ['empresa','Empresa'],['publicar','En la web'],['activo','Cuenta']],
-    form:[
-      { c:'nombre', t:'Nombre', tipo:'text', req:true, ayuda:'Como quiere aparecer publicado.' },
-      { c:'cargo_asociacion', t:'Cargo en la Asociación', tipo:'text', ayuda:'Presidente, Secretaria, Tesorero o Vocal. Vacío si es socio sin cargo.' },
-      { c:'cargo_profesional', t:'Puesto profesional', tipo:'text' },
-      { c:'empresa', t:'Empresa', tipo:'text' },
-      { c:'linkedin', t:'LinkedIn', tipo:'url' },
-      { c:'twitter', t:'Twitter / X', tipo:'url' },
-      { c:'foto_url', t:'Foto', tipo:'text', ayuda:'Ruta o dirección de la imagen. Ej.: /assets/equipo/socios/nombre.webp' },
-      { c:'orden', t:'Orden', tipo:'number', ayuda:'Menor número, más arriba.' },
-      { c:'es_junta', t:'Es de la Junta Directiva', tipo:'bool' },
-      { c:'publicar', t:'Aparece en la web', tipo:'bool', ayuda:'Solo si ha dado su consentimiento por escrito.' },
-      { c:'activo', t:'Cuenta para el número de socios', tipo:'bool' }
+const TIPOS  = { ordinario:'Ordinario', honorifico:'Honorífico', corporativo:'Corporativo', institucional:'Institucional' };
+const TRAMOS = { menor30:'Menor de 30', mayor30:'30 o más' };
+const ESTADOS_SOL = { pendiente:'Pendiente', aprobado:'Aprobada', pagado:'Ya es socio', rechazado:'Rechazada', aceptado:'Aprobada' };
+const MOTIVOS_BAJA = ['Voluntad propia', 'Impago de la cuota', 'Expulsión', 'Otro'];
+
+const hoyISO = () => new Date().toLocaleDateString('sv-SE', { timeZone:'Europe/Madrid' });
+const masMeses = (iso, n) => { const [a,m,d] = iso.split('-').map(Number);
+  const f = new Date(Date.UTC(a, m - 1 + n, d)); return f.toISOString().slice(0,10); };
+const diasHasta = iso => Math.round((new Date(iso + 'T00:00:00Z') - new Date(hoyISO() + 'T00:00:00Z')) / 864e5);
+const edad = iso => { if (!iso) return null; const [a,m,d] = iso.split('-').map(Number);
+  const [ha,hm,hd] = hoyISO().split('-').map(Number);
+  return ha - a - ((hm < m || (hm === m && hd < d)) ? 1 : 0); };
+
+const escapar = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fechaHora = v => v ? new Date(v).toLocaleDateString('es-ES',
+  { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+const soloFecha = v => v ? String(v).slice(0,10).split('-').reverse().join('/') : '';
+const numSocio = v => v ? String(v).padStart(3,'0') : '—';
+const sinTildes = t => String(t ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+
+function estadoSocio(r){
+  if (!r.activo) return 'Baja';
+  if (r.renovacion) {
+    const d = diasHasta(r.renovacion);
+    if (d < 0)   return 'Cuota vencida';
+    if (d <= 30) return 'Renovar pronto';
+  }
+  return 'Activo';
+}
+const CLASE_ESTADO = { 'Activo':'ok', 'Renovar pronto':'aviso', 'Cuota vencida':'mal', 'Baja':'',
+  'Pendiente':'viva', 'Aprobada':'aviso', 'Ya es socio':'ok', 'Rechazada':'' };
+
+/* =================================================================
+   Las pestañas
+   · cols: columnas de la lista. tipo: texto | fecha | fechahora | num | lista | bool
+   · get: valor calculado · fmt: cómo se enseña · pill: pastilla de color
+   ================================================================= */
+
+let emailsSocios = new Set();   // para saber si un inscrito es socio
+
+const SECCIONES = [
+  { id:'solicitudes', grupo:'socios', titulo:'Solicitudes', tabla:'altas_socio', orden:'creado_en',
+    correo:true,
+    explica:'Personas que han pedido el alta y todavía no son socias. <b>Aprobar</b> les manda el correo de pago; <b>Confirmar pago</b> les da el número de socio y las pasa a la pestaña Socios.',
+    vistas:[
+      ['curso', 'En curso',     r => r.estado === 'pendiente' || r.estado === 'aprobado' || r.estado === 'aceptado'],
+      ['rech',  'Rechazadas',   r => r.estado === 'rechazado'],
+      ['pag',   'Ya son socios', r => r.estado === 'pagado'],
+      ['todas', 'Todas',        () => true]],
+    cols:[
+      { c:'creado_en', t:'Recibida', tipo:'fechahora' },
+      { c:'nombre', t:'Nombre' },
+      { c:'email', t:'Email' },
+      { c:'tipo', t:'Tipo', tipo:'lista', fmt:v => TIPOS[v] || v },
+      { c:'tramo', t:'Cuota', tipo:'lista', fmt:v => TRAMOS[v] || v || '—' },
+      { c:'fecha_nacimiento', t:'F. nacimiento', tipo:'fecha' },
+      { c:'estado', t:'Estado', tipo:'lista', fmt:v => ESTADOS_SOL[v] || v, pill:true },
+      { c:'_dni', t:'DNI', tipo:'lista', get:r => r.dni ? 'Recibido' : 'Falta',
+        pill:true, clase:v => v === 'Recibido' ? 'ok' : '' },
+      { c:'_acc', t:'', accion:true }
     ] },
-  { id:'eventos', titulo:'Eventos', tabla:'eventos', orden:'fecha', asc:false, editable:true,
-    campos:[['fecha','Fecha'],['titulo','Título'],['lugar','Lugar'],['publicado','Publicado']],
+
+  { id:'socios', grupo:'socios', titulo:'Socios', tabla:'socios', orden:'num_socio', asc:true,
+    correo:true, crear:true,
+    explica:'El Libro de Registro de Socios. Haz clic en un nombre para ver y editar su ficha. La columna <b>WEB</b> decide si sale en la página /socios/ (se actualiza en menos de una hora); solo se puede activar si el socio ha dado permiso de imagen.',
+    cols:[
+      { c:'num_socio', t:'Nº', tipo:'num', fmt:numSocio },
+      { c:'nombre', t:'Nombre' },
+      { c:'email', t:'Email' },
+      { c:'tipo', t:'Tipo', tipo:'lista', fmt:v => TIPOS[v] || v },
+      { c:'fecha_nacimiento', t:'F. nacimiento', tipo:'fecha' },
+      { c:'fecha_inscripcion', t:'F. inscripción', tipo:'fecha' },
+      { c:'_estado', t:'Estado', tipo:'lista', get:estadoSocio, pill:true },
+      { c:'estudios', t:'Estudios' },
+      { c:'publicar', t:'WEB', tipo:'bool', toggle:'web' }
+    ] },
+
+  { id:'contactos', grupo:'entradas', titulo:'Contactos', tabla:'contactos', orden:'creado_en', correo:true,
+    cols:[
+      { c:'creado_en', t:'Fecha', tipo:'fechahora' },
+      { c:'nombre', t:'Nombre' }, { c:'email', t:'Email' }, { c:'telefono', t:'Teléfono' },
+      { c:'mensaje', t:'Mensaje' },
+      { c:'atendido', t:'Atendido', tipo:'bool', toggle:'simple', si:'Atendido', no:'Pendiente' }],
+    pendiente:r => !r.atendido },
+
+  { id:'evento', grupo:'entradas', titulo:'Inscritos al evento', tabla:'inscripciones_evento', orden:'creado_en',
+    correo:true,
+    cols:[
+      { c:'creado_en', t:'Fecha', tipo:'fechahora' },
+      { c:'evento', t:'Evento', tipo:'lista' },
+      { c:'nombre', t:'Nombre' }, { c:'email', t:'Email' }, { c:'telefono', t:'Teléfono' },
+      { c:'perfil', t:'Perfil', tipo:'lista' },
+      { c:'_socio', t:'¿Socio?', tipo:'lista',
+        get:r => emailsSocios.has(String(r.email ?? '').trim().toLowerCase()) ? 'Sí' : 'No',
+        pill:true, clase:v => v === 'Sí' ? 'ok' : '' },
+      { c:'asistio', t:'Asistió', tipo:'bool', toggle:'simple', si:'Asistió', no:'—' }] },
+
+  { id:'entidades', grupo:'entradas', titulo:'Altas de entidad', tabla:'altas_entidad', orden:'creado_en',
+    cols:[
+      { c:'creado_en', t:'Fecha', tipo:'fechahora' },
+      { c:'entidad', t:'Entidad' }, { c:'contacto_nombre', t:'Contacto' }, { c:'email', t:'Email' },
+      { c:'telefono', t:'Teléfono' }, { c:'origen', t:'Tipo', tipo:'lista' },
+      { c:'estado', t:'Estado', tipo:'lista', select:['pendiente','aceptado','rechazado'] }],
+    pendiente:r => r.estado === 'pendiente' },
+
+  { id:'newsletter', grupo:'entradas', titulo:'Suscriptores newsletter', tabla:'newsletter', orden:'creado_en',
+    explica:'Personas que se han apuntado a recibir novedades desde la casilla de /hazte-socio/. No es un blog: los artículos se publican en <b>Noticias</b>. Esta lista sirve para mandar campañas desde Resend, que gestiona las bajas.',
+    cols:[
+      { c:'creado_en', t:'Fecha', tipo:'fechahora' },
+      { c:'nombre', t:'Nombre' }, { c:'email', t:'Email' },
+      { c:'_baja', t:'Estado', tipo:'lista', get:r => r.baja_en ? 'Dado de baja' : 'Suscrito', pill:true,
+        clase:v => v === 'Suscrito' ? 'ok' : '' }] },
+
+  { id:'eventos', grupo:'contenido', titulo:'Eventos', tabla:'eventos', orden:'fecha', asc:false, editable:true,
+    cols:[{ c:'fecha', t:'Fecha', tipo:'fecha' }, { c:'titulo', t:'Título' }, { c:'lugar', t:'Lugar' },
+          { c:'publicado', t:'Publicado', tipo:'bool' }],
     form:[
       { c:'titulo', t:'Título', tipo:'text', req:true },
       { c:'fecha', t:'Fecha', tipo:'date', req:true },
@@ -266,8 +393,10 @@ const CONTENIDO = [
       { c:'slug', t:'Dirección', tipo:'text', ayuda:'Se rellena sola con el título. /eventos/lo-que-pongas-aqui/' },
       { c:'publicado', t:'Publicado', tipo:'bool' }
     ] },
-  { id:'noticias', titulo:'Noticias', tabla:'noticias', orden:'fecha', asc:false, editable:true,
-    campos:[['fecha','Fecha'],['categoria','Categoría'],['titulo','Título'],['publicado','Publicado']],
+
+  { id:'noticias', grupo:'contenido', titulo:'Noticias', tabla:'noticias', orden:'fecha', asc:false, editable:true,
+    cols:[{ c:'fecha', t:'Fecha', tipo:'fecha' }, { c:'categoria', t:'Categoría', tipo:'lista' },
+          { c:'titulo', t:'Título' }, { c:'publicado', t:'Publicado', tipo:'bool' }],
     form:[
       { c:'titulo', t:'Título', tipo:'text', req:true },
       { c:'fecha', t:'Fecha', tipo:'date', req:true },
@@ -280,25 +409,39 @@ const CONTENIDO = [
       { c:'slug', t:'Dirección', tipo:'text', ayuda:'Se rellena sola con el título. /noticias/lo-que-pongas-aqui/' },
       { c:'publicado', t:'Publicado', tipo:'bool' }
     ] },
-  { id:'redes', titulo:'Números de redes', tabla:'redes_metricas', orden:'red', asc:true,
+
+  { id:'redes', grupo:'contenido', titulo:'Números de redes', tabla:'redes_metricas', orden:'red', asc:true,
     editable:true, clave:'red', crear:false, borrar:false,
-    campos:[['red','Red'],['seguidores','Seguidores'],['impresiones','Impresiones'],['actualizado_en','Actualizado']],
+    cols:[{ c:'red', t:'Red' }, { c:'seguidores', t:'Seguidores', tipo:'num' },
+          { c:'impresiones', t:'Impresiones', tipo:'num' }, { c:'actualizado_en', t:'Actualizado', tipo:'fechahora' }],
     form:[
       { c:'seguidores', t:'Seguidores', tipo:'number' },
       { c:'impresiones', t:'Impresiones o visualizaciones', tipo:'number' }
     ] }
 ];
 
-const TODAS = ENTRADAS.concat(CONTENIDO);
-const $ = s => document.querySelector(s);
-let activa = ENTRADAS[0];
+// Cada pestaña recuerda su orden, filtros, vista y selección mientras no recargues.
+for (const s of SECCIONES) s.st = { vista: s.vistas ? s.vistas[0][0] : null,
+  orden: null, filtros: {}, sel: new Set() };
+
+const $ = q => document.querySelector(q);
+let activa = SECCIONES[0];
 let filas = [];
-let filtro = '';
+let busqueda = '';
 
 const clave = s => s.clave || 'id';
 const RUTA_PUBLICA = { noticias:'/noticias/', eventos:'/eventos/' };
 
-/* ---------------- Acceso ---------------- */
+function avisoWeb(msg){
+  const d = document.createElement('div');
+  d.className = 'aviso-web'; d.textContent = msg;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 4500);
+}
+
+/* =================================================================
+   Acceso
+   ================================================================= */
 
 function errorAcceso(msg){
   const e = $('#errorAcceso');
@@ -347,39 +490,64 @@ async function arrancar(){
   await cargarSeccion();
 }
 
-/* ---------------- Navegación ---------------- */
+/* =================================================================
+   Navegación y resumen
+   ================================================================= */
 
 function pintarPestanas(){
-  const html = lista => lista.map(s =>
+  const html = g => SECCIONES.filter(s => s.grupo === g).map(s =>
     `<button class="pestana ${s.id===activa.id?'activa':''}" data-id="${s.id}">${s.titulo}</button>`).join('');
-  $('#pestEntradas').innerHTML  = html(ENTRADAS);
-  $('#pestContenido').innerHTML = html(CONTENIDO);
+  $('#pestSocios').innerHTML    = html('socios');
+  $('#pestEntradas').innerHTML  = html('entradas');
+  $('#pestContenido').innerHTML = html('contenido');
   document.querySelectorAll('.pestana').forEach(b => b.addEventListener('click', () => {
-    activa = TODAS.find(s => s.id === b.dataset.id);
-    filtro = ''; $('#buscar').value = '';
+    activa = SECCIONES.find(s => s.id === b.dataset.id);
+    busqueda = ''; $('#buscar').value = '';
     pintarPestanas(); cargarSeccion();
   }));
 }
 
 async function cargarResumen(){
-  const cajas = await Promise.all(ENTRADAS.map(async s => {
-    const { data, error } = await sb.from(s.tabla).select('*');
-    if (error) return { s, total:'–', pend:0 };
-    return { s, total:data.length, pend: s.pendiente ? data.filter(s.pendiente).length : 0 };
-  }));
+  const [sol, soc, con, ins] = await Promise.all([
+    sb.from('altas_socio').select('estado'),
+    sb.from('socios').select('activo,renovacion,email'),
+    sb.from('contactos').select('atendido'),
+    sb.from('inscripciones_evento').select('id')
+  ]);
   const { data: nSocios } = await sb.rpc('contar_socios');
-  $('#resumen').innerHTML = cajas.map(c => `
-    <div class="dato"><div class="n">${c.total}</div><div class="t">${c.s.titulo}</div>
-    ${c.pend ? `<div class="pend">${c.pend} sin revisar</div>` : ''}</div>`).join('')
-    + `<div class="dato"><div class="n">${nSocios ?? '–'}</div><div class="t">Socios activos</div>
-       <div class="pend">es el número que sale en la web</div></div>`;
+  const S = sol.data || [], So = soc.data || [];
+  emailsSocios = new Set(So.filter(r => r.activo && r.email).map(r => r.email.trim().toLowerCase()));
+  const pendientes = S.filter(r => r.estado === 'pendiente').length;
+  const sinPagar   = S.filter(r => r.estado === 'aprobado' || r.estado === 'aceptado').length;
+  const renovar    = So.filter(r => r.activo && r.renovacion && diasHasta(r.renovacion) <= 30).length;
+  const sinAtender = (con.data || []).filter(r => !r.atendido).length;
+  const caja = (n, t, pie) => `<div class="dato"><div class="n">${n}</div><div class="t">${t}</div>${pie ? `<div class="pend">${pie}</div>` : ''}</div>`;
+  $('#resumen').innerHTML =
+      caja(nSocios ?? '–', 'Socios activos', 'es el número que sale en la web')
+    + caja(pendientes, 'Solicitudes por revisar', sinPagar ? `${sinPagar} aprobadas sin pagar` : '')
+    + caja(renovar, 'Cuotas que vencen en 30 días', renovar ? 'o ya vencidas' : '')
+    + caja(sinAtender, 'Contactos sin atender', '')
+    + caja((ins.data || []).length, 'Inscritos a eventos', '');
 }
 
 async function cargarSeccion(){
+  const s = activa;
   $('#contenido').innerHTML = '<div class="cargando">Cargando…</div>';
-  $('#btnNuevo').classList.toggle('oculto', !(activa.editable && activa.crear !== false));
-  const { data, error } = await sb.from(activa.tabla).select('*')
-    .order(activa.orden, { ascending: activa.asc === true });
+  $('#btnNuevo').classList.toggle('oculto', !((s.editable && s.crear !== false) || s.crear === true));
+  $('#btnNuevo').textContent = s.id === 'socios' ? '+ Añadir socio a mano' : '+ Añadir';
+  $('#btnCorreo').classList.toggle('oculto', !s.correo);
+  $('#explica').classList.toggle('oculto', !s.explica);
+  $('#explica').innerHTML = s.explica || '';
+  const v = $('#vistas');
+  v.classList.toggle('oculto', !s.vistas);
+  v.innerHTML = (s.vistas || []).map(([id, t]) =>
+    `<button class="vista ${s.st.vista === id ? 'activa' : ''}" data-v="${id}">${t}</button>`).join('');
+  v.querySelectorAll('.vista').forEach(b => b.addEventListener('click', () => {
+    s.st.vista = b.dataset.v; s.st.sel.clear(); cargarSeccion();
+  }));
+
+  const { data, error } = await sb.from(s.tabla).select('*')
+    .order(s.orden, { ascending: s.asc === true, nullsFirst: false });
   if (error) {
     $('#contenido').innerHTML = `<div class="vacio">No se han podido cargar los datos.<br><small>${escapar(error.message)}</small></div>`;
     return;
@@ -388,89 +556,243 @@ async function cargarSeccion(){
   pintarTabla();
 }
 
-/* ---------------- Utilidades ---------------- */
+/* =================================================================
+   Tabla: valores, orden y filtros
+   ================================================================= */
 
-const escapar = t => String(t ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const fechaHora = v => v ? new Date(v).toLocaleDateString('es-ES',
-  { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
-const soloFecha = v => v ? new Date(v + 'T00:00:00').toLocaleDateString('es-ES',
-  { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+const valor = (r, col) => col.get ? col.get(r) : r[col.c];
 
-function celda(r, c){
-  const v = r[c];
-  if (typeof v === 'boolean')
-    return `<span class="pastilla ${v?'viva':''}">${v ? 'Sí' : 'No'}</span>`;
-  if (c === 'fecha') return soloFecha(v);
-  if (c.endsWith('_en')) return fechaHora(v);
-  if (typeof v === 'number') return v.toLocaleString('es-ES');
-  return `<span class="recorte">${escapar(v)}</span>`;
+function texto(r, col){
+  const v = valor(r, col);
+  if (col.fmt) return String(col.fmt(v, r) ?? '');
+  if (col.tipo === 'bool') return v ? (col.si || 'Sí') : (col.no || 'No');
+  if (col.tipo === 'fecha') return soloFecha(v);
+  if (col.tipo === 'fechahora') return fechaHora(v);
+  if (col.tipo === 'num') return v == null ? '' : Number(v).toLocaleString('es-ES');
+  return String(v ?? '');
+}
+
+function comparar(a, b, col){
+  const x = valor(a, col), y = valor(b, col);
+  const vx = x == null || x === '', vy = y == null || y === '';
+  if (vx || vy) return vx && vy ? 0 : vx ? 1 : -1;       // vacíos siempre al final
+  if (col.tipo === 'num') return Number(x) - Number(y);
+  if (col.tipo === 'bool') return (x === y) ? 0 : x ? -1 : 1;
+  if (col.tipo === 'fecha' || col.tipo === 'fechahora') return String(x) < String(y) ? -1 : String(x) > String(y) ? 1 : 0;
+  return texto(a, col).localeCompare(texto(b, col), 'es', { sensitivity:'base', numeric:true });
+}
+
+function pasaFiltros(r){
+  const f = activa.st.filtros;
+  for (const col of activa.cols) {
+    const q = f[col.c];
+    if (!q) continue;
+    if (col.tipo === 'fecha' || col.tipo === 'fechahora' || col.tipo === 'num') {
+      const v = valor(r, col);
+      if (v == null || v === '') return false;
+      if (col.tipo === 'num') {
+        if (q.desde !== '' && q.desde != null && Number(v) < Number(q.desde)) return false;
+        if (q.hasta !== '' && q.hasta != null && Number(v) > Number(q.hasta)) return false;
+      } else {
+        const d = String(v).slice(0, 10);
+        if (q.desde && d < q.desde) return false;
+        if (q.hasta && d > q.hasta) return false;
+      }
+    } else if (col.tipo === 'lista' || col.tipo === 'bool') {
+      if (texto(r, col) !== q) return false;
+    } else if (!sinTildes(texto(r, col)).includes(sinTildes(q))) return false;
+  }
+  return true;
 }
 
 function visibles(){
-  if (!filtro) return filas;
-  const q = filtro.toLowerCase();
-  return filas.filter(r => Object.values(r).some(v => String(v ?? '').toLowerCase().includes(q)));
+  const s = activa;
+  let d = filas;
+  if (s.vistas) { const f = s.vistas.find(v => v[0] === s.st.vista)[2]; d = d.filter(f); }
+  d = d.filter(pasaFiltros);
+  if (busqueda) {
+    const q = sinTildes(busqueda);
+    d = d.filter(r => Object.values(r).some(v => sinTildes(v).includes(q)) ||
+                      s.cols.some(c => c.get && sinTildes(texto(r, c)).includes(q)));
+  }
+  if (s.st.orden) {
+    const col = s.cols.find(c => c.c === s.st.orden.c);
+    const dir = s.st.orden.dir;
+    d = d.slice().sort((a, b) => dir * comparar(a, b, col));
+  }
+  return d;
 }
 
-/* ---------------- Tabla ---------------- */
+function celda(r, col){
+  const s = activa, k = escapar(r[clave(s)]);
+  if (col.accion) return accionesFila(r);
+  if (col.toggle) {
+    const v = !!r[col.c];
+    if (col.toggle === 'web') {
+      const puede = v || r.acepta_imagen;
+      return `<button class="marca ${v?'si':''}" data-k="${k}" data-campo="${col.c}" data-valor="${!v}"
+              ${puede ? '' : 'disabled title="No ha dado permiso de imagen"'}>${v ? 'SÍ' : 'NO'}</button>`;
+    }
+    return `<button class="marca ${v?'si':''}" data-k="${k}" data-campo="${col.c}" data-valor="${!v}">${v ? col.si : col.no}</button>`;
+  }
+  if (col.select) {
+    const v = r[col.c];
+    return `<select class="estado" data-k="${k}" data-campo="${col.c}">` +
+      col.select.map(o => `<option value="${o}" ${v===o?'selected':''}>${o}</option>`).join('') + `</select>`;
+  }
+  const t = texto(r, col);
+  if (col.pill) {
+    const cls = col.clase ? col.clase(t) : (CLASE_ESTADO[t] ?? '');
+    return `<span class="pastilla ${cls}">${escapar(t)}</span>`;
+  }
+  if (col.tipo === 'bool') return `<span class="pastilla ${valor(r,col)?'viva':''}">${escapar(t)}</span>`;
+  return `<span class="recorte">${escapar(t)}</span>`;
+}
+
+function accionesFila(r){
+  if (r.estado === 'pendiente')
+    return `<button class="accion" data-acc="aprobar" data-id="${r.id}">Aprobar</button>`;
+  if (r.estado === 'aprobado' || r.estado === 'aceptado')
+    return `<button class="accion sec" data-acc="pago" data-id="${r.id}">${r.tipo === 'ordinario' ? 'Confirmar pago' : 'Pasar a socios'}</button>`;
+  return '';
+}
+
+function filtroCabecera(col){
+  if (col.accion) return '<th></th>';
+  const q = activa.st.filtros[col.c];
+  if (col.tipo === 'fecha' || col.tipo === 'fechahora' || col.tipo === 'num') {
+    const t = col.tipo === 'num' ? 'number' : 'date';
+    return `<th><div class="rango">
+      <input type="${t}" data-f="${col.c}" data-lado="desde" value="${escapar(q?.desde ?? '')}" placeholder="Desde" title="Desde" aria-label="${escapar(col.t)} desde">
+      <input type="${t}" data-f="${col.c}" data-lado="hasta" value="${escapar(q?.hasta ?? '')}" placeholder="Hasta" title="Hasta" aria-label="${escapar(col.t)} hasta">
+    </div></th>`;
+  }
+  if (col.tipo === 'lista' || col.tipo === 'bool' || col.select) {
+    const base = activa.vistas ? filas.filter(activa.vistas.find(v => v[0] === activa.st.vista)[2]) : filas;
+    const ops = [...new Set(base.map(r => texto(r, col)))].filter(x => x !== '')
+      .sort((a, b) => a.localeCompare(b, 'es'));
+    return `<th><select data-f="${col.c}" aria-label="Filtrar ${escapar(col.t)}"><option value="">Todos</option>` +
+      ops.map(o => `<option ${q === o ? 'selected' : ''}>${escapar(o)}</option>`).join('') + `</select></th>`;
+  }
+  return `<th><input type="search" data-f="${col.c}" value="${escapar(q ?? '')}" placeholder="Filtrar" aria-label="Filtrar ${escapar(col.t)}"></th>`;
+}
 
 function pintarTabla(){
-  const s = activa, datos = visibles();
-  if (!datos.length) {
-    $('#contenido').innerHTML = `<div class="vacio">${filtro ? 'Nada coincide con la búsqueda.' : 'Todavía no hay nada aquí.'}</div>`;
-    return;
+  const s = activa, datos = visibles(), st = s.st;
+  // Solo se quedan seleccionados los que siguen a la vista.
+  const idsVis = new Set(datos.map(r => r.id));
+  for (const id of [...st.sel]) if (!idsVis.has(id)) st.sel.delete(id);
+
+  const cont = $('#contador');
+  if (s.id === 'socios') {
+    const activos = filas.filter(r => r.activo).length;
+    cont.innerHTML = `<span class="n">${activos}</span> socios activos`;
+  } else {
+    cont.innerHTML = `<span class="n">${datos.length}</span> de ${filas.length}`;
   }
-  const primeraFecha = s.editable ? [] : ['<th>Fecha</th>'];
-  const cabecera = primeraFecha.concat(s.campos.map(c => `<th>${c[1]}</th>`))
-                               .concat(s.marca ? ['<th></th>'] : []).join('');
+  cont.classList.remove('oculto');
+  $('#btnCorreo').textContent = st.sel.size ? `Enviar correo (${st.sel.size})` : 'Enviar correo';
 
-  const cuerpo = datos.map(r => {
-    const cs = (s.editable ? [] : [`<td>${fechaHora(r.creado_en)}</td>`])
-      .concat(s.campos.map(c => `<td>${celda(r, c[0])}</td>`));
-    if (s.marca) {
-      const v = r[s.marca.campo];
-      cs.push(s.marca.tipo === 'bool'
-        ? `<td><button class="marca ${v?'si':''}" data-k="${escapar(r[clave(s)])}" data-campo="${s.marca.campo}" data-valor="${!v}">${v?s.marca.si:s.marca.no}</button></td>`
-        : `<td><select class="estado" data-k="${escapar(r[clave(s)])}" data-campo="${s.marca.campo}">`
-          + s.marca.opciones.map(o => `<option value="${o}" ${v===o?'selected':''}>${o}</option>`).join('')
-          + `</select></td>`);
-    }
+  const flecha = c => st.orden?.c === c ? (st.orden.dir > 0 ? '▲' : '▼') : '';
+  const cab = (s.correo ? [`<th class="sel"><input type="checkbox" id="selTodos" aria-label="Seleccionar todos" ${datos.length && datos.every(r => st.sel.has(r.id)) ? 'checked' : ''}></th>`] : [])
+    .concat(s.cols.map(col => col.accion ? '<th></th>'
+      : `<th class="orden" data-c="${col.c}" title="Ordenar">${col.t}<span class="flecha">${flecha(col.c)}</span></th>`)).join('');
+  const filtrosFila = (s.correo ? ['<th class="sel"></th>'] : []).concat(s.cols.map(filtroCabecera)).join('');
+
+  const cuerpo = datos.length ? datos.map(r => {
+    const cs = (s.correo ? [`<td class="sel"><input type="checkbox" class="selFila" data-id="${r.id}" ${st.sel.has(r.id)?'checked':''} aria-label="Seleccionar"></td>`] : [])
+      .concat(s.cols.map(col => `<td>${celda(r, col)}</td>`));
     return `<tr class="fila" data-k="${escapar(r[clave(s)])}">${cs.join('')}</tr>`;
-  }).join('');
+  }).join('') : `<tr><td colspan="${s.cols.length + (s.correo ? 1 : 0)}"><div class="vacio">${
+      filas.length ? 'Nada coincide con los filtros.' : 'Todavía no hay nada aquí.'}</div></td></tr>`;
 
-  $('#contenido').innerHTML = `<table><thead><tr>${cabecera}</tr></thead><tbody>${cuerpo}</tbody></table>`;
+  $('#contenido').innerHTML = `<table><thead><tr>${cab}</tr><tr class="filtros">${filtrosFila}</tr></thead><tbody>${cuerpo}</tbody></table>`;
 
-  $('#contenido').querySelectorAll('tr.fila').forEach(tr => tr.addEventListener('click', ev => {
-    if (ev.target.closest('button, select')) return;
-    const r = filas.find(f => String(f[clave(s)]) === tr.dataset.k);
-    s.editable ? editar(r) : verFicha(r);
+  // Ordenar: 1.er clic ascendente, 2.º descendente, 3.º orden original
+  $('#contenido').querySelectorAll('th.orden').forEach(th => th.addEventListener('click', () => {
+    const c = th.dataset.c;
+    if (st.orden?.c !== c) st.orden = { c, dir: 1 };
+    else if (st.orden.dir === 1) st.orden.dir = -1;
+    else st.orden = null;
+    pintarTabla();
   }));
+
+  // Filtros por columna
+  $('#contenido').querySelectorAll('[data-f]').forEach(el => {
+    const ev = el.tagName === 'SELECT' || el.type === 'date' ? 'change' : 'input';
+    el.addEventListener(ev, () => {
+      const c = el.dataset.f;
+      if (el.dataset.lado) {
+        const q = st.filtros[c] || { desde:'', hasta:'' };
+        q[el.dataset.lado] = el.value;
+        st.filtros[c] = (q.desde || q.hasta) ? q : undefined;
+      } else st.filtros[c] = el.value || undefined;
+      const foco = el.dataset.f + (el.dataset.lado || '');
+      const pos = el.selectionStart;
+      pintarTabla();
+      const nuevo = [...$('#contenido').querySelectorAll('[data-f]')]
+        .find(x => x.dataset.f + (x.dataset.lado || '') === foco);
+      if (nuevo) { nuevo.focus(); if (pos != null && nuevo.setSelectionRange && nuevo.type === 'search') nuevo.setSelectionRange(pos, pos); }
+    });
+  });
+
+  // Selección
+  $('#selTodos')?.addEventListener('change', e => {
+    datos.forEach(r => e.target.checked ? st.sel.add(r.id) : st.sel.delete(r.id));
+    pintarTabla();
+  });
+  $('#contenido').querySelectorAll('.selFila').forEach(cb => cb.addEventListener('change', () => {
+    const id = Number(cb.dataset.id);
+    cb.checked ? st.sel.add(id) : st.sel.delete(id);
+    $('#btnCorreo').textContent = st.sel.size ? `Enviar correo (${st.sel.size})` : 'Enviar correo';
+  }));
+
+  // Abrir ficha
+  $('#contenido').querySelectorAll('tr.fila').forEach(tr => tr.addEventListener('click', ev => {
+    if (ev.target.closest('button, select, input, a')) return;
+    const r = filas.find(f => String(f[clave(s)]) === tr.dataset.k);
+    if (!r) return;
+    if (s.id === 'solicitudes') fichaSolicitud(r);
+    else if (s.id === 'socios') fichaSocio(r);
+    else if (s.editable) editar(r);
+    else verFicha(r);
+  }));
+
+  // Botones de marca (Sí/No) y desplegables de estado
   $('#contenido').querySelectorAll('.marca').forEach(b =>
     b.addEventListener('click', () => guardarCampo(b.dataset.k, b.dataset.campo, b.dataset.valor === 'true')));
-  $('#contenido').querySelectorAll('.estado').forEach(sel =>
+  $('#contenido').querySelectorAll('select.estado').forEach(sel =>
     sel.addEventListener('change', () => guardarCampo(sel.dataset.k, sel.dataset.campo, sel.value)));
+
+  // Botones de las solicitudes
+  $('#contenido').querySelectorAll('.accion').forEach(b => b.addEventListener('click', () => {
+    const r = filas.find(f => f.id === Number(b.dataset.id));
+    if (b.dataset.acc === 'aprobar') aprobar(r, b);
+    else confirmarPago(r);
+  }));
 }
 
 async function guardarCampo(k, campo, valor){
   const { error } = await sb.from(activa.tabla).update({ [campo]: valor }).eq(clave(activa), k);
-  if (error) { alert('No se ha podido guardar: ' + error.message); return; }
+  if (error) {
+    alert(error.message.includes('socios_web_con_permiso')
+      ? 'No se puede poner en la web: este socio no ha dado permiso de imagen.'
+      : 'No se ha podido guardar: ' + error.message);
+    return;
+  }
   const f = filas.find(x => String(x[clave(activa)]) === String(k));
   if (f) f[campo] = valor;
   pintarTabla(); cargarResumen();
 }
 
-/* ---------------- Ficha de solo lectura ---------------- */
+$('#buscar').addEventListener('input', e => { busqueda = e.target.value.trim(); pintarTabla(); });
+$('#btnLimpiar').addEventListener('click', () => {
+  activa.st.filtros = {}; activa.st.orden = null; busqueda = ''; $('#buscar').value = ''; pintarTabla();
+});
 
-const ETIQUETAS = {
-  creado_en:'Recibido', nombre:'Nombre', apellido:'Apellido', email:'Email', telefono:'Teléfono',
-  mensaje:'Mensaje', municipio:'Municipio', tramo:'Cuota', situacion:'Situación',
-  sector:'Estudios o sector', linkedin:'LinkedIn', como_conocio:'Cómo nos conoció',
-  expectativas:'Qué espera', estado:'Estado', acepta_comunicaciones:'Acepta comunicaciones',
-  atendido:'Atendido', entidad:'Entidad', cif:'CIF', web:'Web', contacto_nombre:'Persona de contacto',
-  contacto_cargo:'Cargo', colaboracion:'Colaboración', origen:'Tipo de alta', evento:'Evento',
-  perfil:'Perfil', anio_graduacion:'Año de graduación', comentario:'Comentario', asistio:'Asistió',
-  notas_internas:'Notas internas', baja_en:'Baja'
-};
+/* =================================================================
+   Ventanas
+   ================================================================= */
 
 function abrir(html, ancha){
   $('#ventana').innerHTML = `<div class="fondo"><div class="ficha${ancha ? ' ancha' : ''}">${html}</div></div>`;
@@ -480,28 +802,389 @@ function abrir(html, ancha){
 }
 const cerrar = () => { $('#ventana').innerHTML = ''; };
 
+const ETIQUETAS = {
+  creado_en:'Recibido', nombre:'Nombre', apellido:'Apellido', email:'Email', telefono:'Teléfono',
+  mensaje:'Mensaje', municipio:'Municipio', tramo:'Cuota', situacion:'Situación',
+  sector:'Estudios o sector', estudios:'Estudios', linkedin:'LinkedIn', twitter:'Twitter / X',
+  como_conocio:'Cómo nos conoció', expectativas:'Qué espera', estado:'Estado',
+  acepta_comunicaciones:'Acepta comunicaciones', atendido:'Atendido', entidad:'Entidad', cif:'CIF',
+  web:'Web', contacto_nombre:'Persona de contacto', contacto_cargo:'Cargo', colaboracion:'Colaboración',
+  origen:'Tipo de alta', evento:'Evento', perfil:'Perfil', anio_graduacion:'Año de graduación',
+  comentario:'Comentario', asistio:'Asistió', notas_internas:'Notas internas', baja_en:'Baja',
+  fecha_nacimiento:'Fecha de nacimiento', tipo:'Tipo de socio', aprobado_junta:'Aprobado en junta',
+  aprobado_en:'Aprobado el', dni:'DNI / NIE', acepta_estatutos:'Declaración y estatutos',
+  acepta_imagen:'Permiso de imagen (web)', completado_en:'Datos completados el', pagado_en:'Pagado el',
+  num_socio:'Nº de socio', fecha_inscripcion:'Fecha de inscripción', fecha_pago:'Último pago',
+  renovacion:'Renovación', motivo_baja:'Motivo de la baja', cargo_asociacion:'Cargo en la Asociación',
+  cargo_profesional:'Puesto profesional', empresa:'Empresa', foto_url:'Foto', es_junta:'Es de la Junta',
+  publicar:'Sale en la web', activo:'Cuenta para el número de socios', orden:'Orden en la web',
+  socio_id:'Ficha de socio', solicitud_id:'Solicitud de origen', id:'Id'
+};
+
+function formatoDato(k, v){
+  if (v === null || v === '' || (Array.isArray(v) && !v.length)) return null;
+  if (k === 'token') return null;
+  if (Array.isArray(v)) return escapar(v.join(', '));
+  if (typeof v === 'boolean') return v ? 'Sí' : 'No';
+  if (k === 'tipo') return escapar(TIPOS[v] || v);
+  if (k === 'tramo') return escapar(TRAMOS[v] || v);
+  if (k === 'estado' && ESTADOS_SOL[v] && activa.id === 'solicitudes') return escapar(ESTADOS_SOL[v]);
+  if (k === 'num_socio') return numSocio(v);
+  if (k.endsWith('_en') && String(v).length > 10) return fechaHora(v);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(v))) {
+    if (k === 'fecha_nacimiento') return `${soloFecha(v)} (${edad(v)} años)`;
+    return soloFecha(v);
+  }
+  if (k === 'email') return `<a href="mailto:${escapar(v)}">${escapar(v)}</a>`;
+  if (k === 'telefono') return `<a href="tel:${escapar(v)}">${escapar(v)}</a>`;
+  if (k === 'linkedin' || k === 'web' || k === 'twitter')
+    return `<a href="${escapar(v)}" target="_blank" rel="noopener">${escapar(v)}</a>`;
+  return escapar(v).replace(/\n/g, '<br>');
+}
+
+function listaDatos(r, omitir = []){
+  return Object.entries(r)
+    .filter(([k]) => k !== 'id' && !omitir.includes(k))
+    .map(([k, v]) => { const t = formatoDato(k, v); return t == null ? '' : `<dt>${ETIQUETAS[k] || k}</dt><dd>${t}</dd>`; })
+    .join('');
+}
+
 function verFicha(r){
   if (!r) return;
-  const cuerpo = Object.entries(r)
-    .filter(([k,v]) => k !== 'id' && v !== null && v !== '' && !(Array.isArray(v) && !v.length))
-    .map(([k,v]) => {
-      let t = Array.isArray(v) ? v.join(', ')
-            : typeof v === 'boolean' ? (v ? 'Sí' : 'No')
-            : k.endsWith('_en') ? fechaHora(v) : String(v);
-      if (k === 'email') t = `<a href="mailto:${escapar(v)}">${escapar(v)}</a>`;
-      else if (k === 'telefono') t = `<a href="tel:${escapar(v)}">${escapar(v)}</a>`;
-      else if (k === 'linkedin' || k === 'web') t = `<a href="${escapar(v)}" target="_blank" rel="noopener">${escapar(v)}</a>`;
-      else t = escapar(t);
-      return `<dt>${ETIQUETAS[k] || k}</dt><dd>${t}</dd>`;
-    }).join('');
-  abrir(`<h2>${escapar(r.nombre || r.entidad || 'Detalle')}</h2><dl>${cuerpo}</dl>
+  abrir(`<h2>${escapar(r.nombre || r.entidad || 'Detalle')}</h2><dl>${listaDatos(r)}</dl>
          <div class="acciones"><button class="btn" id="vCerrar">Cerrar</button></div>`);
   $('#vCerrar').addEventListener('click', cerrar);
 }
 
-/* ---------------- Alta y edición ---------------- */
+/* =================================================================
+   Llamada a los botones con correo (Edge Function panel-acciones)
+   ================================================================= */
 
-$('#btnNuevo').addEventListener('click', () => editar(null));
+async function accionPanel(cuerpo){
+  const { data, error } = await sb.functions.invoke('panel-acciones', { body: cuerpo });
+  if (error) {
+    let msg = error.message;
+    try { const j = await error.context.json(); if (j?.error) msg = j.error; } catch (_) {}
+    throw new Error(msg);
+  }
+  if (!data?.ok) throw new Error(data?.error || 'No ha funcionado.');
+  return data;
+}
+
+/* =================================================================
+   Solicitudes
+   ================================================================= */
+
+function avisosSolicitud(r){
+  const a = [];
+  const e = edad(r.fecha_nacimiento);
+  if (e == null) a.push('No tenemos fecha de nacimiento (solicitud anterior al nuevo formulario). Pídesela antes de aprobar.');
+  else if (e < 18) a.push(`Es menor de edad (${e} años). De momento no admitimos menores.`);
+  else if (r.tramo && ((r.tramo === 'menor30') !== (e < 30)))
+    a.push(`Tiene ${e} años pero ha elegido la cuota «${TRAMOS[r.tramo]}». Corrígela antes de aprobar.`);
+  if ((r.estado === 'aprobado' || r.estado === 'aceptado') && !r.dni)
+    a.push('Todavía no ha completado sus datos (DNI). Puedes confirmar el pago igualmente; el DNI se añadirá a su ficha cuando lo mande.');
+  return a;
+}
+
+async function aprobar(r, boton){
+  const ordinario = r.tipo === 'ordinario';
+  if (!confirm(ordinario
+      ? `¿Aprobar la solicitud de ${r.nombre}?\n\nSe le enviará el correo con los datos de pago y el enlace para completar su alta.`
+      : `¿Aprobar la solicitud de ${r.nombre}?\n\nComo es socio ${TIPOS[r.tipo] || r.tipo}, no se envía correo de pago: gestionadlo a mano.`)) return;
+  if (boton) { boton.disabled = true; boton.textContent = 'Aprobando…'; }
+  try {
+    const res = await accionPanel({ accion:'aprobar', id:r.id });
+    avisoWeb(res.mensaje);
+    cerrar(); await cargarSeccion(); cargarResumen();
+  } catch (e) {
+    alert('No se ha podido aprobar: ' + e.message);
+    if (boton) { boton.disabled = false; boton.textContent = 'Aprobar'; }
+  }
+}
+
+function confirmarPago(r){
+  const ordinario = r.tipo === 'ordinario';
+  const avisos = avisosSolicitud(r).map(a => `<div class="alerta">${escapar(a)}</div>`).join('');
+  abrir(`<h2>${ordinario ? 'Confirmar pago' : 'Pasar a socios'} · ${escapar(r.nombre)}</h2>${avisos}
+    <p style="margin:0 0 16px;line-height:1.6">Se le asigna el siguiente número de socio, pasa al Libro de Registro,
+    sube el contador de la web y recibe el correo de bienvenida con las ventajas y el enlace de WhatsApp.</p>
+    <div class="campo"><label for="fPago">${ordinario ? 'Fecha en que llegó la transferencia' : 'Fecha de alta'}</label>
+      <input type="date" id="fPago" value="${hoyISO()}" max="${hoyISO()}">
+      <p class="ayuda">La cuota se renovará a los 12 meses de esta fecha.</p></div>
+    <div id="vError" class="aviso oculto"></div>
+    <div class="acciones"><button class="btn" id="vOk">${ordinario ? 'Confirmar pago' : 'Pasar a socios'}</button>
+      <button class="btn gris" id="vCancelar">Cancelar</button></div>`);
+  $('#vCancelar').addEventListener('click', cerrar);
+  $('#vOk').addEventListener('click', async () => {
+    const b = $('#vOk'); b.disabled = true; b.textContent = 'Dando de alta…';
+    try {
+      const res = await accionPanel({ accion:'confirmar-pago', id:r.id, fecha:$('#fPago').value });
+      cerrar(); avisoWeb(res.mensaje);
+      await cargarSeccion(); cargarResumen();
+    } catch (e) {
+      const el = $('#vError'); el.textContent = e.message; el.classList.remove('oculto');
+      b.disabled = false; b.textContent = ordinario ? 'Confirmar pago' : 'Pasar a socios';
+    }
+  });
+}
+
+function fichaSolicitud(r){
+  const enCurso = ['pendiente','aprobado','aceptado'].includes(r.estado);
+  const avisos = avisosSolicitud(r).map(a => `<div class="alerta">${escapar(a)}</div>`).join('');
+  const opciones = (obj, v) => Object.entries(obj).map(([k, t]) => `<option value="${k}" ${v === k ? 'selected' : ''}>${t}</option>`).join('');
+  const botones = [];
+  if (enCurso) botones.push('<button class="btn gris" id="vGuardar">Guardar cambios</button>');
+  if (r.estado === 'pendiente') botones.push('<button class="btn" id="vAprobar">Aprobar</button>');
+  if (r.estado === 'aprobado' || r.estado === 'aceptado') {
+    botones.push(`<button class="btn" id="vPago">${r.tipo === 'ordinario' ? 'Confirmar pago' : 'Pasar a socios'}</button>`);
+    if (r.tipo === 'ordinario') botones.push('<button class="btn gris" id="vReenviar">Reenviar correo de pago</button>');
+  }
+  if (enCurso) botones.push('<button class="btn rojo" id="vRechazar">Rechazar</button>');
+  if (r.estado === 'rechazado') botones.push('<button class="btn gris" id="vRecuperar">Volver a pendiente</button>');
+  botones.push('<button class="btn gris" id="vCerrar">Cerrar</button>');
+
+  abrir(`<h2>${escapar(r.nombre)}</h2>${avisos}
+    ${enCurso ? `<h3>Antes de aprobar puedes corregir</h3>
+    <div class="dos">
+      <div class="campo"><label for="eTipo">Tipo de socio</label>
+        <select class="campo" id="eTipo">${opciones(TIPOS, r.tipo)}</select></div>
+      <div class="campo"><label for="eTramo">Cuota</label>
+        <select class="campo" id="eTramo">${opciones(TRAMOS, r.tramo)}</select></div>
+    </div>
+    <p class="ayuda" style="margin:-6px 0 14px">Honoríficos, corporativos e institucionales se gestionan a mano: al aprobarlos no sale el correo de pago.</p>
+    <div class="campo"><label for="eNotas">Notas internas</label><textarea id="eNotas">${escapar(r.notas_internas || '')}</textarea></div>` : ''}
+    <h3>Lo que ha enviado</h3>
+    <dl>${listaDatos(r, enCurso ? ['notas_internas'] : [])}</dl>
+    <div id="vError" class="aviso oculto" style="margin-top:16px"></div>
+    <div class="acciones">${botones.join('')}</div>`);
+
+  const leer = () => ({ tipo:$('#eTipo').value, tramo:$('#eTramo').value, notas_internas:$('#eNotas').value.trim() || null });
+  const guardar = async () => {
+    const d = leer();
+    const { error } = await sb.from('altas_socio').update(d).eq('id', r.id);
+    if (error) throw new Error(error.message);
+    Object.assign(r, d);
+  };
+  const mostrarError = m => { const e = $('#vError'); e.textContent = m; e.classList.remove('oculto'); };
+
+  $('#vCerrar').addEventListener('click', cerrar);
+  $('#vGuardar')?.addEventListener('click', async () => {
+    try { await guardar(); cerrar(); avisoWeb('Cambios guardados.'); await cargarSeccion(); }
+    catch (e) { mostrarError('No se ha podido guardar: ' + e.message); }
+  });
+  $('#vAprobar')?.addEventListener('click', async () => {
+    try { await guardar(); } catch (e) { return mostrarError('No se ha podido guardar: ' + e.message); }
+    aprobar(r, $('#vAprobar'));
+  });
+  $('#vReenviar')?.addEventListener('click', async () => {
+    if (!confirm(`¿Reenviar a ${r.email} el correo con los datos de pago?`)) return;
+    try { await guardar(); const res = await accionPanel({ accion:'aprobar', id:r.id }); avisoWeb(res.mensaje.replace('Aprobada. ', '')); }
+    catch (e) { mostrarError(e.message); }
+  });
+  $('#vPago')?.addEventListener('click', async () => {
+    try { await guardar(); } catch (e) { return mostrarError('No se ha podido guardar: ' + e.message); }
+    confirmarPago(r);
+  });
+  $('#vRechazar')?.addEventListener('click', async () => {
+    if (!confirm(`¿Rechazar la solicitud de ${r.nombre}? No se le envía ningún correo. La solicitud se guarda en «Rechazadas».`)) return;
+    const { error } = await sb.from('altas_socio').update({ estado:'rechazado' }).eq('id', r.id);
+    if (error) return mostrarError(error.message);
+    cerrar(); avisoWeb('Solicitud rechazada.'); await cargarSeccion(); cargarResumen();
+  });
+  $('#vRecuperar')?.addEventListener('click', async () => {
+    const { error } = await sb.from('altas_socio').update({ estado:'pendiente' }).eq('id', r.id);
+    if (error) return mostrarError(error.message);
+    cerrar(); avisoWeb('La solicitud vuelve a estar pendiente.'); await cargarSeccion(); cargarResumen();
+  });
+}
+
+/* =================================================================
+   Socios: la ficha del Libro de Registro
+   ================================================================= */
+
+const FICHA_SOCIO = [
+  ['Datos personales', [
+    { c:'nombre', t:'Nombre y apellidos', tipo:'text', req:true },
+    { c:'dni', t:'DNI / NIE', tipo:'text' },
+    { c:'email', t:'Email', tipo:'email' },
+    { c:'telefono', t:'Teléfono', tipo:'text' },
+    { c:'fecha_nacimiento', t:'Fecha de nacimiento', tipo:'date' },
+    { c:'municipio', t:'Municipio', tipo:'text' }]],
+  ['En la Asociación', [
+    { c:'num_socio', t:'Nº de socio', tipo:'number' },
+    { c:'tipo', t:'Tipo de socio', tipo:'select', ops:TIPOS },
+    { c:'fecha_inscripcion', t:'Fecha de inscripción', tipo:'date' },
+    { c:'tramo', t:'Cuota', tipo:'select', ops:{ '':'—', ...TRAMOS } },
+    { c:'fecha_pago', t:'Último pago', tipo:'date' },
+    { c:'renovacion', t:'Renovación', tipo:'date' },
+    { c:'cargo_asociacion', t:'Cargo en la Asociación', tipo:'text', ayuda:'Presidente, Secretaria, Tesorero o Vocal. Vacío si no tiene cargo.' },
+    { c:'es_junta', t:'Es de la Junta Directiva', tipo:'bool' },
+    { c:'activo', t:'Cuenta para el número de socios', tipo:'bool' }]],
+  ['Perfil', [
+    { c:'estudios', t:'Estudios', tipo:'text' },
+    { c:'situacion', t:'Situación', tipo:'text' },
+    { c:'cargo_profesional', t:'Puesto profesional', tipo:'text' },
+    { c:'empresa', t:'Empresa', tipo:'text' },
+    { c:'linkedin', t:'LinkedIn', tipo:'url' },
+    { c:'twitter', t:'Twitter / X', tipo:'url' },
+    { c:'como_conocio', t:'Cómo nos conoció', tipo:'text' },
+    { c:'expectativas', t:'Qué espera de la Asociación', tipo:'textarea' }]],
+  ['Web y consentimientos', [
+    { c:'acepta_imagen', t:'Ha dado permiso para salir en la web con nombre y foto', tipo:'bool' },
+    { c:'publicar', t:'Sale en la web (/socios/)', tipo:'bool', ayuda:'Solo se puede marcar si hay permiso de imagen.' },
+    { c:'foto_url', t:'Foto', tipo:'foto' },
+    { c:'orden', t:'Orden en la web', tipo:'number', ayuda:'Menor número, más arriba.' },
+    { c:'acepta_comunicaciones', t:'Acepta recibir noticias y actividades por correo', tipo:'bool' },
+    { c:'notas_internas', t:'Notas internas', tipo:'textarea' }]]
+];
+
+function campoHtml(f, v){
+  const ayuda = f.ayuda ? `<p class="ayuda">${f.ayuda}</p>` : '';
+  if (f.tipo === 'bool')
+    return `<div class="check"><input type="checkbox" id="f_${f.c}" ${v?'checked':''}><label for="f_${f.c}">${f.t}</label></div>${ayuda}`;
+  if (f.tipo === 'textarea')
+    return `<div class="campo"><label for="f_${f.c}">${f.t}</label><textarea id="f_${f.c}">${escapar(v ?? '')}</textarea>${ayuda}</div>`;
+  if (f.tipo === 'select')
+    return `<div class="campo"><label for="f_${f.c}">${f.t}</label><select class="campo" id="f_${f.c}">` +
+      Object.entries(f.ops).map(([k, t]) => `<option value="${k}" ${String(v ?? '') === k ? 'selected' : ''}>${t}</option>`).join('') +
+      `</select>${ayuda}</div>`;
+  if (f.tipo === 'foto')
+    return `<div class="campo"><label for="f_foto_archivo">${f.t}</label>
+      <div class="foto"><img id="fotoPrevia" alt="" src="${escapar(v || '')}" ${v ? '' : 'style="visibility:hidden"'}>
+        <div><input type="file" id="f_foto_archivo" accept="image/jpeg,image/png,image/webp">
+        <p class="ayuda">JPG, PNG o WebP de menos de 2 MB. Mejor cuadrada o vertical.</p></div></div>
+      <input type="text" id="f_foto_url" value="${escapar(v || '')}" placeholder="O pega la dirección de la imagen"></div>`;
+  return `<div class="campo"><label for="f_${f.c}">${f.t}${f.req ? ' *' : ''}</label>
+    <input type="${f.tipo}" id="f_${f.c}" value="${escapar(v ?? '')}">${ayuda}</div>`;
+}
+
+function fichaSocio(r){
+  const nuevo = !r;
+  if (nuevo) {
+    const sig = Math.max(0, ...filas.map(x => x.num_socio || 0)) + 1;
+    r = { num_socio:sig, tipo:'ordinario', fecha_inscripcion:hoyISO(), activo:true, publicar:false,
+          acepta_imagen:false, es_junta:false, orden:100 };
+  }
+  const est = nuevo ? '' : estadoSocio(r);
+  const cabecera = nuevo ? '' : `<p style="margin:-10px 0 18px"><span class="pastilla ${CLASE_ESTADO[est] ?? ''}">${est}</span>
+    ${r.baja_en ? ` Baja el ${soloFecha(r.baja_en)}${r.motivo_baja ? ' · ' + escapar(r.motivo_baja) : ''}` : ''}
+    ${r.renovacion && r.activo ? ` Renueva el ${soloFecha(r.renovacion)}` : ''}</p>`;
+  const secciones = FICHA_SOCIO.map(([titulo, campos]) =>
+    `<h3>${titulo}</h3><div class="${titulo === 'Web y consentimientos' ? '' : 'dos'}">` +
+    campos.map(f => campoHtml(f, r[f.c])).join('') + '</div>').join('');
+
+  const botones = ['<button class="btn" id="vGuardar">Guardar</button>'];
+  if (!nuevo && r.activo) {
+    botones.push('<button class="btn gris" id="vRenovar">Registrar renovación</button>');
+    botones.push('<button class="btn rojo" id="vBaja">Dar de baja</button>');
+  }
+  if (!nuevo && !r.activo) botones.push('<button class="btn gris" id="vAlta">Reactivar</button>');
+  botones.push('<button class="btn gris" id="vCancelar">Cancelar</button>');
+
+  abrir(`<h2>${nuevo ? 'Añadir socio a mano' : `Socio nº ${numSocio(r.num_socio)} · ${escapar(r.nombre)}`}</h2>${cabecera}
+    ${nuevo ? '<div class="alerta">Úsalo solo para casos especiales (honoríficos, corporativos, fundadores). Lo normal es que lleguen desde Solicitudes.</div>' : ''}
+    <div id="vError" class="aviso oculto"></div>${secciones}
+    <div class="acciones">${botones.join('')}</div>`, true);
+
+  // Web solo con permiso de imagen
+  const img = $('#f_acepta_imagen'), pub = $('#f_publicar');
+  const sincronizar = () => { if (!img.checked) pub.checked = false; pub.disabled = !img.checked; };
+  img.addEventListener('change', sincronizar); sincronizar();
+
+  // Foto
+  $('#f_foto_url').addEventListener('input', e => {
+    const p = $('#fotoPrevia'); p.src = e.target.value; p.style.visibility = e.target.value ? 'visible' : 'hidden';
+  });
+  $('#f_foto_archivo').addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { alert('La foto pesa más de 2 MB. Redúcela y vuelve a probar.'); e.target.value = ''; return; }
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z]/g, '');
+    const ruta = `${sinTildes(r.nombre || 'socio').replace(/[^a-z0-9]+/g, '-')}-${Date.now()}.${ext}`;
+    const { error } = await sb.storage.from('fotos-socios').upload(ruta, file, { contentType:file.type, upsert:false });
+    if (error) { alert('No se ha podido subir la foto: ' + error.message); return; }
+    const url = sb.storage.from('fotos-socios').getPublicUrl(ruta).data.publicUrl;
+    $('#f_foto_url').value = url;
+    const p = $('#fotoPrevia'); p.src = url; p.style.visibility = 'visible';
+  });
+
+  const mostrarError = m => { const e = $('#vError'); e.textContent = m; e.classList.remove('oculto'); $('.ficha').scrollTop = 0; };
+
+  const leer = () => {
+    const d = {};
+    for (const [, campos] of FICHA_SOCIO) for (const f of campos) {
+      if (f.tipo === 'foto') { d.foto_url = $('#f_foto_url').value.trim() || null; continue; }
+      const el = document.getElementById('f_' + f.c);
+      let v = f.tipo === 'bool' ? el.checked : el.value.trim();
+      if (f.req && !v) throw new Error('Falta rellenar: ' + f.t);
+      if (f.tipo === 'number') v = v === '' ? null : Number(v);
+      else if (f.tipo !== 'bool' && v === '') v = null;
+      d[f.c] = v;
+    }
+    if (!d.tipo) d.tipo = 'ordinario';
+    if (d.orden == null) d.orden = 100;
+    return d;
+  };
+
+  const guardar = async extra => {
+    let d;
+    try { d = { ...leer(), ...(extra || {}) }; } catch (e) { mostrarError(e.message); return false; }
+    const q = nuevo ? sb.from('socios').insert(d) : sb.from('socios').update(d).eq('id', r.id);
+    const { error } = await q;
+    if (error) {
+      mostrarError(error.message.includes('socios_num_socio') ? 'Ese número de socio ya lo tiene otra persona.'
+        : error.message.includes('socios_web_con_permiso') ? 'Para salir en la web hace falta el permiso de imagen.'
+        : 'No se ha podido guardar: ' + error.message);
+      return false;
+    }
+    return true;
+  };
+  const terminar = async msg => { cerrar(); avisoWeb(msg); await cargarSeccion(); cargarResumen(); };
+
+  $('#vCancelar').addEventListener('click', cerrar);
+  $('#vGuardar').addEventListener('click', async () => { if (await guardar()) terminar('Ficha guardada.'); });
+
+  $('#vRenovar')?.addEventListener('click', () => {
+    abrir(`<h2>Registrar renovación · ${escapar(r.nombre)}</h2>
+      <p style="margin:0 0 16px;line-height:1.6">Apunta la fecha en que llegó el pago. La próxima renovación queda a 12 meses.</p>
+      <div class="campo"><label for="fRen">Fecha del pago</label><input type="date" id="fRen" value="${hoyISO()}" max="${hoyISO()}"></div>
+      <div class="acciones"><button class="btn" id="vOk">Registrar</button><button class="btn gris" id="vNo">Cancelar</button></div>`);
+    $('#vNo').addEventListener('click', () => fichaSocio(r));
+    $('#vOk').addEventListener('click', async () => {
+      const f = $('#fRen').value || hoyISO();
+      const { error } = await sb.from('socios').update({ fecha_pago:f, renovacion:masMeses(f, 12) }).eq('id', r.id);
+      if (error) return alert('No se ha podido guardar: ' + error.message);
+      terminar(`Renovación registrada hasta el ${soloFecha(masMeses(f, 12))}.`);
+    });
+  });
+
+  $('#vBaja')?.addEventListener('click', () => {
+    abrir(`<h2>Dar de baja · ${escapar(r.nombre)}</h2>
+      <p style="margin:0 0 16px;line-height:1.6">Deja de contar como socio y deja de salir en la web. Su ficha se conserva en el libro.</p>
+      <div class="campo"><label for="fMotivo">Motivo (estatutos, art. 12)</label>
+        <select class="campo" id="fMotivo">${MOTIVOS_BAJA.map(m => `<option>${m}</option>`).join('')}</select></div>
+      <div class="campo"><label for="fBaja">Fecha de la baja</label><input type="date" id="fBaja" value="${hoyISO()}"></div>
+      <div class="acciones"><button class="btn rojo" id="vOk">Dar de baja</button><button class="btn gris" id="vNo">Cancelar</button></div>`);
+    $('#vNo').addEventListener('click', () => fichaSocio(r));
+    $('#vOk').addEventListener('click', async () => {
+      const { error } = await sb.from('socios').update({ activo:false, publicar:false,
+        baja_en:$('#fBaja').value || hoyISO(), motivo_baja:$('#fMotivo').value }).eq('id', r.id);
+      if (error) return alert('No se ha podido dar de baja: ' + error.message);
+      terminar(`${r.nombre} ha quedado de baja.`);
+    });
+  });
+
+  $('#vAlta')?.addEventListener('click', async () => {
+    if (!confirm(`¿Reactivar a ${r.nombre}? Vuelve a contar como socio. Recuerda registrar su pago.`)) return;
+    if (await guardar({ activo:true, baja_en:null, motivo_baja:null })) terminar(`${r.nombre} vuelve a estar activo.`);
+  });
+}
+
+/* =================================================================
+   Alta y edición de contenido (eventos, noticias, redes)
+   ================================================================= */
+
+$('#btnNuevo').addEventListener('click', () => activa.id === 'socios' ? fichaSocio(null) : editar(null));
 
 function editar(fila){
   const s = activa;
@@ -552,7 +1235,6 @@ function editar(fila){
          <button class="btn gris" id="vCancelar">Cancelar</button>${borrar}</div>`,
         s.form.some(f => f.tipo === 'markdown'));
 
-  // Vista previa y botones de formato
   s.form.filter(f => f.tipo === 'markdown').forEach(f => {
     const ta = document.getElementById('f_' + f.c);
     const pv = document.getElementById('p_' + f.c);
@@ -566,8 +1248,8 @@ function editar(fila){
       const sel = ta.value.slice(ini, fin) || 'texto';
       let texto;
       if (fmt === 'enlace')            texto = `[${sel}](https://)`;
-      else if (fmt.endsWith(' '))      texto = fmt + sel;          // encabezados, listas, citas
-      else                             texto = fmt + sel + fmt;    // negrita, cursiva
+      else if (fmt.endsWith(' '))      texto = fmt + sel;
+      else                             texto = fmt + sel + fmt;
       ta.setRangeText(texto, ini, fin, 'end');
       ta.focus(); pintar();
     });
@@ -607,26 +1289,102 @@ function editar(fila){
   });
 }
 
-/* ---------------- CSV ---------------- */
+/* =================================================================
+   Enviar correo a los seleccionados
+   ================================================================= */
 
-$('#btnCsv').addEventListener('click', () => {
-  const datos = visibles();
-  if (!datos.length) return;
-  const cols = Object.keys(datos[0]);
-  const c = v => {
-    const t = Array.isArray(v) ? v.join(' | ') : String(v ?? '');
-    return /[";\n]/.test(t) ? '"' + t.replace(/"/g,'""') + '"' : t;
-  };
-  // Punto y coma y BOM: así Excel en español lo abre de un doble clic.
-  const csv = '﻿' + [cols.join(';')]
-    .concat(datos.map(r => cols.map(x => c(r[x])).join(';'))).join('\r\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8;' }));
-  a.download = `lgmp-${activa.id}-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click(); URL.revokeObjectURL(a.href);
+const PLANTILLAS = {
+  libre: { t:'Texto libre', asunto:'', cuerpo:'Hola, {nombre}:\n\n\n\nUn abrazo,\nLa Junta de LGMP' },
+  renovacion: { t:'Recordatorio de renovación', solo:['socios'],
+    asunto:'Tu cuota de LGMP se renueva pronto',
+    cuerpo:'Hola, {nombre}:\n\nTu cuota anual de la Asociación La Generación Mejor Preparada se renueva en los próximos días.\n\nPara renovarla, haz una transferencia con tu cuota anual a este IBAN: {iban}\nConcepto: Renovación LGMP y tu nombre.\n\nGracias por seguir con nosotros.\nLa Junta de LGMP' },
+  evento: { t:'Información del evento', solo:['evento'],
+    asunto:'Te esperamos: todo lo que necesitas saber',
+    cuerpo:'Hola, {nombre}:\n\nGracias por inscribirte. Te dejamos los detalles:\n\nFecha: \nHora: \nLugar: \n\nSi al final no puedes venir, responde a este correo y liberamos tu plaza.\n\n¡Nos vemos!\nLa Junta de LGMP' }
+};
+const TABLA_CORREO = { socios:'socios', solicitudes:'altas_socio', evento:'inscripciones_evento', contactos:'contactos' };
+
+$('#btnCorreo').addEventListener('click', () => {
+  const s = activa, ids = [...s.st.sel];
+  if (!ids.length) { alert('Marca primero a quién quieres escribir (casillas de la izquierda).'); return; }
+  const gente = filas.filter(r => s.st.sel.has(r.id));
+  const conEmail = gente.filter(r => r.email);
+  const sinCom = gente.filter(r => r.acepta_comunicaciones === false).length;
+  const plantillas = Object.entries(PLANTILLAS).filter(([, p]) => !p.solo || p.solo.includes(s.id));
+  abrir(`<h2>Enviar correo</h2>
+    <p class="destinatarios">A ${conEmail.length} persona${conEmail.length === 1 ? '' : 's'}: ${escapar(conEmail.slice(0, 4).map(r => r.nombre || r.email).join(', '))}${conEmail.length > 4 ? '…' : ''}</p>
+    ${conEmail.length > 100 ? '<div class="alerta">Máximo 100 por envío (límite diario del plan gratuito de Resend). Quita a algunas personas.</div>' : ''}
+    ${sinCom && s.id !== 'socios' ? `<div class="alerta">${sinCom} de estas personas no marcó la casilla de recibir comunicaciones. Escríbeles solo sobre lo que pidieron (su solicitud, su inscripción…), no con publicidad.</div>` : ''}
+    <div class="campo"><label for="cPlantilla">Plantilla</label><select class="campo" id="cPlantilla">
+      ${plantillas.map(([k, p]) => `<option value="${k}">${p.t}</option>`).join('')}</select></div>
+    <div class="campo"><label for="cAsunto">Asunto *</label><input type="text" id="cAsunto" maxlength="150"></div>
+    <div class="campo"><label for="cCuerpo">Texto *</label><textarea id="cCuerpo" style="min-height:240px"></textarea>
+      <p class="ayuda">{nombre} se cambia por el nombre de cada persona${s.id === 'socios' ? ' y {iban} por el IBAN de la Asociación' : ''}. Deja una línea en blanco entre párrafos. Sale desde hola@ y las respuestas llegan a hola@.</p></div>
+    <div id="vError" class="aviso oculto"></div>
+    <div class="acciones"><button class="btn" id="vEnviar">Enviar</button><button class="btn gris" id="vCancelar">Cancelar</button></div>`, true);
+  const poner = () => { const p = PLANTILLAS[$('#cPlantilla').value]; $('#cAsunto').value = p.asunto; $('#cCuerpo').value = p.cuerpo; };
+  $('#cPlantilla').addEventListener('change', poner); poner();
+  $('#vCancelar').addEventListener('click', cerrar);
+  $('#vEnviar').addEventListener('click', async () => {
+    const asunto = $('#cAsunto').value.trim(), cuerpo = $('#cCuerpo').value.trim();
+    const err = m => { const e = $('#vError'); e.textContent = m; e.classList.remove('oculto'); };
+    if (!asunto || !cuerpo) return err('Escribe el asunto y el texto.');
+    if (!confirm(`¿Enviar «${asunto}» a ${conEmail.length} persona${conEmail.length === 1 ? '' : 's'}?`)) return;
+    const b = $('#vEnviar'); b.disabled = true; b.textContent = 'Enviando…';
+    try {
+      const res = await accionPanel({ accion:'enviar-correo', tabla:TABLA_CORREO[s.id], ids, asunto, cuerpo });
+      s.st.sel.clear(); cerrar(); avisoWeb(res.mensaje); pintarTabla();
+    } catch (e) { err(e.message); b.disabled = false; b.textContent = 'Enviar'; }
+  });
 });
 
-$('#buscar').addEventListener('input', e => { filtro = e.target.value.trim(); pintarTabla(); });
+/* =================================================================
+   Exportar a Excel (lo que ves: con filtros y orden)
+   ================================================================= */
+
+function cargarXlsx(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((ok, ko) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    sc.onload = () => ok(window.XLSX); sc.onerror = () => ko(new Error('No se ha podido cargar el exportador.'));
+    document.head.appendChild(sc);
+  });
+}
+
+$('#btnExcel').addEventListener('click', async () => {
+  const datos = visibles();
+  if (!datos.length) { alert('No hay filas que exportar.'); return; }
+  let XLSX;
+  try { XLSX = await cargarXlsx(); } catch (e) { alert(e.message); return; }
+
+  // Columnas: todas las del registro (no solo las visibles), con nombres legibles.
+  const ocultas = new Set(['token']);
+  const claves = [...new Set(datos.flatMap(r => Object.keys(r)))].filter(k => !ocultas.has(k));
+  if (activa.id === 'socios') {           // el libro, empezando por el número
+    claves.sort((a, b) => (a === 'num_socio' ? -1 : b === 'num_socio' ? 1 : 0));
+  }
+  const calculadas = activa.cols.filter(c => c.get && !c.accion && c.c !== '_dni');
+  const cabecera = claves.map(k => ETIQUETAS[k] || k).concat(calculadas.map(c => c.t));
+  const celdaX = (k, v) => {
+    if (v == null) return '';
+    if (Array.isArray(v)) return v.join(', ');
+    if (typeof v === 'boolean') return v ? 'Sí' : 'No';
+    if (k === 'tipo') return TIPOS[v] || v;
+    if (k === 'tramo') return TRAMOS[v] || v;
+    if (k === 'num_socio') return numSocio(v);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(v))) return soloFecha(v);
+    if (k.endsWith('_en') && String(v).length > 10) return fechaHora(v);
+    return v;
+  };
+  const filasX = datos.map(r => claves.map(k => celdaX(k, r[k])).concat(calculadas.map(c => texto(r, c))));
+  const hoja = XLSX.utils.aoa_to_sheet([cabecera, ...filasX]);
+  hoja['!cols'] = cabecera.map((h, i) => ({ wch: Math.min(40, Math.max(String(h).length,
+    ...filasX.slice(0, 200).map(f => String(f[i] ?? '').length)) + 2) }));
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, activa.titulo.slice(0, 31));
+  XLSX.writeFile(libro, `lgmp-${activa.id}-${hoyISO()}.xlsx`);
+});
 
 arrancar();
 </script>
