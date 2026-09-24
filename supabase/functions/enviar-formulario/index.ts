@@ -267,6 +267,8 @@ async function escribirA(para: string, asunto: string, titulo: string, parrafos:
     headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: REMITENTE_SOCIOS, to: [para], reply_to: CORREO_LGMP,
+      // Copia oculta a la asociación, para ver exactamente lo que sale.
+      ...(para.toLowerCase() !== CORREO_LGMP ? { bcc: [CORREO_LGMP] } : {}),
       subject: asunto, html, text: parrafos.join('\n\n'),
     }),
   });

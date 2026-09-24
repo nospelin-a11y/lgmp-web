@@ -171,8 +171,11 @@ async function mandar(correos: Correo[]) {
     const r = await fetch('https://api.resend.com/emails/batch', {
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(lote.map((c) => ({
+      body: JSON.stringify(lote.map((c, j) => ({
         from: REMITENTE, to: [c.to], reply_to: CORREO_LGMP,
+        // Copia oculta a la asociación. En los envíos a varios, solo del
+        // primero: el texto es el mismo para todos y así no llegan 100 copias.
+        ...(enviados === 0 && j === 0 && c.to.toLowerCase() !== CORREO_LGMP ? { bcc: [CORREO_LGMP] } : {}),
         subject: c.subject, html: c.html, text: c.text,
       }))),
     });
