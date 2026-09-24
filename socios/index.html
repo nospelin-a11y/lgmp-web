@@ -26,6 +26,7 @@
 <meta name="theme-color" content="#1E2A4A">
 
 <script src="/support.js"></script>
+<script src="/lgmp-datos.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"NGO","@id":"https://lageneracionmejorpreparada.com/#organizacion","name":"Asociación La Generación Mejor Preparada","alternateName":"LGMP","url":"https://lageneracionmejorpreparada.com/","logo":"https://lageneracionmejorpreparada.com/assets/logo-light.webp","image":"https://lageneracionmejorpreparada.com/assets/og.jpg","email":"hola@lageneracionmejorpreparada.com","taxID":"G88948880","foundingDate":"2026-06-21","nonprofitStatus":"NonprofitANBI","description":"Asociación sin ánimo de lucro de la Región de Murcia que acompaña a los jóvenes en el salto de la universidad al mundo laboral.","address":{"@type":"PostalAddress","streetAddress":"Avenida Región de Murcia 89, Guadalupe","addressLocality":"Murcia","postalCode":"30107","addressRegion":"Región de Murcia","addressCountry":"ES"},"areaServed":{"@type":"AdministrativeArea","name":"Región de Murcia"},"sameAs":["https://open.spotify.com/show/71loMrrju6KJBK8F6sTqEg","https://www.youtube.com/@LaGeneracionMejorPreparada","https://www.instagram.com/lageneracionmejorpreparada/","https://www.tiktok.com/@lageneracionpodcast"]}]}</script>
 </head>
 <body>
@@ -208,6 +209,15 @@
     </div>
   </section>
 
+  <!-- ============ CONTADOR DE SOCIOS ============ -->
+  <section style="background:#1E2A4A;padding:80px 0;position:relative;overflow:hidden">
+    <div class="lg-blob" aria-hidden="true" style="position:absolute;top:-140px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.18),rgba(240,80,60,0) 65%);animation:lgmpFloat 10s ease-in-out infinite"></div>
+    <div class="lg-cont" data-counter="true" style="position:relative;max-width:1400px;margin:0 auto;padding:0 48px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap">
+      <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(32px,4.4vw,56px);line-height:1.1;text-transform:uppercase;color:#ffffff;margin:0;max-width:640px">Número actual de <span style="color:#F0503C">socios</span></h2>
+      <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(90px,12vw,160px);line-height:1;color:#F0503C">{{ sociosCount }}</div>
+    </div>
+  </section>
+
   <!-- ============ CTA ============ -->
   <section style="background:#1E2A4A;padding:90px 0;position:relative;overflow:hidden">
     <div class="lg-blob" aria-hidden="true" style="position:absolute;top:-140px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(240,80,60,.18),rgba(240,80,60,0) 65%);animation:lgmpFloat 10s ease-in-out infinite"></div>
@@ -241,14 +251,64 @@
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;motion&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;numSocios&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 7, &quot;min&quot;: 0, &quot;max&quot;: 10000, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Contenido&quot;}, &quot;motion&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;}}">
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  state = { count: 0 };
+
+  renderVals() { return { sociosCount: this.state.count }; }
+
+  /**
+   * Socios activos, contados en la base de datos con contar_socios(). Si
+   * Supabase no responde, se usa la prop `numSocios` como respaldo para que
+   * el bloque nunca se quede en cero.
+   */
+  objetivoSocios() {
+    if (!this._socios) {
+      const respaldo = Math.max(0, Math.round(this.props.numSocios ?? 7));
+      const consulta = window.LGMP ? window.LGMP.contarSocios() : Promise.resolve(null);
+      this._socios = consulta
+        // Un 0 significa que todavía no se ha cargado a nadie en la tabla,
+        // no que la Asociación no tenga socios: en ese caso, respaldo.
+        .then((n) => (typeof n === 'number' && n > 0 ? n : respaldo))
+        .catch(() => respaldo);
+    }
+    return this._socios;
+  }
+
+  startCounter() {
+    if (this._counterStarted) return;
+    this._counterStarted = true;
+    this.objetivoSocios().then((target) => {
+      if (this._desmontado) return;
+      const dur = 1800;
+      const t0 = performance.now();
+      const tick = (t) => {
+        const p = Math.min(1, (t - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        this.setState({ count: Math.round(target * eased) });
+        if (p < 1) this._raf = requestAnimationFrame(tick);
+      };
+      this._raf = requestAnimationFrame(tick);
+    });
+  }
 
   componentDidMount() {
     const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (this.props.motion === false || reduced) return;
     this._timer = setTimeout(() => {
+      // Contador: arranca al verse en pantalla; sin animación, número directo.
+      const counterEl = document.querySelector('[data-counter]');
+      if (counterEl) {
+        if (reduced || this.props.motion === false) {
+          this.objetivoSocios().then((n) => { if (!this._desmontado) this.setState({ count: n }); });
+        } else {
+          this._cio = new IntersectionObserver((entries) => {
+            entries.forEach((en) => { if (en.isIntersecting) { this.startCounter(); this._cio.disconnect(); } });
+          }, { threshold: 0.4 });
+          this._cio.observe(counterEl);
+        }
+      }
+
+      if (this.props.motion === false || reduced) return;
       const els = Array.from(document.querySelectorAll('[data-reveal]'));
       const io = new IntersectionObserver((entries) => {
         entries.forEach((en) => {
@@ -273,8 +333,11 @@ class Component extends DCLogic {
   }
 
   componentWillUnmount() {
+    this._desmontado = true;
     clearTimeout(this._timer);
+    cancelAnimationFrame(this._raf);
     if (this._io) this._io.disconnect();
+    if (this._cio) this._cio.disconnect();
   }
 }
 </script>
