@@ -28,6 +28,10 @@ const BASE  = 'https://lageneracionmejorpreparada.com';
 const URL_SB = process.env.SUPABASE_URL  || 'https://cegicdvznbvbemqoftod.supabase.co';
 const CLAVE  = process.env.SUPABASE_ANON || 'sb_publishable_hyev91V4OhpAo79Ox7vqBg_LU_Mfzbh';
 
+// Fecha de hoy en formato ISO: se compara como texto con `eventos.fecha`,
+// que es un `date` y viene como 'AAAA-MM-DD'.
+const HOY = new Date().toISOString().slice(0, 10);
+
 const ESC = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' };
 const e = t => String(t ?? '').replace(/[&<>"]/g, c => ESC[c]);
 
@@ -87,7 +91,7 @@ function tarjetaSocio(s) {
    Plantilla de una página individual
    --------------------------------------------------------------------- */
 
-function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta }) {
+function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta, apunte }) {
   const ld = tipo === 'evento'
     ? { '@type':'Event', name:titulo, description:descripcion, startDate:meta.fecha,
         eventStatus:'https://schema.org/EventScheduled',
@@ -151,7 +155,38 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
              padding:14px 32px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);
              transition:transform .2s;display:inline-block}
   .apuntarse:hover{transform:translateY(-3px);color:#ffffff}
-  @media (prefers-reduced-motion: reduce){ .apuntarse:hover{transform:none} }
+
+  /* ---- Formulario de inscripción ---- */
+  .apunte{max-width:760px;margin:44px auto 0;padding:0 28px}
+  .apunte .caja{background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:24px;padding:clamp(26px,4.5vw,40px)}
+  .apunte h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(22px,3vw,27px);margin:0 0 8px}
+  .apunte .sub{font-size:16px;line-height:1.6;color:rgba(30,42,74,.72);margin:0 0 26px}
+  .apunte .fila{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .apunte .campo{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+  .apunte .fila .campo{margin-bottom:0}
+  .apunte label{font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:#1E2A4A}
+  .apunte label .opt{font-weight:400;color:rgba(30,42,74,.5)}
+  .apunte input[type=text],.apunte input[type=email],.apunte input[type=tel]{
+    background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:14px 16px;
+    font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;
+    transition:border-color .2s,background .2s}
+  .apunte input:focus{border-color:#F0503C;background:#ffffff}
+  .apunte input::placeholder{color:rgba(30,42,74,.42)}
+  .apunte .check{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.55;
+                 color:rgba(30,42,74,.75);cursor:pointer;margin:16px 0 0}
+  .apunte .check input{width:18px;height:18px;flex:none;margin-top:1px;accent-color:#F0503C;cursor:pointer}
+  .apunte .btn{background:#F0503C;color:#ffffff;border:none;cursor:pointer;margin-top:24px;
+               font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:16px 42px;
+               border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s}
+  .apunte .btn:hover{transform:translateY(-3px)}
+  .apunte .btn:disabled{opacity:.6;cursor:wait;transform:none}
+  .apunte .error{color:#C4341F;font-size:14.5px;font-weight:600;margin:16px 0 0}
+  .apunte .exito{text-align:center;padding:14px 0}
+  .apunte .exito h2{margin-bottom:12px}
+  .apunte .exito p{font-size:16.5px;line-height:1.65;color:rgba(30,42,74,.75);margin:0 auto;max-width:440px}
+  .oculto{display:none !important}
+  @media (max-width:640px){ .apunte .fila{grid-template-columns:1fr;gap:0} .apunte .fila .campo{margin-bottom:16px} }
+  @media (prefers-reduced-motion: reduce){ .apuntarse:hover,.apunte .btn:hover{transform:none} }
 </style>
 </head>
 <body>
@@ -176,6 +211,7 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
       ${cta || ''}
       <a class="volver" href="/actividades/">← Volver a Actividades</a>
     </div>
+    ${apunte ? formulario(apunte) : ''}
   </article>
 </main>
 
@@ -193,6 +229,117 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
 </body>
 </html>
 `;
+}
+
+/* ---------------------------------------------------------------------
+   Formulario de inscripción
+
+   Va dentro de la propia página del evento: quien llega buscando el evento
+   se apunta sin cambiar de página. Pide lo mínimo —nombre y correo— porque
+   lo que necesitamos es poder mandarle el recordatorio; el teléfono es
+   opcional y sirve para avisar por WhatsApp el día antes.
+
+   Escribe en `inscripciones_evento` a través de la Edge Function, igual que
+   el resto de formularios de la web. `evento` viaja como texto para que en
+   el panel se lea a qué evento corresponde cada inscripción.
+   --------------------------------------------------------------------- */
+function formulario({ evento, titulo }) {
+  return `
+    <section class="apunte" id="apuntarme">
+      <div class="caja">
+        <div id="exito" class="exito oculto">
+          <h2>¡Estás dentro!</h2>
+          <p>Te hemos apuntado. Unos días antes te escribimos al correo con el recordatorio y los últimos detalles.</p>
+        </div>
+
+        <form id="formEvento" novalidate>
+          <h2>Apúntate</h2>
+          <p class="sub">Es gratis. Déjanos tu correo y te avisamos unos días antes.</p>
+
+          <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <div class="campo">
+            <label for="nombre">Nombre y apellidos</label>
+            <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+          </div>
+
+          <div class="fila">
+            <div class="campo">
+              <label for="email">Correo electrónico</label>
+              <input type="email" id="email" name="email" autocomplete="email" required>
+            </div>
+            <div class="campo">
+              <label for="telefono">Teléfono <span class="opt">(opcional)</span></label>
+              <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="Para el recordatorio por WhatsApp">
+            </div>
+          </div>
+
+          <label class="check">
+            <input type="checkbox" id="rgpd" required>
+            <span>He leído y acepto la <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a> y el tratamiento de mis datos para gestionar mi inscripción.</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox" id="marketing">
+            <span>Quiero recibir información sobre la Asociación, sus actividades y cómo asociarme.</span>
+          </label>
+
+          <p id="error" class="error oculto"></p>
+          <button type="submit" id="enviar" class="btn">Apuntarme</button>
+        </form>
+      </div>
+    </section>
+
+<script src="/lgmp-datos.js"></script>
+<script>
+(function(){
+  var form  = document.getElementById('formEvento');
+  var exito = document.getElementById('exito');
+  var error = document.getElementById('error');
+  var boton = document.getElementById('enviar');
+
+  function fallo(msg){
+    error.textContent = msg;
+    error.classList.remove('oculto');
+    boton.disabled = false;
+    boton.textContent = 'Apuntarme';
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    error.classList.add('oculto');
+
+    var tel = form.telefono.value.trim();
+
+    if (!form.nombre.value.trim())
+      return fallo('Escribe tu nombre y apellidos.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.value.trim()))
+      return fallo('Escribe un correo electrónico válido.');
+    // El teléfono es opcional, pero si lo escribe que sea uno de verdad.
+    if (tel && tel.replace(/\D/g,'').length < 9)
+      return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
+    if (!document.getElementById('rgpd').checked)
+      return fallo('Debes aceptar la Política de Privacidad para continuar.');
+
+    boton.disabled = true;
+    boton.textContent = 'Apuntándote…';
+
+    window.LGMP.enviar('inscripcion-evento', {
+      evento:   ${JSON.stringify(evento)},
+      nombre:   form.nombre.value,
+      email:    form.email.value,
+      telefono: tel,
+      acepta_comunicaciones: document.getElementById('marketing').checked
+    }, form.trampa.value)
+    .then(function(){
+      form.classList.add('oculto');
+      exito.classList.remove('oculto');
+      exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    })
+    .catch(function(err){ fallo(err.message); });
+  });
+})();
+</script>`;
 }
 
 /* ---------------------------------------------------------------------
@@ -280,13 +427,21 @@ async function main() {
     const url = `${BASE}/eventos/${ev.slug}/`;
     const desc = ev.descripcion || resumir(ev.cuerpo) || ev.titulo;
     const detalle = [fechaLarga(ev.fecha), ev.hora, ev.lugar].filter(Boolean).join(' · ');
-    const cta = ev.url_inscripcion
-      ? `<a class="apuntarse" href="${e(ev.url_inscripcion)}">Apúntate</a>` : '';
+    // Si el evento ya ha pasado no se puede uno apuntar: ni botón ni formulario.
+    const abierto = String(ev.fecha) >= HOY;
+    // `url_inscripcion` gana: sirve para eventos que se gestionan fuera
+    // (los de Alumni, por ejemplo). Si no hay, el botón baja al formulario.
+    const cta = !abierto ? ''
+      : ev.url_inscripcion
+        ? `<a class="apuntarse" href="${e(ev.url_inscripcion)}">Apúntate</a>`
+        : `<a class="apuntarse" href="#apuntarme">Apúntate</a>`;
+    const apunte = (abierto && !ev.url_inscripcion)
+      ? { titulo: ev.titulo, evento: `${ev.titulo} · ${fechaLarga(ev.fecha)}` } : null;
     await mkdir(join(RAIZ, 'eventos', ev.slug), { recursive: true });
     await writeFile(join(RAIZ, 'eventos', ev.slug, 'index.html'),
       pagina({ tipo:'evento', titulo:ev.titulo, descripcion:desc, url, kicker:'Evento',
                meta:{ linea:detalle, fecha:ev.fecha, lugar:ev.lugar },
-               cuerpo:aHtml(ev.cuerpo), cta }));
+               cuerpo:aHtml(ev.cuerpo), cta, apunte }));
     escritas.push(`/eventos/${ev.slug}/`);
   }
 

@@ -354,9 +354,10 @@ function preparar(tipo: string, d: Record<string, unknown>): Preparado {
     const comunicaciones = bool(d.acepta_comunicaciones);
     exigir(nombre, 'Escribe tu nombre y apellidos.');
     exigir(emailValido(email), 'Escribe un correo electrónico válido.');
-    exigir(telefonoValido(telefono), 'Escribe un teléfono válido.');
-    exigir(perfil, 'Dinos con qué te identificas.');
-    const evento = txt(d.evento, 160) ?? 'Presentación oficial · 1 de octubre de 2026';
+    // En los formularios de las páginas de evento solo pedimos nombre y correo:
+    // el resto es opcional, pero si viene escrito tiene que ser válido.
+    exigir(!telefono || telefonoValido(telefono), 'Ese teléfono no parece válido.');
+    const evento = txt(d.evento, 160) ?? 'Evento sin identificar';
     return {
       tabla: 'inscripciones_evento',
       fila: {
