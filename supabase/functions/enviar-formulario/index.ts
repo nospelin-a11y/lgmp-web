@@ -240,31 +240,14 @@ async function avisar(asunto: string, resumen: [string, string][], responderA?: 
   if (!r.ok) console.error('Resend falló:', r.status, await r.text());
 }
 
-/** Grupo de WhatsApp de la asociación. Va en el correo de acuse del alta. */
-const GRUPO_WSP = 'https://chat.whatsapp.com/JmDwucxgTAeDyFZDKjslqm';
-
 /**
  * Correo para la persona que ha rellenado el formulario (no para la junta).
- * `parrafos` es texto plano: cada elemento, un párrafo. Si se pasa `boton`,
- * se pinta debajo como llamada a la acción y su URL se repite en la versión de
- * texto plano, que es donde los clientes sin HTML tienen que poder verla.
+ * `parrafos` es texto plano: cada elemento, un párrafo.
  */
-async function escribirA(
-  para: string, asunto: string, titulo: string, parrafos: string[],
-  boton?: { texto: string; url: string },
-) {
+async function escribirA(para: string, asunto: string, titulo: string, parrafos: string[]) {
   if (!RESEND_KEY) { console.warn('RESEND_API_KEY sin configurar: no se envía el acuse.'); return; }
   const cuerpo = parrafos.map((p) =>
     `<p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#1E2A4A">${escapar(p).replace(/\n/g, '<br>')}</p>`).join('');
-  // Tabla en vez de un enlace suelto: Outlook se salta el padding y el borde
-  // redondeado de un <a>, y el botón sale como texto plano subrayado.
-  const llamada = boton
-    ? '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 18px">' +
-        '<tr><td style="border-radius:999px;background:#F0503C">' +
-          `<a href="${escapar(boton.url)}" style="display:inline-block;padding:13px 26px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px">${escapar(boton.texto)}</a>` +
-        '</td></tr>' +
-      '</table>'
-    : '';
   const html =
     '<div style="background:#F4F6FA;padding:28px">' +
       '<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #E6EAF2">' +
@@ -272,7 +255,7 @@ async function escribirA(
           '<p style="margin:0;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;font-weight:700">La Generación Mejor Preparada</p>' +
           `<h1 style="margin:6px 0 0;font-family:Arial,sans-serif;font-size:21px;color:#ffffff">${escapar(titulo)}</h1>` +
         '</div>' +
-        `<div style="padding:26px 26px 12px">${cuerpo}${llamada}</div>` +
+        `<div style="padding:26px 26px 12px">${cuerpo}</div>` +
         '<p style="margin:0;padding:16px 26px;font-family:Arial,sans-serif;font-size:12.5px;color:#6B7590;background:#F4F6FA">' +
           'Asociación La Generación Mejor Preparada · Murcia · lageneracionmejorpreparada.com<br>' +
           'Recibes este correo porque has solicitado el alta como socio. Si no has sido tú, responde a este correo y lo borramos.' +
@@ -286,8 +269,7 @@ async function escribirA(
       from: REMITENTE_SOCIOS, to: [para], reply_to: CORREO_LGMP,
       // Copia oculta a la asociación, para ver exactamente lo que sale.
       ...(para.toLowerCase() !== CORREO_LGMP ? { bcc: [CORREO_LGMP] } : {}),
-      subject: asunto, html,
-      text: parrafos.join('\n\n') + (boton ? `\n\n${boton.texto}: ${boton.url}` : ''),
+      subject: asunto, html, text: parrafos.join('\n\n'),
     }),
   });
   if (!r.ok) console.error('Resend (acuse) falló:', r.status, await r.text());
@@ -625,10 +607,9 @@ Deno.serve(async (req) => {
         `Hola, ${nombre}:`,
         'Gracias por querer formar parte de la Asociación La Generación Mejor Preparada.',
         'Hemos recibido tu solicitud de alta. La Junta Directiva la revisa en los próximos días y te escribimos a este correo con los siguientes pasos.',
-        'Mientras tanto, entra en el grupo de WhatsApp de la asociación. Es donde contamos lo que vamos montando y el sitio más rápido para preguntar cualquier cosa.',
-        'Si lo prefieres, responde a este correo y te contestamos igual.',
+        'Si tienes cualquier duda, responde a este correo.',
         'Un abrazo,\nLa Junta de LGMP',
-      ], { texto: 'Entrar al grupo de WhatsApp', url: GRUPO_WSP });
+      ]);
     } catch (e) {
       console.error('Error al enviar el acuse:', e);
     }
