@@ -490,9 +490,9 @@ async function main() {
 
   // Sitemap
   const FIJAS = ['/', '/actividades/', '/socios/', '/podcast/', '/hazte-socio/', '/contacto/',
-                 '/presentacion/', '/alta-socio/', '/alta-entidad/', '/aviso-legal/',
+                 '/alta-socio/', '/alta-entidad/', '/aviso-legal/',
                  '/privacidad/', '/cookies/'];
-  const PRIORIDAD = { '/':'1.0', '/hazte-socio/':'0.9', '/presentacion/':'0.9',
+  const PRIORIDAD = { '/':'1.0', '/hazte-socio/':'0.9',
                       '/actividades/':'0.8', '/podcast/':'0.8', '/socios/':'0.7', '/contacto/':'0.7' };
   const hoy = new Date().toISOString().slice(0, 10);
   const url = r => `  <url>\n    <loc>${BASE}${r}</loc>\n    <lastmod>${hoy}</lastmod>\n    <priority>${PRIORIDAD[r] || (r.startsWith('/noticias/') || r.startsWith('/eventos/') ? '0.6' : '0.4')}</priority>\n  </url>`;
