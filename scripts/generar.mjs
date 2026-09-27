@@ -87,19 +87,45 @@ function tarjetaSocio(s) {
         </div>`;
 }
 
+const ORGANIZACION = { '@type':'Organization', '@id': BASE + '/#organizacion',
+  name:'Asociación La Generación Mejor Preparada', url: BASE + '/' };
+
+/* Fecha + hora del evento en ISO con la zona de Murcia (+01:00 / +02:00).
+   `hora` admite '19:00' o '19:00 a 20:30'; `cual` 0 = inicio, 1 = fin.
+   Sin hora de fin, el fin coincide con el inicio (mejor escribir las dos). */
+function momento(fecha, hora, cual) {
+  const horas = String(hora || '').match(/\d{1,2}:\d{2}/g) || [];
+  const h = horas[cual] || horas[0];
+  if (!h) return fecha;
+  const hh = h.padStart(5, '0');
+  const zona = new Intl.DateTimeFormat('en-US', { timeZone:'Europe/Madrid', timeZoneName:'longOffset' })
+    .formatToParts(new Date(`${fecha}T${hh}:00Z`)).find(p => p.type === 'timeZoneName').value;
+  return `${fecha}T${hh}:00${zona.replace('GMT', '') || '+00:00'}`;
+}
+
 /* ---------------------------------------------------------------------
    Plantilla de una página individual
    --------------------------------------------------------------------- */
 
 function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta, apunte }) {
   const ld = tipo === 'evento'
-    ? { '@type':'Event', name:titulo, description:descripcion, startDate:meta.fecha,
+    ? { '@type':'Event', name:titulo, description:descripcion,
+        startDate: momento(meta.fecha, meta.hora, 0),
+        endDate:   momento(meta.fecha, meta.hora, 1),
         eventStatus:'https://schema.org/EventScheduled',
         eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',
         location:{ '@type':'Place', name: meta.lugar || 'Murcia',
                    address:{ '@type':'PostalAddress', addressLocality:'Murcia',
                              addressRegion:'Región de Murcia', addressCountry:'ES' } },
-        organizer:{ '@id': BASE + '/#organizacion' }, url }
+        image: [ imagen || BASE + '/assets/og.jpg' ],
+        // Google no sigue el @id hasta la portada: el nombre tiene que ir aquí.
+        organizer: ORGANIZACION, performer: ORGANIZACION,
+        // Todos los eventos son gratuitos.
+        offers:{ '@type':'Offer', price:0, priceCurrency:'EUR',
+                 availability:'https://schema.org/InStock',
+                 url: meta.inscripcion || url + '#apuntarme',
+                 ...(meta.creado ? { validFrom: meta.creado } : {}) },
+        url }
     : { '@type':'NewsArticle', headline:titulo, description:descripcion,
         datePublished:meta.fecha, inLanguage:'es-ES',
         author:{ '@type': meta.autor ? 'Person' : 'Organization',
@@ -440,8 +466,9 @@ async function main() {
     await mkdir(join(RAIZ, 'eventos', ev.slug), { recursive: true });
     await writeFile(join(RAIZ, 'eventos', ev.slug, 'index.html'),
       pagina({ tipo:'evento', titulo:ev.titulo, descripcion:desc, url, kicker:'Evento',
-               meta:{ linea:detalle, fecha:ev.fecha, lugar:ev.lugar },
-               cuerpo:aHtml(ev.cuerpo), cta, apunte }));
+               meta:{ linea:detalle, fecha:ev.fecha, hora:ev.hora, lugar:ev.lugar,
+                      creado:ev.creado_en, inscripcion:ev.url_inscripcion },
+               cuerpo:aHtml(ev.cuerpo), imagen:ev.imagen_url, cta, apunte }));
     escritas.push(`/eventos/${ev.slug}/`);
   }
 
