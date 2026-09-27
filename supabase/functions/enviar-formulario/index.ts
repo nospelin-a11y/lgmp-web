@@ -22,7 +22,14 @@
 //
 //  Además de guardar formularios, atiende el enlace "Completar mi alta"
 //  del correo de pago (tipos `consultar-alta` y `completar-alta`).
+//
+//  Inscripciones a eventos: si llega `evento_id`, se comprueba que el
+//  evento esté publicado y abierto, no se admite el mismo correo dos veces
+//  en el mismo evento y la persona recibe un correo de confirmación con
+//  botones para añadirlo al calendario.
 // =====================================================================
+
+import { correoConfirmacion, type Evento } from '../_shared/eventos.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('CLAVE_SECRETA') ??
@@ -291,6 +298,37 @@ async function rpc(nombre: string, args: Record<string, unknown>) {
   return cuerpo;
 }
 
+/** Evento por id, con la clave secreta (incluye columnas que la web no ve). */
+async function leerEvento(id: number): Promise<Evento | null> {
+  const cols = 'id,titulo,fecha,hora,lugar,modalidad,slug,publicado,recordatorios,enlace_reunion';
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/eventos?select=${cols}&id=eq.${id}`, {
+    headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` },
+  });
+  if (!r.ok) throw new Error(`Leer evento ${id} (${r.status}): ${await r.text()}`);
+  const filas = await r.json();
+  return Array.isArray(filas) && filas[0] ? filas[0] : null;
+}
+
+/** ¿Ya hay una inscripción con este correo en este evento? */
+async function yaInscrito(eventoId: number, email: string): Promise<boolean> {
+  // Se comparan en minúsculas aquí: ilike trataría "_" o "*" como comodines.
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/inscripciones_evento?select=email&evento_id=eq.${eventoId}`, {
+    headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` },
+  });
+  if (!r.ok) throw new Error(`Comprobar duplicado (${r.status}): ${await r.text()}`);
+  const filas: { email: string | null }[] = await r.json();
+  const buscado = email.trim().toLowerCase();
+  return filas.some((f) => String(f.email ?? '').trim().toLowerCase() === buscado);
+}
+
+const MESES_LARGO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+                     'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const fechaLarga = (f: string) => {
+  const [a, m, d] = f.split('-').map(Number);
+  return `${d} de ${MESES_LARGO[m - 1]} de ${a}`;
+};
+const hoyMadrid = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(new Date());
+
 // ------------------------------------------------- Definición de formularios
 
 type Preparado = {
@@ -371,12 +409,12 @@ function preparar(tipo: string, d: Record<string, unknown>): Preparado {
         ['Evento', evento],
         ['Nombre', nombre],
         ['Email', email],
-        ['Teléfono', telefono],
-        ['Perfil', perfil],
+        ['Teléfono', telefono ?? '—'],
+        ['Situación', perfil ?? '—'],
         ['Estudios o sector', sector ?? '—'],
         ['Año de graduación', anio ?? '—'],
         ['Cómo se enteró', como ?? '—'],
-        ['Comentario', comentario ?? '—'],
+        ['Comentario o pregunta', comentario ?? '—'],
         ['Acepta comunicaciones', si(comunicaciones)],
       ],
     };
@@ -575,6 +613,24 @@ Deno.serve(async (req) => {
     throw e;
   }
 
+  // Inscripción a un evento concreto de la web
+  let evento: Evento | null = null;
+  if (tipo === 'inscripcion-evento' && datos.evento_id != null) {
+    const id = Number(datos.evento_id);
+    try {
+      evento = Number.isInteger(id) && id > 0 ? await leerEvento(id) : null;
+    } catch (e) {
+      console.error('Error al leer el evento:', e);
+      return responder({ ok: false, error: `No hemos podido apuntarte. Escríbenos a ${CORREO_LGMP} y lo resolvemos.` }, 500, origen);
+    }
+    if (!evento || !evento.publicado || evento.fecha < hoyMadrid()) {
+      return responder({ ok: false, error: 'Las inscripciones de este evento están cerradas.' }, 400, origen);
+    }
+    preparado.fila.evento_id = evento.id;
+    preparado.fila.evento = `${evento.titulo} · ${fechaLarga(evento.fecha)}`;
+    preparado.resumen[0] = ['Evento', String(preparado.fila.evento)];
+  }
+
   const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim();
   if (await limiteSuperado(ip, tipo)) {
     return responder({
@@ -583,9 +639,22 @@ Deno.serve(async (req) => {
     }, 429, origen);
   }
 
+  // Mismo correo, mismo evento: no se guarda otra vez ni se manda nada.
+  if (evento) {
+    try {
+      if (await yaInscrito(evento.id, String(preparado.fila.email))) {
+        return responder({ ok: true, ya_inscrito: true }, 200, origen);
+      }
+    } catch (e) {
+      console.error('Error al comprobar duplicados:', e);   // el índice único lo para igualmente
+    }
+  }
+
   try {
     await insertar(preparado.tabla, preparado.fila, preparado.params ?? '');
   } catch (e) {
+    // Dos envíos casi a la vez: el índice único de la tabla frena el segundo.
+    if (evento && String(e).includes('(409)')) return responder({ ok: true, ya_inscrito: true }, 200, origen);
     console.error('Error al guardar:', e);
     return responder({
       ok: false,
@@ -613,6 +682,25 @@ Deno.serve(async (req) => {
       ]);
     } catch (e) {
       console.error('Error al enviar el acuse:', e);
+    }
+  }
+
+  // Confirmación para quien se inscribe a un evento. Best-effort.
+  if (evento) {
+    try {
+      const nombre = String(preparado.fila.nombre).split(' ')[0];
+      const c = correoConfirmacion(evento, nombre);
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: REMITENTE_SOCIOS, to: [String(preparado.fila.email)], reply_to: CORREO_LGMP,
+          subject: c.asunto, html: c.html, text: c.texto,
+        }),
+      });
+      if (!r.ok) console.error('Resend (confirmación) falló:', r.status, await r.text());
+    } catch (e) {
+      console.error('Error al enviar la confirmación:', e);
     }
   }
 

@@ -45,8 +45,8 @@ function partes(fecha) {
 }
 const fechaLarga = f => { const p = partes(f); return `${p.dia} de ${p.mesLargo} de ${p.anio}`; };
 
-async function traer(tabla, orden) {
-  const r = await fetch(`${URL_SB}/rest/v1/${tabla}?select=*&publicado=eq.true&order=${orden}`, {
+async function traer(tabla, orden, cols = '*') {
+  const r = await fetch(`${URL_SB}/rest/v1/${tabla}?select=${cols}&publicado=eq.true&order=${orden}`, {
     headers: { apikey: CLAVE, Authorization: 'Bearer ' + CLAVE }
   });
   if (!r.ok) throw new Error(`${tabla}: HTTP ${r.status} ${await r.text()}`);
@@ -87,6 +87,14 @@ function tarjetaSocio(s) {
         </div>`;
 }
 
+/* Columnas de `eventos` que puede leer la clave pública. El enlace de la
+   videollamada (`enlace_reunion`) es privado y no está en la lista. */
+const COLS_EVENTOS = 'id,creado_en,titulo,fecha,hora,lugar,descripcion,url_inscripcion,' +
+                     'publicado,slug,cuerpo,modalidad,imagen_url,recordatorios';
+
+// Las imágenes para compartir tienen que ir con la dirección completa.
+const absoluta = u => (u && u.startsWith('/') ? BASE + u : u);
+
 const ORGANIZACION = { '@type':'Organization', '@id': BASE + '/#organizacion',
   name:'Asociación La Generación Mejor Preparada', url: BASE + '/' };
 
@@ -104,20 +112,72 @@ function momento(fecha, hora, cual) {
 }
 
 /* ---------------------------------------------------------------------
+   Calendario: enlace de Google Calendar y archivo .ics de cada evento.
+   Sin hora, el evento va como de día completo. Sin hora de fin, dura 1 h.
+   --------------------------------------------------------------------- */
+const aUtc = d => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+const diaSiguiente = f => new Date(Date.parse(f + 'T12:00:00Z') + 864e5).toISOString().slice(0, 10);
+
+function tramo(ev) {
+  const horas = String(ev.hora || '').match(/\d{1,2}:\d{2}/g) || [];
+  if (!horas.length) return null;
+  const inicio = new Date(momento(ev.fecha, ev.hora, 0));
+  const fin = horas[1] ? new Date(momento(ev.fecha, ev.hora, 1)) : new Date(inicio.getTime() + 36e5);
+  return { inicio, fin };
+}
+
+const dondeEs = ev => ev.lugar || (ev.modalidad === 'online' ? 'Online' : 'Murcia');
+
+function urlGoogle(ev, url) {
+  const t = tramo(ev);
+  const fechas = t ? `${aUtc(t.inicio)}/${aUtc(t.fin)}`
+                   : `${ev.fecha.replace(/-/g, '')}/${diaSiguiente(ev.fecha).replace(/-/g, '')}`;
+  const p = new URLSearchParams({ text:ev.titulo,
+    details:url,
+    location:dondeEs(ev), ctz:'Europe/Madrid' });
+  // `dates` va sin codificar: Google espera la barra tal cual.
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&dates=${fechas}&${p}`;
+}
+
+function ics(ev, url) {
+  const t = tramo(ev);
+  const esc = x => String(x).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  // Líneas de 75 caracteres como máximo, como pide el formato.
+  const doblar = l => l.length <= 74 ? l : l.slice(0, 74) + '\r\n ' + doblar(l.slice(74));
+  const lineas = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//LGMP//Eventos//ES', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:evento-${ev.id}@lageneracionmejorpreparada.com`,
+    // Fija (la de creación del evento) para que el archivo no cambie cada día.
+    `DTSTAMP:${aUtc(new Date(ev.creado_en || ev.fecha))}`,
+    ...(t ? [`DTSTART:${aUtc(t.inicio)}`, `DTEND:${aUtc(t.fin)}`]
+          : [`DTSTART;VALUE=DATE:${ev.fecha.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${diaSiguiente(ev.fecha).replace(/-/g, '')}`]),
+    `SUMMARY:${esc(ev.titulo)}`,
+    `DESCRIPTION:${esc(url)}`,
+    `LOCATION:${esc(dondeEs(ev))}`,
+    `URL:${url}`,
+    'END:VEVENT', 'END:VCALENDAR'];
+  return lineas.map(doblar).join('\r\n') + '\r\n';
+}
+
+/* ---------------------------------------------------------------------
    Plantilla de una página individual
    --------------------------------------------------------------------- */
 
-function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta, apunte }) {
+function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta, arriba, apunte }) {
   const ld = tipo === 'evento'
     ? { '@type':'Event', name:titulo, description:descripcion,
         startDate: momento(meta.fecha, meta.hora, 0),
         endDate:   momento(meta.fecha, meta.hora, 1),
         eventStatus:'https://schema.org/EventScheduled',
-        eventAttendanceMode:'https://schema.org/OfflineEventAttendanceMode',
-        location:{ '@type':'Place', name: meta.lugar || 'Murcia',
-                   address:{ '@type':'PostalAddress', addressLocality:'Murcia',
-                             addressRegion:'Región de Murcia', addressCountry:'ES' } },
-        image: [ imagen || BASE + '/assets/og.jpg' ],
+        eventAttendanceMode: meta.online ? 'https://schema.org/OnlineEventAttendanceMode'
+                                         : 'https://schema.org/OfflineEventAttendanceMode',
+        location: meta.online
+          ? { '@type':'VirtualLocation', url }
+          : { '@type':'Place', name: meta.lugar || 'Murcia',
+              address:{ '@type':'PostalAddress', addressLocality:'Murcia',
+                        addressRegion:'Región de Murcia', addressCountry:'ES' } },
+        image: [ absoluta(imagen) || BASE + '/assets/og.jpg' ],
         // Google no sigue el @id hasta la portada: el nombre tiene que ir aquí.
         organizer: ORGANIZACION, performer: ORGANIZACION,
         // Todos los eventos son gratuitos.
@@ -131,7 +191,8 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
         author:{ '@type': meta.autor ? 'Person' : 'Organization',
                  name: meta.autor || 'Asociación La Generación Mejor Preparada' },
         publisher:{ '@id': BASE + '/#organizacion' },
-        mainEntityOfPage: url, ...(imagen ? { image: imagen } : {}) };
+        mainEntityOfPage: url, ...(imagen ? { image: absoluta(imagen) } : {}) };
+  const imagenOg = absoluta(imagen) || BASE + '/assets/og.jpg';
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -148,11 +209,14 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
 <meta property="og:title" content="${e(titulo)}">
 <meta property="og:description" content="${e(descripcion)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${e(imagen || BASE + '/assets/og.jpg')}">
+<meta property="og:image" content="${e(imagenOg)}">${imagen ? `
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${e(titulo)}">` : ''}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${e(titulo)}">
 <meta name="twitter:description" content="${e(descripcion)}">
-<meta name="twitter:image" content="${e(imagen || BASE + '/assets/og.jpg')}">
+<meta name="twitter:image" content="${e(imagenOg)}">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/assets/favicon.png">
 <meta name="theme-color" content="#1E2A4A">
@@ -165,9 +229,12 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
   .art .kicker{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;
                text-transform:uppercase;color:#F0503C;margin:0 0 14px}
   .art h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.15;margin:0}
+  html{scroll-behavior:smooth}
   .art .meta{font-size:14.5px;color:rgba(30,42,74,.6);margin:18px 0 0}
+  .art .arriba{margin:26px 0 0}
+  .apunte{scroll-margin-top:16px}
   .art .portada{width:100%;border-radius:20px;margin:32px 0 0;display:block}
-  .cuerpo{max-width:760px;margin:0 auto;padding:8px 28px 0;font-size:17px;line-height:1.75;color:rgba(30,42,74,.85)}
+  .cuerpo{max-width:760px;margin:0 auto;padding:28px 28px 0;font-size:17px;line-height:1.75;color:rgba(30,42,74,.85)}
   .cuerpo h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:#1E2A4A;margin:36px 0 12px}
   .cuerpo h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:19px;color:#1E2A4A;margin:28px 0 10px}
   .cuerpo p{margin:0 0 18px}
@@ -179,7 +246,7 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
   .volver{font-family:'Nunito',sans-serif;font-weight:700;font-size:15px}
   .apuntarse{background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;
              padding:14px 32px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);
-             transition:transform .2s;display:inline-block}
+             transition:transform .2s;display:inline-block;text-decoration:none}
   .apuntarse:hover{transform:translateY(-3px);color:#ffffff}
 
   /* ---- Formulario de inscripción ---- */
@@ -196,7 +263,21 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
     background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:14px 16px;
     font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;
     transition:border-color .2s,background .2s}
-  .apunte input:focus{border-color:#F0503C;background:#ffffff}
+  .apunte select,.apunte textarea{
+    background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:14px 16px;
+    font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;
+    transition:border-color .2s,background .2s}
+  .apunte select{appearance:none;cursor:pointer;padding-right:44px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231E2A4A' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 18px center}
+  .apunte textarea{min-height:110px;resize:vertical;line-height:1.55}
+  .apunte .pista{font-size:13.5px;color:rgba(30,42,74,.55);margin:0}
+  .apunte input:focus,.apunte select:focus,.apunte textarea:focus{border-color:#F0503C;background-color:#ffffff}
+  .apunte .calendario{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 4px}
+  .apunte .calendario a{font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px;padding:11px 22px;
+    border-radius:999px;border:2px solid #1E2A4A;color:#1E2A4A;text-decoration:none;transition:transform .2s}
+  .apunte .calendario a:first-child{background:#F0503C;border-color:#F0503C;color:#ffffff;box-shadow:0 8px 24px rgba(240,80,60,.3)}
+  .apunte .calendario a:hover{transform:translateY(-3px)}
   .apunte input::placeholder{color:rgba(30,42,74,.42)}
   .apunte .check{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.55;
                  color:rgba(30,42,74,.75);cursor:pointer;margin:16px 0 0}
@@ -211,8 +292,19 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
   .apunte .exito h2{margin-bottom:12px}
   .apunte .exito p{font-size:16.5px;line-height:1.65;color:rgba(30,42,74,.75);margin:0 auto;max-width:440px}
   .oculto{display:none !important}
-  @media (max-width:640px){ .apunte .fila{grid-template-columns:1fr;gap:0} .apunte .fila .campo{margin-bottom:16px} }
-  @media (prefers-reduced-motion: reduce){ .apuntarse:hover,.apunte .btn:hover{transform:none} }
+  @media (max-width:640px){
+    .apunte .fila{grid-template-columns:1fr;gap:0} .apunte .fila .campo{margin-bottom:16px}
+    .cab{padding:16px 0} .cab .cont{padding:0 20px} .cab img{height:40px}
+    .art{padding:36px 20px 0} .cuerpo{padding:20px 20px 0;font-size:16px} .cierre{padding:14px 20px 0}
+    .cuerpo h2{font-size:21px;margin-top:30px} .cuerpo h3{font-size:17.5px}
+    .apunte{padding:0 12px;margin-top:32px} .apunte .caja{border-radius:20px;padding:24px 18px}
+    .art .arriba .apuntarse,.apunte .btn{display:block;width:100%;text-align:center}
+    .apunte .calendario a{flex:1 1 100%;text-align:center}
+    .apunte input[type=text],.apunte input[type=email],.apunte input[type=tel],.apunte select,.apunte textarea{font-size:16px}
+    footer .cont{padding:0 20px}
+  }
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+  @media (prefers-reduced-motion: reduce){ .apuntarse:hover,.apunte .btn:hover,.apunte .calendario a:hover{transform:none} }
 </style>
 </head>
 <body>
@@ -230,7 +322,8 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
       <p class="kicker">${e(kicker)}</p>
       <h1>${e(titulo)}</h1>
       <p class="meta">${e(meta.linea)}</p>
-      ${imagen ? `<img class="portada" src="${e(imagen)}" alt="${e(titulo)}">` : ''}
+      ${arriba ? `<div class="arriba">${arriba}</div>` : ''}
+      ${imagen && tipo !== 'evento' ? `<img class="portada" src="${e(imagen)}" alt="${e(titulo)}">` : ''}
     </div>
     <div class="cuerpo">${cuerpo || `<p>${e(descripcion)}</p>`}</div>
     <div class="cierre">
@@ -261,34 +354,42 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
    Formulario de inscripción
 
    Va dentro de la propia página del evento: quien llega buscando el evento
-   se apunta sin cambiar de página. Pide lo mínimo —nombre y correo— porque
-   lo que necesitamos es poder mandarle el recordatorio; el teléfono es
-   opcional y sirve para avisar por WhatsApp el día antes.
+   se apunta sin cambiar de página.
+
+   · Presencial: nombre, correo y teléfono opcional (para WhatsApp).
+   · Online: nombre, correo, situación, estudios y una pregunta opcional
+     para los ponentes. Sin teléfono: el enlace va por correo.
 
    Escribe en `inscripciones_evento` a través de la Edge Function, igual que
-   el resto de formularios de la web. `evento` viaja como texto para que en
-   el panel se lea a qué evento corresponde cada inscripción.
+   el resto de formularios de la web. `evento_id` sirve para no admitir el
+   mismo correo dos veces y para los recordatorios; `evento` viaja como texto
+   para que en el panel se lea a qué evento corresponde cada inscripción.
+   Al terminar, la función manda un correo de confirmación.
    --------------------------------------------------------------------- */
-function formulario({ evento, titulo }) {
-  return `
-    <section class="apunte" id="apuntarme">
-      <div class="caja">
-        <div id="exito" class="exito oculto">
-          <h2>¡Estás dentro!</h2>
-          <p>Te hemos apuntado. Unos días antes te escribimos al correo con el recordatorio y los últimos detalles.</p>
-        </div>
+const SITUACIONES = ['Estudiante', 'Recién graduado/a', '1-3 años de experiencia', 'Otro'];
 
-        <form id="formEvento" novalidate>
-          <h2>Apúntate</h2>
-          <p class="sub">Es gratis. Déjanos tu correo y te avisamos unos días antes.</p>
-
-          <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
-
+function formulario({ id, evento, online, google, ics }) {
+  const camposOnline = `
           <div class="campo">
-            <label for="nombre">Nombre y apellidos</label>
-            <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+            <label for="perfil">¿En qué momento estás?</label>
+            <select id="perfil" name="perfil" required>
+              <option value="">Elige una opción</option>
+              ${SITUACIONES.map(x => `<option>${e(x)}</option>`).join('\n              ')}
+            </select>
           </div>
 
+          <div class="campo">
+            <label for="sector">¿Qué estudias o estudiaste? <span class="opt">(opcional)</span></label>
+            <input type="text" id="sector" name="sector" placeholder="Ej.: ADE, Derecho, Enfermería, FP de Marketing…">
+          </div>
+
+          <div class="campo">
+            <label for="comentario">Tu pregunta para los ponentes <span class="opt">(opcional)</span></label>
+            <textarea id="comentario" name="comentario" maxlength="1000" placeholder="Si quieres que respondan algo en concreto, escríbelo aquí."></textarea>
+            <p class="pista">Se la pasamos a los ponentes con tu nombre, sin tu correo.</p>
+          </div>`;
+
+  const camposPresencial = `
           <div class="fila">
             <div class="campo">
               <label for="email">Correo electrónico</label>
@@ -298,7 +399,40 @@ function formulario({ evento, titulo }) {
               <label for="telefono">Teléfono <span class="opt">(opcional)</span></label>
               <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="Para el recordatorio por WhatsApp">
             </div>
+          </div>`;
+
+  return `
+    <section class="apunte" id="apuntarme">
+      <div class="caja">
+        <div id="exito" class="exito oculto">
+          <h2 id="exitoTitulo">¡Estás dentro!</h2>
+          <p id="exitoTexto">${online
+            ? 'Te hemos mandado un correo con el enlace para entrar. Si no lo ves, mira en spam.'
+            : 'Te hemos mandado un correo con los detalles.'}</p>
+          <div class="calendario">
+            <a href="${e(google)}" target="_blank" rel="noopener">Añadir a Google Calendar</a>
+            <a href="${e(ics)}" download>Outlook o Apple (.ics)</a>
           </div>
+        </div>
+
+        <form id="formEvento" novalidate>
+          <h2>Apúntate</h2>
+          <p class="sub">${online
+            ? 'Es gratis y online. Al apuntarte te mandamos por correo el enlace para entrar.'
+            : 'Es gratis. Déjanos tu correo y te avisamos unos días antes.'}</p>
+
+          <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <div class="campo">
+            <label for="nombre">Nombre y apellidos</label>
+            <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+          </div>
+${online ? `
+          <div class="campo">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+          </div>
+${camposOnline}` : camposPresencial}
 
           <label class="check">
             <input type="checkbox" id="rgpd" required>
@@ -307,7 +441,9 @@ function formulario({ evento, titulo }) {
 
           <label class="check">
             <input type="checkbox" id="marketing">
-            <span>Quiero recibir información sobre la Asociación, sus actividades y cómo asociarme.</span>
+            <span>${online
+              ? 'Quiero recibir novedades de la asociación.'
+              : 'Quiero recibir información sobre la Asociación, sus actividades y cómo asociarme.'}</span>
           </label>
 
           <p id="error" class="error oculto"></p>
@@ -323,6 +459,7 @@ function formulario({ evento, titulo }) {
   var exito = document.getElementById('exito');
   var error = document.getElementById('error');
   var boton = document.getElementById('enviar');
+  var online = ${online ? 'true' : 'false'};
 
   function fallo(msg){
     error.textContent = msg;
@@ -335,7 +472,7 @@ function formulario({ evento, titulo }) {
     ev.preventDefault();
     error.classList.add('oculto');
 
-    var tel = form.telefono.value.trim();
+    var tel = form.telefono ? form.telefono.value.trim() : '';
 
     if (!form.nombre.value.trim())
       return fallo('Escribe tu nombre y apellidos.');
@@ -344,20 +481,37 @@ function formulario({ evento, titulo }) {
     // El teléfono es opcional, pero si lo escribe que sea uno de verdad.
     if (tel && tel.replace(/\D/g,'').length < 9)
       return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
+    if (online && !form.perfil.value)
+      return fallo('Dinos en qué momento estás.');
     if (!document.getElementById('rgpd').checked)
       return fallo('Debes aceptar la Política de Privacidad para continuar.');
 
     boton.disabled = true;
     boton.textContent = 'Apuntándote…';
 
-    window.LGMP.enviar('inscripcion-evento', {
-      evento:   ${JSON.stringify(evento)},
-      nombre:   form.nombre.value,
-      email:    form.email.value,
-      telefono: tel,
+    var datos = {
+      evento_id: ${Number(id)},
+      evento:    ${JSON.stringify(evento)},
+      nombre:    form.nombre.value,
+      email:     form.email.value,
       acepta_comunicaciones: document.getElementById('marketing').checked
-    }, form.trampa.value)
-    .then(function(){
+    };
+    if (online) {
+      datos.perfil = form.perfil.value;
+      datos.sector = form.sector.value;
+      datos.comentario = form.comentario.value;
+    } else {
+      datos.telefono = tel;
+    }
+
+    window.LGMP.llamar('inscripcion-evento', datos, form.trampa.value)
+    .then(function(r){
+      if (r && r.ya_inscrito) {
+        document.getElementById('exitoTitulo').textContent = 'Ya estabas en la lista';
+        document.getElementById('exitoTexto').textContent =
+          'Este correo ya está inscrito, no hace falta que te apuntes otra vez. ' +
+          'Si no encuentras el correo de confirmación, mira en spam o escríbenos a ' + window.LGMP.correo + '.';
+      }
       form.classList.add('oculto');
       exito.classList.remove('oculto');
       exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -442,7 +596,7 @@ async function limpiarCarpeta(carpeta, slugsVivos) {
 /* --------------------------------------------------------------------- */
 
 async function main() {
-  const eventos  = await traer('eventos',  'fecha.desc');
+  const eventos  = await traer('eventos',  'fecha.desc', COLS_EVENTOS);
   const noticias = await traer('noticias', 'fecha.desc');
   console.log(`Publicados: ${eventos.length} eventos, ${noticias.length} noticias`);
 
@@ -452,7 +606,9 @@ async function main() {
     if (!ev.slug) { console.warn(`  evento ${ev.id} sin slug, se salta`); continue; }
     const url = `${BASE}/eventos/${ev.slug}/`;
     const desc = ev.descripcion || resumir(ev.cuerpo) || ev.titulo;
-    const detalle = [fechaLarga(ev.fecha), ev.hora, ev.lugar].filter(Boolean).join(' · ');
+    const online = ev.modalidad === 'online';
+    const detalle = [fechaLarga(ev.fecha), ev.hora, ev.lugar || (online ? 'Online' : '')]
+                    .filter(Boolean).join(' · ');
     // Si el evento ya ha pasado no se puede uno apuntar: ni botón ni formulario.
     const abierto = String(ev.fecha) >= HOY;
     // `url_inscripcion` gana: sirve para eventos que se gestionan fuera
@@ -461,14 +617,22 @@ async function main() {
       : ev.url_inscripcion
         ? `<a class="apuntarse" href="${e(ev.url_inscripcion)}">Apúntate</a>`
         : `<a class="apuntarse" href="#apuntarme">Apúntate</a>`;
+    // Con formulario propio, el botón va arriba (baja hasta el formulario) y
+    // no se repite abajo, justo encima del propio formulario.
+    const arriba = (abierto && !ev.url_inscripcion) ? cta : '';
     const apunte = (abierto && !ev.url_inscripcion)
-      ? { titulo: ev.titulo, evento: `${ev.titulo} · ${fechaLarga(ev.fecha)}` } : null;
+      ? { id: ev.id, evento: `${ev.titulo} · ${fechaLarga(ev.fecha)}`, online,
+          google: urlGoogle(ev, url), ics: `/eventos/${ev.slug}/evento.ics` } : null;
     await mkdir(join(RAIZ, 'eventos', ev.slug), { recursive: true });
+    // Archivo de calendario (lo enlazan la página y el correo de confirmación)
+    await writeFile(join(RAIZ, 'eventos', ev.slug, 'evento.ics'), ics(ev, url));
     await writeFile(join(RAIZ, 'eventos', ev.slug, 'index.html'),
-      pagina({ tipo:'evento', titulo:ev.titulo, descripcion:desc, url, kicker:'Evento',
-               meta:{ linea:detalle, fecha:ev.fecha, hora:ev.hora, lugar:ev.lugar,
+      pagina({ tipo:'evento', titulo:ev.titulo, descripcion:desc, url,
+               kicker: online ? 'Evento online · Gratis' : 'Evento',
+               meta:{ linea:detalle, fecha:ev.fecha, hora:ev.hora, lugar:ev.lugar, online,
                       creado:ev.creado_en, inscripcion:ev.url_inscripcion },
-               cuerpo:aHtml(ev.cuerpo), imagen:ev.imagen_url, cta, apunte }));
+               cuerpo:aHtml(ev.cuerpo), imagen:ev.imagen_url,
+               cta: arriba ? '' : cta, arriba, apunte }));
     escritas.push(`/eventos/${ev.slug}/`);
   }
 

@@ -241,6 +241,8 @@
       <div class="vistas oculto" id="vistas"></div>
       <input type="search" id="buscar" placeholder="Buscar…" autocomplete="off">
       <button class="csv" id="btnExcel">Exportar a Excel</button>
+      <button class="csv" id="btnCsv">Descargar CSV</button>
+      <button class="csv oculto" id="btnPonentes" title="Nombre, situación, estudios y pregunta. Sin correos ni teléfonos.">CSV para ponentes</button>
       <button class="csv oculto" id="btnCorreo">Enviar correo</button>
       <button class="csv" id="btnLimpiar">Quitar filtros</button>
       <button class="nuevo oculto" id="btnNuevo">+ Añadir</button>
@@ -353,11 +355,14 @@ const SECCIONES = [
 
   { id:'evento', grupo:'entradas', titulo:'Inscritos al evento', tabla:'inscripciones_evento', orden:'creado_en',
     correo:true,
+    explica:'Elige el evento en el filtro de la columna <b>Evento</b> y pulsa <b>Descargar CSV</b> para tener la lista completa, o <b>CSV para ponentes</b> para una lista sin correos ni teléfonos (nombre, situación, estudios y pregunta).',
     cols:[
       { c:'creado_en', t:'Fecha', tipo:'fechahora' },
       { c:'evento', t:'Evento', tipo:'lista' },
       { c:'nombre', t:'Nombre' }, { c:'email', t:'Email' }, { c:'telefono', t:'Teléfono' },
-      { c:'perfil', t:'Perfil', tipo:'lista' },
+      { c:'perfil', t:'Situación', tipo:'lista' },
+      { c:'sector', t:'Estudios' },
+      { c:'comentario', t:'Pregunta' },
       { c:'_socio', t:'¿Socio?', tipo:'lista',
         get:r => emailsSocios.has(String(r.email ?? '').trim().toLowerCase()) ? 'Sí' : 'No',
         pill:true, clase:v => v === 'Sí' ? 'ok' : '' },
@@ -385,11 +390,18 @@ const SECCIONES = [
     form:[
       { c:'titulo', t:'Título', tipo:'text', req:true },
       { c:'fecha', t:'Fecha', tipo:'date', req:true },
-      { c:'hora', t:'Hora', tipo:'text', ayuda:'Texto libre. Ej.: 18:30' },
-      { c:'lugar', t:'Lugar', tipo:'text' },
+      { c:'hora', t:'Hora', tipo:'text', ayuda:'Hora de España. Ej.: 18:30, o 19:00 a 20:00 si quieres que salga la hora de fin (la usan el calendario y los recordatorios).' },
+      { c:'modalidad', t:'Modalidad', tipo:'select', opciones:[['presencial','Presencial'], ['online','Online']],
+        ayuda:'Online: el formulario pide situación, estudios y una pregunta para los ponentes, y no pide teléfono.' },
+      { c:'lugar', t:'Lugar', tipo:'text', ayuda:'Si es online, por ejemplo: Online · Google Meet' },
       { c:'descripcion', t:'Entradilla', tipo:'textarea', ayuda:'Una o dos frases. Es lo que se ve en el listado de Actividades.' },
       { c:'cuerpo', t:'Texto del evento', tipo:'markdown', ayuda:'El contenido de su página. Puedes dejarlo vacío si no hace falta.' },
       { c:'url_inscripcion', t:'Enlace de inscripción', tipo:'text', ayuda:'Solo si la inscripción se gestiona fuera de la web. Si lo dejas vacío, la página del evento lleva su propio formulario.' },
+      { c:'imagen_url', t:'Imagen para compartir', tipo:'text', ayuda:'La que sale al pegar el enlace en WhatsApp o LinkedIn. 1200 × 630 px, subida a /assets/. Ej.: /assets/eventos/mi-evento.jpg. Vacío: el logo de la Asociación.' },
+      { c:'recordatorios', t:'Mandar recordatorios por correo (el día antes y 1 hora antes)', tipo:'bool',
+        ayuda:'Solo a quien se inscriba desde la web. Necesita la hora de inicio. Ojo: el plan gratuito de Resend manda 100 correos al día.' },
+      { c:'enlace_reunion', t:'Enlace de la videollamada (privado)', tipo:'text',
+        ayuda:'Ej.: https://meet.google.com/abc-defg-hij. No sale en la web: solo va en los recordatorios.' },
       { c:'slug', t:'Dirección', tipo:'text', ayuda:'Se rellena sola con el título. /eventos/lo-que-pongas-aqui/' },
       { c:'publicado', t:'Publicado', tipo:'bool' }
     ] },
@@ -536,6 +548,7 @@ async function cargarSeccion(){
   $('#btnNuevo').classList.toggle('oculto', !((s.editable && s.crear !== false) || s.crear === true));
   $('#btnNuevo').textContent = s.id === 'socios' ? '+ Añadir socio a mano' : '+ Añadir';
   $('#btnCorreo').classList.toggle('oculto', !s.correo);
+  $('#btnPonentes').classList.toggle('oculto', s.id !== 'evento');
   $('#explica').classList.toggle('oculto', !s.explica);
   $('#explica').innerHTML = s.explica || '';
   const v = $('#vistas');
@@ -810,7 +823,7 @@ const ETIQUETAS = {
   acepta_comunicaciones:'Acepta comunicaciones', atendido:'Atendido', entidad:'Entidad', cif:'CIF',
   web:'Web', contacto_nombre:'Persona de contacto', contacto_cargo:'Cargo', colaboracion:'Colaboración',
   origen:'Tipo de alta', evento:'Evento', perfil:'Perfil', anio_graduacion:'Año de graduación',
-  comentario:'Comentario', asistio:'Asistió', notas_internas:'Notas internas', baja_en:'Baja',
+  comentario:'Comentario o pregunta', asistio:'Asistió', notas_internas:'Notas internas', baja_en:'Baja',
   fecha_nacimiento:'Fecha de nacimiento', tipo:'Tipo de socio', aprobado_junta:'Aprobado en junta',
   aprobado_en:'Aprobado el', dni:'DNI / NIE', acepta_estatutos:'Declaración y estatutos',
   acepta_imagen:'Permiso de imagen (web)', completado_en:'Datos completados el', pagado_en:'Pagado el',
@@ -818,7 +831,9 @@ const ETIQUETAS = {
   renovacion:'Renovación', motivo_baja:'Motivo de la baja', cargo_asociacion:'Cargo en la Asociación',
   cargo_profesional:'Puesto profesional', empresa:'Empresa', foto_url:'Foto', es_junta:'Es de la Junta',
   publicar:'Sale en la web', activo:'Cuenta para el número de socios', orden:'Orden en la web',
-  socio_id:'Ficha de socio', solicitud_id:'Solicitud de origen', id:'Id'
+  socio_id:'Ficha de socio', solicitud_id:'Solicitud de origen', id:'Id',
+  evento_id:'Id del evento', recordatorio_dia_en:'Recordatorio del día antes',
+  recordatorio_hora_en:'Recordatorio de 1 h antes'
 };
 
 function formatoDato(k, v){
@@ -1215,6 +1230,10 @@ function editar(fila){
     if (f.tipo === 'textarea')
       return `<div class="campo"><label for="f_${f.c}">${f.t}</label>
               <textarea id="f_${f.c}">${escapar(v)}</textarea>${ayuda}</div>`;
+    if (f.tipo === 'select')
+      return `<div class="campo"><label for="f_${f.c}">${f.t}</label>
+              <select class="campo" id="f_${f.c}">${f.opciones.map(([val, txt]) =>
+                `<option value="${val}" ${(v || f.opciones[0][0]) === val ? 'selected' : ''}>${txt}</option>`).join('')}</select>${ayuda}</div>`;
     return `<div class="campo"><label for="f_${f.c}">${f.t}${f.req?' *':''}</label>
             <input type="${f.tipo}" id="f_${f.c}" value="${escapar(v)}">${ayuda}</div>`;
   }).join('');
@@ -1384,6 +1403,64 @@ $('#btnExcel').addEventListener('click', async () => {
   const libro = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(libro, hoja, activa.titulo.slice(0, 31));
   XLSX.writeFile(libro, `lgmp-${activa.id}-${hoyISO()}.xlsx`);
+});
+
+/* CSV con punto y coma y BOM: Excel en español lo abre bien con doble clic. */
+function bajarCsv(nombre, cabecera, filasCsv){
+  const campo = v => {
+    const t = String(v ?? '');
+    return /[";\n\r]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  };
+  const csv = '\ufeff' + [cabecera, ...filasCsv].map(f => f.map(campo).join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+const nombreArchivo = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50);
+
+/** Si la lista es de un solo evento, su nombre (para el archivo). */
+function eventoUnico(datos){
+  const evs = [...new Set(datos.map(r => r.evento))];
+  return evs.length === 1 ? evs[0] : null;
+}
+
+$('#btnCsv').addEventListener('click', () => {
+  const datos = visibles();
+  if (!datos.length) { alert('No hay filas que exportar.'); return; }
+  const ocultas = new Set(['token']);
+  const claves = [...new Set(datos.flatMap(r => Object.keys(r)))].filter(k => !ocultas.has(k));
+  const calculadas = activa.cols.filter(c => c.get && !c.accion && c.c !== '_dni');
+  const celda = (k, v) => {
+    if (v == null) return '';
+    if (Array.isArray(v)) return v.join(', ');
+    if (typeof v === 'boolean') return v ? 'Sí' : 'No';
+    if (k === 'tipo') return TIPOS[v] || v;
+    if (k === 'tramo') return TRAMOS[v] || v;
+    if (k === 'num_socio') return numSocio(v);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(v))) return soloFecha(v);
+    if (k.endsWith('_en') && String(v).length > 10) return fechaHora(v);
+    return v;
+  };
+  const ev = activa.id === 'evento' ? eventoUnico(datos) : null;
+  bajarCsv(`lgmp-${ev ? nombreArchivo(ev) : activa.id}-${hoyISO()}.csv`,
+    claves.map(k => ETIQUETAS[k] || k).concat(calculadas.map(c => c.t)),
+    datos.map(r => claves.map(k => celda(k, r[k])).concat(calculadas.map(c => texto(r, c)))));
+});
+
+// Para pasar a los ponentes: sin correos ni teléfonos.
+$('#btnPonentes').addEventListener('click', () => {
+  const datos = visibles();
+  if (!datos.length) { alert('No hay inscritos que exportar.'); return; }
+  const ev = eventoUnico(datos);
+  if (!ev) { alert('Elige primero un evento en el filtro de la columna «Evento».'); return; }
+  const orden = datos.slice().sort((a, b) => String(a.creado_en).localeCompare(String(b.creado_en)));
+  bajarCsv(`ponentes-${nombreArchivo(ev)}.csv`,
+    ['Nombre', 'Situación', 'Estudios', 'Pregunta para los ponentes'],
+    orden.map(r => [r.nombre, r.perfil, r.sector, r.comentario]));
 });
 
 arrancar();

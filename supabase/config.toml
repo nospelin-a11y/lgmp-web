@@ -15,3 +15,8 @@ verify_jwt = false
 # la función comprueba ella misma la sesión y que la persona esté en `junta`.
 [functions.panel-acciones]
 verify_jwt = false
+
+# Recordatorios de eventos. La llama pg_cron cada 10 minutos con la cabecera
+# x-clave; la propia función la compara con el secreto RECORDATORIOS_CLAVE.
+[functions.recordatorios]
+verify_jwt = false
