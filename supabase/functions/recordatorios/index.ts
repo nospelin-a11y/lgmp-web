@@ -149,6 +149,29 @@ Deno.serve(async (req) => {
     return json({ ok: true, prueba: cuerpo.prueba });
   }
 
+  // ---- Correo puntual a inscritos concretos ----
+  // {"enviar":{"ids":[2,3],"asunto":"…","html":"…","texto":"…"}}. En html y
+  // texto, {nombre} se cambia por el nombre de pila. Siempre con copia a hola@.
+  if (cuerpo?.enviar) {
+    const { ids, asunto, html, texto } = cuerpo.enviar;
+    const lista = (Array.isArray(ids) ? ids : []).map(Number).filter(Number.isInteger);
+    if (!lista.length || !asunto || !html) return json({ ok: false, error: 'Faltan ids, asunto o html' }, 400);
+    const gente: Inscrito[] = await db(`inscripciones_evento?select=id,nombre,email&id=in.(${lista.join(',')})`);
+    const correos = gente.filter((p) => p.email).map((p) => {
+      const nombre = String(p.nombre ?? '').trim().split(/\s+/)[0] || 'hola';
+      return { from: REMITENTE, to: [String(p.email)], cc: [CORREO_LGMP], reply_to: CORREO_LGMP,
+               subject: asunto, html: String(html).replaceAll('{nombre}', nombre),
+               text: String(texto ?? '').replaceAll('{nombre}', nombre) };
+    });
+    const r = await fetch('https://api.resend.com/emails/batch', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json',
+                 'Idempotency-Key': `lgmp-puntual-${lista.join('-')}-${asunto}`.slice(0, 250) },
+      body: JSON.stringify(correos),
+    });
+    return json({ ok: r.ok, enviados: r.ok ? correos.length : 0, resend: await r.json().catch(() => null) }, r.ok ? 200 : 502);
+  }
+
   // ---- Vuelta normal ----
   const ahora = Date.now();
   const hoy = new Date(ahora - 24 * H).toISOString().slice(0, 10);
