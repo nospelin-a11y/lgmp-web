@@ -30,9 +30,12 @@
   .art .kicker{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;
                text-transform:uppercase;color:#F0503C;margin:0 0 14px}
   .art h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.15;margin:0}
+  html{scroll-behavior:smooth}
   .art .meta{font-size:14.5px;color:rgba(30,42,74,.6);margin:18px 0 0}
+  .art .arriba{margin:26px 0 0}
+  .apunte{scroll-margin-top:16px}
   .art .portada{width:100%;border-radius:20px;margin:32px 0 0;display:block}
-  .cuerpo{max-width:760px;margin:0 auto;padding:8px 28px 0;font-size:17px;line-height:1.75;color:rgba(30,42,74,.85)}
+  .cuerpo{max-width:760px;margin:0 auto;padding:28px 28px 0;font-size:17px;line-height:1.75;color:rgba(30,42,74,.85)}
   .cuerpo h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:#1E2A4A;margin:36px 0 12px}
   .cuerpo h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:19px;color:#1E2A4A;margin:28px 0 10px}
   .cuerpo p{margin:0 0 18px}
@@ -44,7 +47,7 @@
   .volver{font-family:'Nunito',sans-serif;font-weight:700;font-size:15px}
   .apuntarse{background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:16px;
              padding:14px 32px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);
-             transition:transform .2s;display:inline-block}
+             transition:transform .2s;display:inline-block;text-decoration:none}
   .apuntarse:hover{transform:translateY(-3px);color:#ffffff}
 
   /* ---- Formulario de inscripción ---- */
@@ -61,7 +64,21 @@
     background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:14px 16px;
     font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;
     transition:border-color .2s,background .2s}
-  .apunte input:focus{border-color:#F0503C;background:#ffffff}
+  .apunte select,.apunte textarea{
+    background:#F4F6FA;border:1px solid rgba(30,42,74,.1);border-radius:12px;padding:14px 16px;
+    font-family:'Nunito Sans',sans-serif;font-size:15.5px;color:#1E2A4A;outline:none;width:100%;
+    transition:border-color .2s,background .2s}
+  .apunte select{appearance:none;cursor:pointer;padding-right:44px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231E2A4A' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 18px center}
+  .apunte textarea{min-height:110px;resize:vertical;line-height:1.55}
+  .apunte .pista{font-size:13.5px;color:rgba(30,42,74,.55);margin:0}
+  .apunte input:focus,.apunte select:focus,.apunte textarea:focus{border-color:#F0503C;background-color:#ffffff}
+  .apunte .calendario{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 4px}
+  .apunte .calendario a{font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px;padding:11px 22px;
+    border-radius:999px;border:2px solid #1E2A4A;color:#1E2A4A;text-decoration:none;transition:transform .2s}
+  .apunte .calendario a:first-child{background:#F0503C;border-color:#F0503C;color:#ffffff;box-shadow:0 8px 24px rgba(240,80,60,.3)}
+  .apunte .calendario a:hover{transform:translateY(-3px)}
   .apunte input::placeholder{color:rgba(30,42,74,.42)}
   .apunte .check{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.55;
                  color:rgba(30,42,74,.75);cursor:pointer;margin:16px 0 0}
@@ -76,8 +93,19 @@
   .apunte .exito h2{margin-bottom:12px}
   .apunte .exito p{font-size:16.5px;line-height:1.65;color:rgba(30,42,74,.75);margin:0 auto;max-width:440px}
   .oculto{display:none !important}
-  @media (max-width:640px){ .apunte .fila{grid-template-columns:1fr;gap:0} .apunte .fila .campo{margin-bottom:16px} }
-  @media (prefers-reduced-motion: reduce){ .apuntarse:hover,.apunte .btn:hover{transform:none} }
+  @media (max-width:640px){
+    .apunte .fila{grid-template-columns:1fr;gap:0} .apunte .fila .campo{margin-bottom:16px}
+    .cab{padding:16px 0} .cab .cont{padding:0 20px} .cab img{height:40px}
+    .art{padding:36px 20px 0} .cuerpo{padding:20px 20px 0;font-size:16px} .cierre{padding:14px 20px 0}
+    .cuerpo h2{font-size:21px;margin-top:30px} .cuerpo h3{font-size:17.5px}
+    .apunte{padding:0 12px;margin-top:32px} .apunte .caja{border-radius:20px;padding:24px 18px}
+    .art .arriba .apuntarse,.apunte .btn{display:block;width:100%;text-align:center}
+    .apunte .calendario a{flex:1 1 100%;text-align:center}
+    .apunte input[type=text],.apunte input[type=email],.apunte input[type=tel],.apunte select,.apunte textarea{font-size:16px}
+    footer .cont{padding:0 20px}
+  }
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+  @media (prefers-reduced-motion: reduce){ .apuntarse:hover,.apunte .btn:hover,.apunte .calendario a:hover{transform:none} }
 </style>
 </head>
 <body>
@@ -95,6 +123,7 @@
       <p class="kicker">Evento</p>
       <h1>Después de la carrera, ¿qué?</h1>
       <p class="meta">21 de octubre de 2026 · 19:00 a 20:30 · Sala de Grados Jorge Guillén · Facultad de Letras · Campus de La Merced, Murcia</p>
+      <div class="arriba"><a class="apuntarse" href="#apuntarme">Apúntate</a></div>
       
     </div>
     <div class="cuerpo"><h2>Dar el salto al mundo laboral no viene con manual de instrucciones</h2>
@@ -115,15 +144,19 @@
 <h2>Organizan</h2>
 <p>Asociación La Generación Mejor Preparada, <strong>Alumni · Asociación de Antiguos Alumnos y Amigos de la Universidad de Murcia</strong> y el <strong>COIE</strong> de la Universidad de Murcia.</p></div>
     <div class="cierre">
-      <a class="apuntarse" href="#apuntarme">Apúntate</a>
+      
       <a class="volver" href="/actividades/">← Volver a Actividades</a>
     </div>
     
     <section class="apunte" id="apuntarme">
       <div class="caja">
         <div id="exito" class="exito oculto">
-          <h2>¡Estás dentro!</h2>
-          <p>Te hemos apuntado. Unos días antes te escribimos al correo con el recordatorio y los últimos detalles.</p>
+          <h2 id="exitoTitulo">¡Estás dentro!</h2>
+          <p id="exitoTexto">Te hemos mandado un correo con los detalles.</p>
+          <div class="calendario">
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;dates=20261021T170000Z/20261021T183000Z&amp;text=Despu%C3%A9s+de+la+carrera%2C+%C2%BFqu%C3%A9%3F&amp;details=https%3A%2F%2Flageneracionmejorpreparada.com%2Feventos%2Fdespues-de-la-carrera-que%2F&amp;location=Sala+de+Grados+Jorge+Guill%C3%A9n+%C2%B7+Facultad+de+Letras+%C2%B7+Campus+de+La+Merced%2C+Murcia&amp;ctz=Europe%2FMadrid" target="_blank" rel="noopener">Añadir a Google Calendar</a>
+            <a href="/eventos/despues-de-la-carrera-que/evento.ics" download>Outlook o Apple (.ics)</a>
+          </div>
         </div>
 
         <form id="formEvento" novalidate>
@@ -171,6 +204,7 @@
   var exito = document.getElementById('exito');
   var error = document.getElementById('error');
   var boton = document.getElementById('enviar');
+  var online = false;
 
   function fallo(msg){
     error.textContent = msg;
@@ -183,7 +217,7 @@
     ev.preventDefault();
     error.classList.add('oculto');
 
-    var tel = form.telefono.value.trim();
+    var tel = form.telefono ? form.telefono.value.trim() : '';
 
     if (!form.nombre.value.trim())
       return fallo('Escribe tu nombre y apellidos.');
@@ -192,20 +226,37 @@
     // El teléfono es opcional, pero si lo escribe que sea uno de verdad.
     if (tel && tel.replace(/D/g,'').length < 9)
       return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
+    if (online && !form.perfil.value)
+      return fallo('Dinos en qué momento estás.');
     if (!document.getElementById('rgpd').checked)
       return fallo('Debes aceptar la Política de Privacidad para continuar.');
 
     boton.disabled = true;
     boton.textContent = 'Apuntándote…';
 
-    window.LGMP.enviar('inscripcion-evento', {
-      evento:   "Después de la carrera, ¿qué? · 21 de octubre de 2026",
-      nombre:   form.nombre.value,
-      email:    form.email.value,
-      telefono: tel,
+    var datos = {
+      evento_id: 3,
+      evento:    "Después de la carrera, ¿qué? · 21 de octubre de 2026",
+      nombre:    form.nombre.value,
+      email:     form.email.value,
       acepta_comunicaciones: document.getElementById('marketing').checked
-    }, form.trampa.value)
-    .then(function(){
+    };
+    if (online) {
+      datos.perfil = form.perfil.value;
+      datos.sector = form.sector.value;
+      datos.comentario = form.comentario.value;
+    } else {
+      datos.telefono = tel;
+    }
+
+    window.LGMP.llamar('inscripcion-evento', datos, form.trampa.value)
+    .then(function(r){
+      if (r && r.ya_inscrito) {
+        document.getElementById('exitoTitulo').textContent = 'Ya estabas en la lista';
+        document.getElementById('exitoTexto').textContent =
+          'Este correo ya está inscrito, no hace falta que te apuntes otra vez. ' +
+          'Si no encuentras el correo de confirmación, mira en spam o escríbenos a ' + window.LGMP.correo + '.';
+      }
       form.classList.add('oculto');
       exito.classList.remove('oculto');
       exito.scrollIntoView({ behavior: 'smooth', block: 'center' });

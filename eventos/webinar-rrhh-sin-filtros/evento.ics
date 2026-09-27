@@ -1,0 +1,18 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//LGMP//Eventos//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:evento-6@lageneracionmejorpreparada.com
+DTSTAMP:20260927T155700Z
+DTSTART:20261112T180000Z
+DTEND:20261112T190000Z
+SUMMARY:WEBINAR LGMP: Recursos Humanos sin filtros
+DESCRIPTION:https://lageneracionmejorpreparada.com/eventos/webinar-rrhh-si
+ n-filtros/
+LOCATION:Online · Google Meet
+URL:https://lageneracionmejorpreparada.com/eventos/webinar-rrhh-sin-filtro
+ s/
+END:VEVENT
+END:VCALENDAR

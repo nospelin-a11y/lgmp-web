@@ -1,0 +1,17 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//LGMP//Eventos//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:evento-5@lageneracionmejorpreparada.com
+DTSTAMP:20260918T174909Z
+DTSTART;VALUE=DATE:20261030
+DTEND;VALUE=DATE:20261031
+SUMMARY:Noche Emprendedora
+DESCRIPTION:https://lageneracionmejorpreparada.com/eventos/noche-emprended
+ ora/
+LOCATION:Sala de Catas de Estrella Levante\, Murcia
+URL:https://lageneracionmejorpreparada.com/eventos/noche-emprendedora/
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,19 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//LGMP//Eventos//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:evento-3@lageneracionmejorpreparada.com
+DTSTAMP:20260917T164258Z
+DTSTART:20261021T170000Z
+DTEND:20261021T183000Z
+SUMMARY:Después de la carrera\, ¿qué?
+DESCRIPTION:https://lageneracionmejorpreparada.com/eventos/despues-de-la-c
+ arrera-que/
+LOCATION:Sala de Grados Jorge Guillén · Facultad de Letras · Campus de La 
+ Merced\, Murcia
+URL:https://lageneracionmejorpreparada.com/eventos/despues-de-la-carrera-q
+ ue/
+END:VEVENT
+END:VCALENDAR
