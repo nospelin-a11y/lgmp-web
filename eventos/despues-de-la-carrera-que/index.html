@@ -221,10 +221,12 @@
 
     if (!form.nombre.value.trim())
       return fallo('Escribe tu nombre y apellidos.');
-    if (!/^[^@s]+@[^@s]+.[^@s]+$/.test(form.email.value.trim()))
+    // Ojo: esto va dentro de una plantilla de texto de JavaScript, así que
+    // las barras invertidas van dobles para que lleguen a la página.
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.value.trim()))
       return fallo('Escribe un correo electrónico válido.');
     // El teléfono es opcional, pero si lo escribe que sea uno de verdad.
-    if (tel && tel.replace(/D/g,'').length < 9)
+    if (tel && tel.replace(/\D/g,'').length < 9)
       return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
     if (online && !form.perfil.value)
       return fallo('Dinos en qué momento estás.');
