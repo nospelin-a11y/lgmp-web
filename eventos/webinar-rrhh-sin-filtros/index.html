@@ -262,7 +262,7 @@
     // El teléfono es opcional, pero si lo escribe que sea uno de verdad.
     if (tel && tel.replace(/\D/g,'').length < 9)
       return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
-    if (online && !form.perfil.value)
+    if (!form.perfil.value)
       return fallo('Dinos en qué momento estás.');
     if (!document.getElementById('rgpd').checked)
       return fallo('Debes aceptar la Política de Privacidad para continuar.');
@@ -275,10 +275,10 @@
       evento:    "WEBINAR LGMP: Recursos Humanos sin filtros · 12 de noviembre de 2026",
       nombre:    form.nombre.value,
       email:     form.email.value,
+      perfil:    form.perfil.value,
       acepta_comunicaciones: document.getElementById('marketing').checked
     };
     if (online) {
-      datos.perfil = form.perfil.value;
       datos.sector = form.sector.value;
       datos.comentario = form.comentario.value;
     } else {
