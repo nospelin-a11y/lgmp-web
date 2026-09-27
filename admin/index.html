@@ -363,6 +363,9 @@ const SECCIONES = [
       { c:'perfil', t:'Situación', tipo:'lista' },
       { c:'sector', t:'Estudios' },
       { c:'comentario', t:'Pregunta' },
+      { c:'mailerlite_estado', t:'MailerLite', tipo:'lista', pill:true,
+        fmt:v => ({ ok:'Dentro', baja:'Baja: no se toca', error:'Error: se reintenta' })[v] || '—',
+        clase:v => v === 'Dentro' ? 'ok' : v === 'Error: se reintenta' ? 'mal' : '' },
       { c:'_socio', t:'¿Socio?', tipo:'lista',
         get:r => emailsSocios.has(String(r.email ?? '').trim().toLowerCase()) ? 'Sí' : 'No',
         pill:true, clase:v => v === 'Sí' ? 'ok' : '' },
@@ -400,6 +403,8 @@ const SECCIONES = [
       { c:'imagen_url', t:'Imagen para compartir', tipo:'text', ayuda:'La que sale al pegar el enlace en WhatsApp o LinkedIn. 1200 × 630 px, subida a /assets/. Ej.: /assets/eventos/mi-evento.jpg. Vacío: el logo de la Asociación.' },
       { c:'recordatorios', t:'Mandar recordatorios por correo (el día antes y 1 hora antes)', tipo:'bool',
         ayuda:'Solo a quien se inscriba desde la web. Necesita la hora de inicio. Ojo: el plan gratuito de Resend manda 100 correos al día.' },
+      { c:'mailerlite_grupo', t:'Grupo de MailerLite (id)', tipo:'text',
+        ayuda:'Id numérico del grupo del evento en MailerLite (Suscriptores → Grupos). Si lo rellenas, cada inscrito entra en ese grupo, y también en web-asociacion solo si marcó la casilla de novedades. Vacío: no se manda a MailerLite.' },
       { c:'enlace_reunion', t:'Enlace de la videollamada (privado)', tipo:'text',
         ayuda:'Ej.: https://meet.google.com/abc-defg-hij. No sale en la web: solo va en los recordatorios.' },
       { c:'slug', t:'Dirección', tipo:'text', ayuda:'Se rellena sola con el título. /eventos/lo-que-pongas-aqui/' },
@@ -833,7 +838,8 @@ const ETIQUETAS = {
   publicar:'Sale en la web', activo:'Cuenta para el número de socios', orden:'Orden en la web',
   socio_id:'Ficha de socio', solicitud_id:'Solicitud de origen', id:'Id',
   evento_id:'Id del evento', recordatorio_dia_en:'Recordatorio del día antes',
-  recordatorio_hora_en:'Recordatorio de 1 h antes'
+  recordatorio_hora_en:'Recordatorio de 1 h antes', mailerlite_estado:'MailerLite',
+  mailerlite_detalle:'MailerLite · detalle', mailerlite_en:'MailerLite · última vez'
 };
 
 function formatoDato(k, v){

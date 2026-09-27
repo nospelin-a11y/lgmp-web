@@ -30,6 +30,7 @@
 // =====================================================================
 
 import { correoConfirmacion, type Evento } from '../_shared/eventos.ts';
+import { altaEnMailerLite } from '../_shared/mailerlite.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('CLAVE_SECRETA') ??
@@ -300,7 +301,7 @@ async function rpc(nombre: string, args: Record<string, unknown>) {
 
 /** Evento por id, con la clave secreta (incluye columnas que la web no ve). */
 async function leerEvento(id: number): Promise<Evento | null> {
-  const cols = 'id,titulo,fecha,hora,lugar,modalidad,slug,publicado,recordatorios,enlace_reunion';
+  const cols = 'id,titulo,fecha,hora,lugar,modalidad,slug,publicado,recordatorios,enlace_reunion,mailerlite_grupo';
   const r = await fetch(`${SUPABASE_URL}/rest/v1/eventos?select=${cols}&id=eq.${id}`, {
     headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` },
   });
@@ -704,5 +705,43 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Alta en MailerLite (grupo del evento y, solo con consentimiento,
+  // web-asociacion: la regla está explicada en _shared/mailerlite.ts).
+  // Va en segundo plano: la persona ya tiene su respuesta y nunca ve un
+  // error por esto. Si falla, queda `mailerlite_estado = 'error'` en la
+  // inscripción y la función `recordatorios` lo reintenta cada 10 minutos.
+  if (evento?.mailerlite_grupo) {
+    const tarea = sincronizarMailerLite(evento.id, evento.mailerlite_grupo, preparado.fila)
+      .catch((e) => console.error('MailerLite (en segundo plano):', e));
+    // deno-lint-ignore no-explicit-any
+    const rt = (globalThis as any).EdgeRuntime;
+    if (rt?.waitUntil) rt.waitUntil(tarea); else await tarea;
+  }
+
   return responder({ ok: true }, 200, origen);
 });
+
+/** Da de alta en MailerLite y apunta el resultado en la inscripción. */
+async function sincronizarMailerLite(eventoId: number, grupo: string, fila: Record<string, unknown>) {
+  const res = await altaEnMailerLite({
+    email: String(fila.email),
+    nombre: (fila.nombre as string) ?? null,
+    perfil: (fila.perfil as string) ?? null,
+    grupoEvento: grupo,
+    aceptaComunicaciones: fila.acepta_comunicaciones === true,
+  });
+  if (res.estado !== 'ok') console.warn('MailerLite:', res.estado, res.detalle);
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/inscripciones_evento` +
+    `?evento_id=eq.${eventoId}&email=eq.${encodeURIComponent(String(fila.email))}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}`,
+      'Content-Type': 'application/json', Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({
+      mailerlite_estado: res.estado, mailerlite_detalle: res.detalle,
+      mailerlite_en: new Date().toISOString(),
+    }),
+  });
+  if (!r.ok) console.error('No se pudo apuntar el resultado de MailerLite:', r.status, await r.text());
+}

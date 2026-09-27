@@ -15,6 +15,10 @@
 //  Quien se apunta tarde (menos de 3 h antes) no recibe el del día antes,
 //  pero sí el de la hora antes, que lleva el enlace.
 //
+//  Además, en cada vuelta reintenta las altas en MailerLite que fallaron o
+//  que no llegaron a hacerse (ver _shared/mailerlite.ts), solo de eventos
+//  que todavía no han pasado.
+//
 //  Prueba: POST con {"prueba":"correo@ejemplo.com","evento_id":7} manda
 //  los dos recordatorios de ese evento solo a ese correo, sin marcar nada.
 //
@@ -26,6 +30,7 @@
 // =====================================================================
 
 import { correoRecordatorio, inicioFin, type Evento, CORREO_LGMP } from '../_shared/eventos.ts';
+import { altaEnMailerLite, mailerLiteConfigurado } from '../_shared/mailerlite.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SECRETA      = Deno.env.get('CLAVE_SECRETA') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -96,6 +101,37 @@ async function recordar(ev: Evento, cual: 'dia' | 'hora') {
   return enviados;
 }
 
+/** Reintenta altas en MailerLite pendientes o fallidas (máx. 25 por vuelta). */
+async function reintentarMailerLite(): Promise<number> {
+  if (!mailerLiteConfigurado()) return 0;          // sin clave no tiene sentido llamar
+  const hace5min = new Date(Date.now() - 5 * 60000).toISOString();
+  const ayer = new Date(Date.now() - 24 * H).toISOString().slice(0, 10);
+  const filas: {
+    id: number; nombre: string | null; email: string | null; perfil: string | null;
+    acepta_comunicaciones: boolean | null; eventos: { mailerlite_grupo: string | null };
+  }[] = await db('inscripciones_evento?select=id,nombre,email,perfil,acepta_comunicaciones,' +
+    'eventos!inner(mailerlite_grupo,fecha)' +
+    '&or=(mailerlite_estado.is.null,mailerlite_estado.eq.error)' +
+    `&creado_en=lt.${hace5min}&eventos.mailerlite_grupo=not.is.null&eventos.fecha=gte.${ayer}` +
+    '&order=id&limit=25');
+  let hechas = 0;
+  for (const f of filas) {
+    if (!f.email || !f.eventos?.mailerlite_grupo) continue;
+    const res = await altaEnMailerLite({
+      email: f.email, nombre: f.nombre, perfil: f.perfil,
+      grupoEvento: f.eventos.mailerlite_grupo,
+      aceptaComunicaciones: f.acepta_comunicaciones === true,
+    });
+    await db(`inscripciones_evento?id=eq.${f.id}`, {
+      method: 'PATCH', headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({ mailerlite_estado: res.estado, mailerlite_detalle: res.detalle,
+                             mailerlite_en: new Date().toISOString() }),
+    });
+    if (res.estado !== 'error') hechas++;
+  }
+  return hechas;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ ok: false }, 405);
   if (!CLAVE || req.headers.get('x-clave') !== CLAVE) return json({ ok: false, error: 'No autorizado' }, 401);
@@ -122,6 +158,13 @@ Deno.serve(async (req) => {
 
   const hecho: Record<string, number> = {};
   const errores: string[] = [];
+  try {
+    const n = await reintentarMailerLite();
+    if (n) hecho.mailerlite = n;
+  } catch (e) {
+    console.error('Reintento MailerLite:', e);
+    errores.push(`mailerlite: ${e instanceof Error ? e.message : e}`);
+  }
   for (const ev of eventos) {
     const t = inicioFin(ev);
     if (!t) continue;                                   // sin hora no se sabe cuándo avisar

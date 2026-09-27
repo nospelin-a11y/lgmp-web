@@ -367,16 +367,21 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
    Al terminar, la función manda un correo de confirmación.
    --------------------------------------------------------------------- */
 const SITUACIONES = ['Estudiante', 'Recién graduado/a', '1-3 años de experiencia', 'Otro'];
+// Presenciales: las mismas que tenía el formulario de la presentación. Se
+// guardan en `perfil` y viajan a MailerLite (campo «perfil») para segmentar.
+const PERFILES = ['Estudiante de la UMU', 'Estudiante de otra universidad', 'Recién graduado/a', 'Otro'];
 
-function formulario({ id, evento, online, google, ics }) {
-  const camposOnline = `
+const desplegablePerfil = opciones => `
           <div class="campo">
             <label for="perfil">¿En qué momento estás?</label>
             <select id="perfil" name="perfil" required>
               <option value="">Elige una opción</option>
-              ${SITUACIONES.map(x => `<option>${e(x)}</option>`).join('\n              ')}
+              ${opciones.map(x => `<option>${e(x)}</option>`).join('\n              ')}
             </select>
-          </div>
+          </div>`;
+
+function formulario({ id, evento, online, google, ics }) {
+  const camposOnline = `${desplegablePerfil(SITUACIONES)}
 
           <div class="campo">
             <label for="sector">¿Qué estudias o estudiaste? <span class="opt">(opcional)</span></label>
@@ -399,7 +404,8 @@ function formulario({ id, evento, online, google, ics }) {
               <label for="telefono">Teléfono <span class="opt">(opcional)</span></label>
               <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="Para el recordatorio por WhatsApp">
             </div>
-          </div>`;
+          </div>
+${desplegablePerfil(PERFILES)}`;
 
   return `
     <section class="apunte" id="apuntarme">
@@ -483,7 +489,7 @@ ${camposOnline}` : camposPresencial}
     // El teléfono es opcional, pero si lo escribe que sea uno de verdad.
     if (tel && tel.replace(/\\D/g,'').length < 9)
       return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
-    if (online && !form.perfil.value)
+    if (!form.perfil.value)
       return fallo('Dinos en qué momento estás.');
     if (!document.getElementById('rgpd').checked)
       return fallo('Debes aceptar la Política de Privacidad para continuar.');
@@ -496,10 +502,10 @@ ${camposOnline}` : camposPresencial}
       evento:    ${JSON.stringify(evento)},
       nombre:    form.nombre.value,
       email:     form.email.value,
+      perfil:    form.perfil.value,
       acepta_comunicaciones: document.getElementById('marketing').checked
     };
     if (online) {
-      datos.perfil = form.perfil.value;
       datos.sector = form.sector.value;
       datos.comentario = form.comentario.value;
     } else {

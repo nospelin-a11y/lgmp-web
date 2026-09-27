@@ -20,6 +20,7 @@ export type Evento = {
   slug: string | null;
   publicado?: boolean;
   recordatorios?: boolean;
+  mailerlite_grupo?: string | null;   // id del grupo de MailerLite del evento
   enlace_reunion?: string | null;
 };
 
