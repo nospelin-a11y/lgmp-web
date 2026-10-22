@@ -164,7 +164,7 @@ function ics(ev, url) {
    Plantilla de una página individual
    --------------------------------------------------------------------- */
 
-function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta, arriba, apunte }) {
+function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta, arriba, apunte, galeria }) {
   const ld = tipo === 'evento'
     ? { '@type':'Event', name:titulo, description:descripcion,
         startDate: momento(meta.fecha, meta.hora, 0),
@@ -183,7 +183,7 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
         // Todos los eventos son gratuitos.
         offers:{ '@type':'Offer', price:0, priceCurrency:'EUR',
                  availability:'https://schema.org/InStock',
-                 url: meta.inscripcion || url + '#apuntarme',
+                 url: meta.inscripcion || (meta.nota ? url : url + '#apuntarme'),
                  ...(meta.creado ? { validFrom: meta.creado } : {}) },
         url }
     : { '@type':'NewsArticle', headline:titulo, description:descripcion,
@@ -231,9 +231,24 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
   .art h1{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.15;margin:0}
   html{scroll-behavior:smooth}
   .art .meta{font-size:14.5px;color:rgba(30,42,74,.6);margin:18px 0 0}
+  .art .nota{font-size:15px;line-height:1.6;color:#1E2A4A;background:#F4F6FA;border-left:3px solid #F0503C;
+             border-radius:0 12px 12px 0;padding:14px 18px;margin:20px 0 0}
   .art .arriba{margin:26px 0 0}
   .apunte{scroll-margin-top:16px}
   .art .portada{width:100%;border-radius:20px;margin:32px 0 0;display:block}
+  .art .hecho{display:inline-block;margin-left:10px;vertical-align:2px;background:#1E2A4A;color:#ffffff;
+              border-radius:999px;padding:4px 12px;font-size:11px;letter-spacing:.12em}
+
+  /* ---- Fotos y vídeo del evento ---- */
+  .media{max-width:760px;margin:30px auto 0;padding:0 28px}
+  .media .fila{display:grid;grid-template-columns:minmax(0,290px) minmax(0,1fr);gap:16px;align-items:start}
+  .media video{width:100%;display:block;border-radius:16px;background:#000;aspect-ratio:9/16}
+  .media .fotos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .media .fila .fotos{align-content:start}
+  .media .fotos a{display:block;border-radius:14px;overflow:hidden;aspect-ratio:3/4;background:#E6EAF2}
+  .media .fotos img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
+  .media .fotos a:hover img{transform:scale(1.05)}
+  .media .pie{font-size:13.5px;line-height:1.5;color:rgba(30,42,74,.6);margin:14px 0 0}
   .cuerpo{max-width:760px;margin:0 auto;padding:28px 28px 0;font-size:17px;line-height:1.75;color:rgba(30,42,74,.85)}
   .cuerpo h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:#1E2A4A;margin:36px 0 12px}
   .cuerpo h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:19px;color:#1E2A4A;margin:28px 0 10px}
@@ -296,6 +311,9 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
     .apunte .fila{grid-template-columns:1fr;gap:0} .apunte .fila .campo{margin-bottom:16px}
     .cab{padding:16px 0} .cab .cont{padding:0 20px} .cab img{height:40px}
     .art{padding:36px 20px 0} .cuerpo{padding:20px 20px 0;font-size:16px} .cierre{padding:14px 20px 0}
+    /* El vídeo es vertical: a lo ancho del móvil empuja las fotos fuera de la vista. */
+    .media{padding:0 20px} .media .fila{grid-template-columns:1fr;gap:14px}
+    .media video{max-width:300px;margin:0 auto}
     .cuerpo h2{font-size:21px;margin-top:30px} .cuerpo h3{font-size:17.5px}
     .apunte{padding:0 12px;margin-top:32px} .apunte .caja{border-radius:20px;padding:24px 18px}
     .art .arriba .apuntarse,.apunte .btn{display:block;width:100%;text-align:center}
@@ -319,12 +337,14 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
 <main>
   <article>
     <div class="art">
-      <p class="kicker">${e(kicker)}</p>
+      <p class="kicker">${e(kicker)}${meta.realizado ? '<span class="hecho">REALIZADO</span>' : ''}</p>
       <h1>${e(titulo)}</h1>
       <p class="meta">${e(meta.linea)}</p>
+      ${meta.nota ? `<p class="nota">${e(meta.nota)}</p>` : ''}
       ${arriba ? `<div class="arriba">${arriba}</div>` : ''}
       ${imagen && tipo !== 'evento' ? `<img class="portada" src="${e(imagen)}" alt="${e(titulo)}">` : ''}
     </div>
+    ${galeria ? medios(galeria, titulo) : ''}
     <div class="cuerpo">${cuerpo || `<p>${e(descripcion)}</p>`}</div>
     <div class="cierre">
       ${cta || ''}
@@ -531,23 +551,91 @@ ${camposOnline}` : camposPresencial}
 }
 
 /* ---------------------------------------------------------------------
+   Fotos y vídeo de un evento
+
+   No hay que tocar la base de datos para añadirlos: basta con dejar los
+   archivos en `assets/eventos/<slug>/`.
+
+     resumen.mp4   el vídeo (opcional)
+     resumen.jpg   su primer fotograma, para que no salga un hueco negro
+     foto-01.webp  las fotos, por orden de nombre
+
+   El generador lee la carpeta en cada pasada, así que el día que la junta
+   suba fotos de otro evento aparecen solas.
+   --------------------------------------------------------------------- */
+
+const IMAGENES = /\.(webp|jpe?g|png)$/i;
+
+/* Ajustes de un evento que la base de datos todavia no guarda. Hoy solo uno:
+   `inscripcion: "invitacion"` para los eventos a los que no se apunta nadie
+   desde la web porque los organiza otro (quita el boton y el formulario, y
+   pone `nota` en su lugar). Cuando la tabla tenga su columna, esto se va. */
+async function leerAjustes(slug) {
+  const f = join(RAIZ, 'assets', 'eventos', slug, 'ajustes.json');
+  if (!existsSync(f)) return null;
+  try { return JSON.parse(await readFile(f, 'utf8')); }
+  catch (err) { console.warn(`  ajustes.json de ${slug} ilegible: ${err.message}`); return null; }
+}
+
+async function leerGaleria(slug) {
+  const carpeta = join(RAIZ, 'assets', 'eventos', slug);
+  if (!existsSync(carpeta)) return null;
+  const archivos = (await readdir(carpeta)).sort();
+  const fotos = archivos.filter(f => f.startsWith('foto-') && IMAGENES.test(f));
+  const video = archivos.includes('resumen.mp4');
+  if (!fotos.length && !video) return null;
+  const base = `/assets/eventos/${slug}/`;
+  return {
+    video:  video ? base + 'resumen.mp4' : null,
+    cartel: archivos.includes('resumen.jpg') ? base + 'resumen.jpg' : null,
+    fotos:  fotos.map(f => base + f),
+  };
+}
+
+function medios({ video, cartel, fotos }, titulo) {
+  const galeriaFotos = fotos.length
+    ? `<div class="fotos">${fotos.map((f, i) => `
+          <a href="${e(f)}" target="_blank" rel="noopener" aria-label="Foto ${i + 1} del evento, a tamaño completo">
+            <img src="${e(f)}" alt="${e(titulo)} · foto ${i + 1}" loading="lazy" decoding="async">
+          </a>`).join('')}
+        </div>` : '';
+
+  const reproductor = video
+    ? `<video controls preload="none" playsinline${cartel ? ` poster="${e(cartel)}"` : ''}>
+          <source src="${e(video)}" type="video/mp4">
+          Tu navegador no puede reproducir el vídeo. <a href="${e(video)}">Descárgalo aquí</a>.
+        </video>` : '';
+
+  const dentro = video && fotos.length
+    ? `<div class="fila">${reproductor}${galeriaFotos}</div>`
+    : reproductor + galeriaFotos;
+
+  return `
+    <section class="media">
+      ${dentro}
+      <p class="pie">Fotos y vídeo del evento. Pulsa una foto para verla a tamaño completo.</p>
+    </section>`;
+}
+
+/* ---------------------------------------------------------------------
    Tarjetas de los listados
    --------------------------------------------------------------------- */
 
 function tarjetaEvento(ev) {
   const p = partes(ev.fecha);
   const detalle = [ev.lugar, ev.hora].filter(Boolean).join(' · ');
+  const hecho = String(ev.fecha) < HOY;
   return `
         <a href="/eventos/${e(ev.slug)}/" data-reveal="true" style="background:#ffffff;border:1px solid rgba(30,42,74,.07);border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;transition:transform .25s,box-shadow .25s;color:#1E2A4A" style-hover="transform:translateY(-4px);box-shadow:0 16px 34px rgba(30,42,74,.12);color:#1E2A4A">
-          <div style="flex:none;width:84px;height:84px;border-radius:16px;background:#1E2A4A;color:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Nunito',sans-serif">
+          <div style="flex:none;width:84px;height:84px;border-radius:16px;background:${hecho ? 'rgba(30,42,74,.55)' : '#1E2A4A'};color:#ffffff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Nunito',sans-serif">
             <span style="font-weight:900;font-size:28px;line-height:1">${p.dia}</span>
             <span style="font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7)">${p.mes}</span>
           </div>
           <div style="flex:1;min-width:240px">
-            <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A;margin:0 0 6px">${e(ev.titulo)}</h3>
+            <h3 style="font-family:'Nunito',sans-serif;font-weight:800;font-size:20px;color:#1E2A4A;margin:0 0 6px">${e(ev.titulo)}${hecho ? '<span style="margin-left:10px;vertical-align:2px;background:rgba(30,42,74,.08);color:rgba(30,42,74,.65);border-radius:999px;padding:4px 11px;font-size:11px;font-weight:800;letter-spacing:.1em">REALIZADO</span>' : ''}</h3>
             <p style="font-size:15px;line-height:1.6;color:rgba(30,42,74,.72);margin:0">${detalle ? e(detalle) + ' · ' : ''}${e(ev.descripcion || '')}</p>
           </div>
-          <span style="flex:none;background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 24px;border-radius:999px;box-shadow:0 6px 18px rgba(240,80,60,.35)">Ver más</span>
+          <span style="flex:none;background:${hecho ? '#1E2A4A' : '#F0503C'};color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;padding:12px 24px;border-radius:999px;box-shadow:0 6px 18px ${hecho ? 'rgba(30,42,74,.25)' : 'rgba(240,80,60,.35)'}">${hecho ? 'Ver cómo fue' : 'Ver más'}</span>
         </a>`;
 }
 
@@ -617,8 +705,11 @@ async function main() {
     const online = ev.modalidad === 'online';
     const detalle = [fechaLarga(ev.fecha), ev.hora, ev.lugar || (online ? 'Online' : '')]
                     .filter(Boolean).join(' · ');
-    // Si el evento ya ha pasado no se puede uno apuntar: ni botón ni formulario.
-    const abierto = String(ev.fecha) >= HOY;
+    const ajustes = await leerAjustes(ev.slug);
+    const porInvitacion = ajustes?.inscripcion === 'invitacion';
+    // Si el evento ya ha pasado, o es por invitación, no se puede uno apuntar:
+    // ni botón ni formulario.
+    const abierto = String(ev.fecha) >= HOY && !porInvitacion;
     // `url_inscripcion` gana: sirve para eventos que se gestionan fuera
     // (los de Alumni, por ejemplo). Si no hay, el botón baja al formulario.
     const cta = !abierto ? ''
@@ -631,6 +722,7 @@ async function main() {
     const apunte = (abierto && !ev.url_inscripcion)
       ? { id: ev.id, evento: `${ev.titulo} · ${fechaLarga(ev.fecha)}`, online,
           google: urlGoogle(ev, url), ics: `/eventos/${ev.slug}/evento.ics` } : null;
+    const galeria = await leerGaleria(ev.slug);
     await mkdir(join(RAIZ, 'eventos', ev.slug), { recursive: true });
     // Archivo de calendario (lo enlazan la página y el correo de confirmación)
     await writeFile(join(RAIZ, 'eventos', ev.slug, 'evento.ics'), ics(ev, url));
@@ -638,9 +730,11 @@ async function main() {
       pagina({ tipo:'evento', titulo:ev.titulo, descripcion:desc, url,
                kicker: online ? 'Evento online · Gratis' : 'Evento',
                meta:{ linea:detalle, fecha:ev.fecha, hora:ev.hora, lugar:ev.lugar, online,
-                      creado:ev.creado_en, inscripcion:ev.url_inscripcion },
+                      creado:ev.creado_en, inscripcion:ev.url_inscripcion,
+                      realizado: String(ev.fecha) < HOY,
+                      nota: porInvitacion ? ajustes.nota : null },
                cuerpo:aHtml(ev.cuerpo), imagen:ev.imagen_url,
-               cta: arriba ? '' : cta, arriba, apunte }));
+               cta: arriba ? '' : cta, arriba, apunte, galeria }));
     escritas.push(`/eventos/${ev.slug}/`);
   }
 
