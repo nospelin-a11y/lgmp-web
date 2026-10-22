@@ -90,7 +90,7 @@ function tarjetaSocio(s) {
 /* Columnas de `eventos` que puede leer la clave pública. El enlace de la
    videollamada (`enlace_reunion`) es privado y no está en la lista. */
 const COLS_EVENTOS = 'id,creado_en,titulo,fecha,hora,lugar,descripcion,url_inscripcion,' +
-                     'publicado,slug,cuerpo,modalidad,imagen_url,recordatorios';
+                     'publicado,slug,cuerpo,modalidad,imagen_url,recordatorios,aviso_inscripcion';
 
 // Las imágenes para compartir tienen que ir con la dirección completa.
 const absoluta = u => (u && u.startsWith('/') ? BASE + u : u);
@@ -566,17 +566,6 @@ ${camposOnline}` : camposPresencial}
 
 const IMAGENES = /\.(webp|jpe?g|png)$/i;
 
-/* Ajustes de un evento que la base de datos todavia no guarda. Hoy solo uno:
-   `inscripcion: "invitacion"` para los eventos a los que no se apunta nadie
-   desde la web porque los organiza otro (quita el boton y el formulario, y
-   pone `nota` en su lugar). Cuando la tabla tenga su columna, esto se va. */
-async function leerAjustes(slug) {
-  const f = join(RAIZ, 'assets', 'eventos', slug, 'ajustes.json');
-  if (!existsSync(f)) return null;
-  try { return JSON.parse(await readFile(f, 'utf8')); }
-  catch (err) { console.warn(`  ajustes.json de ${slug} ilegible: ${err.message}`); return null; }
-}
-
 async function leerGaleria(slug) {
   const carpeta = join(RAIZ, 'assets', 'eventos', slug);
   if (!existsSync(carpeta)) return null;
@@ -705,11 +694,9 @@ async function main() {
     const online = ev.modalidad === 'online';
     const detalle = [fechaLarga(ev.fecha), ev.hora, ev.lugar || (online ? 'Online' : '')]
                     .filter(Boolean).join(' · ');
-    const ajustes = await leerAjustes(ev.slug);
-    const porInvitacion = ajustes?.inscripcion === 'invitacion';
-    // Si el evento ya ha pasado, o es por invitación, no se puede uno apuntar:
-    // ni botón ni formulario.
-    const abierto = String(ev.fecha) >= HOY && !porInvitacion;
+    // Si el evento ya ha pasado, o lo organiza otro y lleva aviso en lugar de
+    // inscripción, no se puede uno apuntar: ni botón ni formulario.
+    const abierto = String(ev.fecha) >= HOY && !ev.aviso_inscripcion;
     // `url_inscripcion` gana: sirve para eventos que se gestionan fuera
     // (los de Alumni, por ejemplo). Si no hay, el botón baja al formulario.
     const cta = !abierto ? ''
@@ -732,7 +719,7 @@ async function main() {
                meta:{ linea:detalle, fecha:ev.fecha, hora:ev.hora, lugar:ev.lugar, online,
                       creado:ev.creado_en, inscripcion:ev.url_inscripcion,
                       realizado: String(ev.fecha) < HOY,
-                      nota: porInvitacion ? ajustes.nota : null },
+                      nota: ev.aviso_inscripcion || null },
                cuerpo:aHtml(ev.cuerpo), imagen:ev.imagen_url,
                cta: arriba ? '' : cta, arriba, apunte, galeria }));
     escritas.push(`/eventos/${ev.slug}/`);
