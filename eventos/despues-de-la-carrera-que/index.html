@@ -123,7 +123,7 @@
       <p class="kicker">Evento</p>
       <h1>Después de la carrera, ¿qué?</h1>
       <p class="meta">21 de octubre de 2026 · 19:00 a 20:30 · Sala de Grados Jorge Guillén · Facultad de Letras · Campus de La Merced, Murcia</p>
-      <div class="arriba"><a class="apuntarse" href="#apuntarme">Apúntate</a></div>
+      
       
     </div>
     <div class="cuerpo"><h2>Dar el salto al mundo laboral no viene con manual de instrucciones</h2>
@@ -148,136 +148,6 @@
       <a class="volver" href="/actividades/">← Volver a Actividades</a>
     </div>
     
-    <section class="apunte" id="apuntarme">
-      <div class="caja">
-        <div id="exito" class="exito oculto">
-          <h2 id="exitoTitulo">¡Estás dentro!</h2>
-          <p id="exitoTexto">Te hemos mandado un correo con los detalles.</p>
-          <div class="calendario">
-            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;dates=20261021T170000Z/20261021T183000Z&amp;text=Despu%C3%A9s+de+la+carrera%2C+%C2%BFqu%C3%A9%3F&amp;details=https%3A%2F%2Flageneracionmejorpreparada.com%2Feventos%2Fdespues-de-la-carrera-que%2F&amp;location=Sala+de+Grados+Jorge+Guill%C3%A9n+%C2%B7+Facultad+de+Letras+%C2%B7+Campus+de+La+Merced%2C+Murcia&amp;ctz=Europe%2FMadrid" target="_blank" rel="noopener">Añadir a Google Calendar</a>
-            <a href="/eventos/despues-de-la-carrera-que/evento.ics" download>Outlook o Apple (.ics)</a>
-          </div>
-        </div>
-
-        <form id="formEvento" novalidate>
-          <h2>Apúntate</h2>
-          <p class="sub">Es gratis. Déjanos tu correo y te avisamos unos días antes.</p>
-
-          <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
-
-          <div class="campo">
-            <label for="nombre">Nombre y apellidos</label>
-            <input type="text" id="nombre" name="nombre" autocomplete="name" required>
-          </div>
-
-          <div class="fila">
-            <div class="campo">
-              <label for="email">Correo electrónico</label>
-              <input type="email" id="email" name="email" autocomplete="email" required>
-            </div>
-            <div class="campo">
-              <label for="telefono">Teléfono <span class="opt">(opcional)</span></label>
-              <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="Para el recordatorio por WhatsApp">
-            </div>
-          </div>
-
-          <div class="campo">
-            <label for="perfil">¿En qué momento estás?</label>
-            <select id="perfil" name="perfil" required>
-              <option value="">Elige una opción</option>
-              <option>Estudiante de la UMU</option>
-              <option>Estudiante de otra universidad</option>
-              <option>Recién graduado/a</option>
-              <option>Otro</option>
-            </select>
-          </div>
-
-          <label class="check">
-            <input type="checkbox" id="rgpd" required>
-            <span>He leído y acepto la <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a> y el tratamiento de mis datos para gestionar mi inscripción.</span>
-          </label>
-
-          <label class="check">
-            <input type="checkbox" id="marketing">
-            <span>Quiero recibir información sobre la Asociación, sus actividades y cómo asociarme.</span>
-          </label>
-
-          <p id="error" class="error oculto"></p>
-          <button type="submit" id="enviar" class="btn">Apuntarme</button>
-        </form>
-      </div>
-    </section>
-
-<script src="/lgmp-datos.js"></script>
-<script>
-(function(){
-  var form  = document.getElementById('formEvento');
-  var exito = document.getElementById('exito');
-  var error = document.getElementById('error');
-  var boton = document.getElementById('enviar');
-  var online = false;
-
-  function fallo(msg){
-    error.textContent = msg;
-    error.classList.remove('oculto');
-    boton.disabled = false;
-    boton.textContent = 'Apuntarme';
-  }
-
-  form.addEventListener('submit', function(ev){
-    ev.preventDefault();
-    error.classList.add('oculto');
-
-    var tel = form.telefono ? form.telefono.value.trim() : '';
-
-    if (!form.nombre.value.trim())
-      return fallo('Escribe tu nombre y apellidos.');
-    // Ojo: esto va dentro de una plantilla de texto de JavaScript, así que
-    // las barras invertidas van dobles para que lleguen a la página.
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.value.trim()))
-      return fallo('Escribe un correo electrónico válido.');
-    // El teléfono es opcional, pero si lo escribe que sea uno de verdad.
-    if (tel && tel.replace(/\D/g,'').length < 9)
-      return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
-    if (!form.perfil.value)
-      return fallo('Dinos en qué momento estás.');
-    if (!document.getElementById('rgpd').checked)
-      return fallo('Debes aceptar la Política de Privacidad para continuar.');
-
-    boton.disabled = true;
-    boton.textContent = 'Apuntándote…';
-
-    var datos = {
-      evento_id: 3,
-      evento:    "Después de la carrera, ¿qué? · 21 de octubre de 2026",
-      nombre:    form.nombre.value,
-      email:     form.email.value,
-      perfil:    form.perfil.value,
-      acepta_comunicaciones: document.getElementById('marketing').checked
-    };
-    if (online) {
-      datos.sector = form.sector.value;
-      datos.comentario = form.comentario.value;
-    } else {
-      datos.telefono = tel;
-    }
-
-    window.LGMP.llamar('inscripcion-evento', datos, form.trampa.value)
-    .then(function(r){
-      if (r && r.ya_inscrito) {
-        document.getElementById('exitoTitulo').textContent = 'Ya estabas en la lista';
-        document.getElementById('exitoTexto').textContent =
-          'Este correo ya está inscrito, no hace falta que te apuntes otra vez. ' +
-          'Si no encuentras el correo de confirmación, mira en spam o escríbenos a ' + window.LGMP.correo + '.';
-      }
-      form.classList.add('oculto');
-      exito.classList.remove('oculto');
-      exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    })
-    .catch(function(err){ fallo(err.message); });
-  });
-})();
-</script>
   </article>
 </main>
 
