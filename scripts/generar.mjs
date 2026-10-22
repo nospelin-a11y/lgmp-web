@@ -596,7 +596,7 @@ function medios({ video, cartel, fotos }, titulo) {
   const galeriaFotos = fotos.length
     ? `<div class="fotos">${fotos.map((f, i) => `
           <a href="${e(f)}" target="_blank" rel="noopener" aria-label="Foto ${i + 1} del evento, a tamaño completo">
-            <img src="${e(f)}" alt="${e(titulo)} · foto ${i + 1}" loading="lazy" decoding="async">
+            <img src="${e(f)}" alt="${e(titulo)} · foto ${i + 1}" decoding="async"${i < 2 ? '' : ' loading="lazy"'}>
           </a>`).join('')}
         </div>` : '';
 
