@@ -41,7 +41,9 @@ async function db(ruta: string, init: RequestInit = {}) {
                ...(init.headers ?? {}) },
   });
   if (!r.ok) throw new Error(`${ruta} (${r.status}): ${await r.text()}`);
-  return r.status === 204 ? null : r.json();
+  // Con Prefer: return=minimal la respuesta llega vacía (201 o 204).
+  const t = await r.text();
+  return t ? JSON.parse(t) : null;
 }
 
 /** Guarda el permiso de la cuenta de Google (solo la llama google-calendar). */

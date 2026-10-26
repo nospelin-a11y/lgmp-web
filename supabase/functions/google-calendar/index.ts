@@ -18,7 +18,7 @@
 //    https://cegicdvznbvbemqoftod.supabase.co/functions/v1/google-calendar
 // =====================================================================
 
-import { CLIENT_ID, CLIENT_SECRET, CUENTA, calendar, guardarPermiso } from '../_shared/google-calendar.ts';
+import { CLIENT_ID, CLIENT_SECRET, CUENTA, calendar, guardarPermiso, invitar } from '../_shared/google-calendar.ts';
 
 const CLAVE = Deno.env.get('RECORDATORIOS_CLAVE') ?? '';
 const VUELTA = `${Deno.env.get('SUPABASE_URL')}/functions/v1/google-calendar`;
@@ -87,7 +87,12 @@ Deno.serve(async (req) => {
     if (cuenta !== CUENTA) {
       return pagina('Cuenta equivocada', `Has entrado con ${cuenta}. Hay que hacerlo con ${CUENTA}, la dueña de los eventos.`, 403);
     }
-    await guardarPermiso(j.refresh_token, cuenta);
+    try {
+      await guardarPermiso(j.refresh_token, cuenta);
+    } catch (e) {
+      console.error('Guardar permiso:', e);
+      return pagina('No se ha podido guardar', 'Google ha dado el permiso pero no se ha podido guardar. Avisa a Claude.', 500);
+    }
     return pagina('¡Conectado!', `La web ya puede añadir a los inscritos como invitados en el calendario de ${cuenta}. Ya puedes cerrar esta pestaña.`);
   }
 
@@ -95,6 +100,30 @@ Deno.serve(async (req) => {
   if (req.method === 'POST') {
     if (req.headers.get('x-clave') !== CLAVE) return json({ ok: false, error: 'No autorizado' }, 401);
     const c = await req.json().catch(() => ({}));
+
+    // Pruebas: crear un evento de prueba, invitar a alguien y borrarlo.
+    // {"accion":"crear-prueba","inicio":"2026-12-01T10:00:00+01:00","invitados":["a@b.com"]}
+    // {"accion":"invitar","evento":"<id>","email":"c@d.com"}
+    // {"accion":"borrar-prueba","evento":"<id>"}  (solo si el título empieza por PRUEBA)
+    if (c.accion === 'crear-prueba') {
+      const ini = new Date(c.inicio);
+      const r = await calendar('?sendUpdates=all', { method: 'POST', body: JSON.stringify({
+        summary: 'PRUEBA LGMP · no hagas caso', description: 'Evento de prueba de la web. Se borra enseguida.',
+        start: { dateTime: ini.toISOString() }, end: { dateTime: new Date(ini.getTime() + 3600000).toISOString() },
+        attendees: (c.invitados ?? []).map((email: string) => ({ email })),
+        guestsCanSeeOtherGuests: false, guestsCanInviteOthers: false }) });
+      const j = await r.json();
+      return json({ ok: r.ok, evento: j.id, error: r.ok ? undefined : j });
+    }
+    if (c.accion === 'invitar') return json(await invitar(String(c.evento), String(c.email)));
+    if (c.accion === 'borrar-prueba') {
+      const g = await calendar(`/${encodeURIComponent(c.evento)}`);
+      const ev = await g.json();
+      if (!String(ev.summary ?? '').startsWith('PRUEBA')) return json({ ok: false, error: 'Solo se borran eventos de PRUEBA' }, 400);
+      const r = await calendar(`/${encodeURIComponent(c.evento)}?sendUpdates=none`, { method: 'DELETE' });
+      return json({ ok: r.ok });
+    }
+
     if (c.accion !== 'buscar') return json({ ok: false, error: 'Acción desconocida' }, 400);
     const p = new URLSearchParams({ singleEvents: 'true', orderBy: 'startTime', maxResults: '20',
       timeMin: new Date(c.desde ?? Date.now()).toISOString(), ...(c.texto ? { q: String(c.texto) } : {}) });
