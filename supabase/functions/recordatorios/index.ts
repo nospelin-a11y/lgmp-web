@@ -15,6 +15,9 @@
 //  Quien se apunta tarde (menos de 3 h antes) no recibe el del día antes,
 //  pero sí el de la hora antes, que lleva el enlace.
 //
+//  También reintenta las invitaciones de Google Calendar pendientes
+//  (ver _shared/google-calendar.ts).
+//
 //  Además, en cada vuelta reintenta las altas en MailerLite que fallaron o
 //  que no llegaron a hacerse (ver _shared/mailerlite.ts), solo de eventos
 //  que todavía no han pasado.
@@ -31,6 +34,7 @@
 
 import { correoRecordatorio, inicioFin, type Evento, CORREO_LGMP } from '../_shared/eventos.ts';
 import { altaEnMailerLite, mailerLiteConfigurado } from '../_shared/mailerlite.ts';
+import { invitar, googleConectado } from '../_shared/google-calendar.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SECRETA      = Deno.env.get('CLAVE_SECRETA') ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
@@ -132,6 +136,30 @@ async function reintentarMailerLite(): Promise<number> {
   return hechas;
 }
 
+/** Reintenta invitaciones de Google Calendar pendientes o fallidas (máx. 25). */
+async function reintentarGoogle(): Promise<number> {
+  if (!(await googleConectado())) return 0;        // cuenta sin conectar: nada que hacer
+  const hace2min = new Date(Date.now() - 2 * 60000).toISOString();
+  const ayer = new Date(Date.now() - 24 * H).toISOString().slice(0, 10);
+  const filas: { id: number; email: string | null; eventos: { google_evento_id: string | null } }[] =
+    await db('inscripciones_evento?select=id,email,eventos!inner(google_evento_id,fecha)' +
+      '&or=(google_estado.is.null,google_estado.eq.error)' +
+      `&creado_en=lt.${hace2min}&eventos.google_evento_id=not.is.null&eventos.fecha=gte.${ayer}` +
+      '&order=id&limit=25');
+  let hechas = 0;
+  for (const f of filas) {
+    if (!f.email || !f.eventos?.google_evento_id) continue;
+    const res = await invitar(f.eventos.google_evento_id, f.email);
+    await db(`inscripciones_evento?id=eq.${f.id}`, {
+      method: 'PATCH', headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({ google_estado: res.estado, google_detalle: res.detalle,
+                             google_en: new Date().toISOString() }),
+    });
+    if (res.estado === 'ok') hechas++;
+  }
+  return hechas;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ ok: false }, 405);
   if (!CLAVE || req.headers.get('x-clave') !== CLAVE) return json({ ok: false, error: 'No autorizado' }, 401);
@@ -187,6 +215,13 @@ Deno.serve(async (req) => {
   } catch (e) {
     console.error('Reintento MailerLite:', e);
     errores.push(`mailerlite: ${e instanceof Error ? e.message : e}`);
+  }
+  try {
+    const n = await reintentarGoogle();
+    if (n) hecho.google = n;
+  } catch (e) {
+    console.error('Reintento Google:', e);
+    errores.push(`google: ${e instanceof Error ? e.message : e}`);
   }
   for (const ev of eventos) {
     const t = inicioFin(ev);

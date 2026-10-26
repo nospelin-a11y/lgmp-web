@@ -363,6 +363,9 @@ const SECCIONES = [
       { c:'perfil', t:'Situación', tipo:'lista' },
       { c:'sector', t:'Estudios' },
       { c:'comentario', t:'Pregunta' },
+      { c:'google_estado', t:'Calendario', tipo:'lista', pill:true,
+        fmt:v => ({ ok:'Invitado', error:'Error: se reintenta' })[v] || '—',
+        clase:v => v === 'Invitado' ? 'ok' : v === 'Error: se reintenta' ? 'mal' : '' },
       { c:'mailerlite_estado', t:'MailerLite', tipo:'lista', pill:true,
         fmt:v => ({ ok:'Dentro', baja:'Baja: no se toca', error:'Error: se reintenta' })[v] || '—',
         clase:v => v === 'Dentro' ? 'ok' : v === 'Error: se reintenta' ? 'mal' : '' },
@@ -407,6 +410,8 @@ const SECCIONES = [
       { c:'imagen_url', t:'Imagen para compartir', tipo:'text', ayuda:'La que sale al pegar el enlace en WhatsApp o LinkedIn. 1200 × 630 px, subida a /assets/. Ej.: /assets/eventos/mi-evento.jpg. Vacío: el logo de la Asociación.' },
       { c:'recordatorios', t:'Mandar recordatorios por correo (el día antes y 1 hora antes)', tipo:'bool',
         ayuda:'Solo a quien se inscriba desde la web. Necesita la hora de inicio. Ojo: el plan gratuito de Resend manda 100 correos al día.' },
+      { c:'google_evento_id', t:'Evento de Google Calendar (id)', tipo:'text',
+        ayuda:'Si lo rellenas, cada inscrito se añade como invitado a ese evento del calendario de juanfranciscolopezharo@gmail.com (sin ver a los demás invitados). Pídele a Claude que lo busque. Vacío: no se invita a nadie.' },
       { c:'mailerlite_grupo', t:'Grupo de MailerLite (id)', tipo:'text',
         ayuda:'Id numérico del grupo del evento en MailerLite (Suscriptores → Grupos). Si lo rellenas, cada inscrito entra en ese grupo, y también en web-asociacion solo si marcó la casilla de novedades. Vacío: no se manda a MailerLite.' },
       { c:'enlace_reunion', t:'Enlace de la videollamada (privado)', tipo:'text',
@@ -843,7 +848,9 @@ const ETIQUETAS = {
   socio_id:'Ficha de socio', solicitud_id:'Solicitud de origen', id:'Id',
   evento_id:'Id del evento', recordatorio_dia_en:'Recordatorio del día antes',
   recordatorio_hora_en:'Recordatorio de 1 h antes', mailerlite_estado:'MailerLite',
-  mailerlite_detalle:'MailerLite · detalle', mailerlite_en:'MailerLite · última vez'
+  mailerlite_detalle:'MailerLite · detalle', mailerlite_en:'MailerLite · última vez',
+  google_estado:'Google Calendar', google_detalle:'Google Calendar · detalle',
+  google_en:'Google Calendar · última vez', google_evento_id:'Evento de Google Calendar'
 };
 
 function formatoDato(k, v){

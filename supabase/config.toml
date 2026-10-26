@@ -20,3 +20,8 @@ verify_jwt = false
 # x-clave; la propia función la compara con el secreto RECORDATORIOS_CLAVE.
 [functions.recordatorios]
 verify_jwt = false
+
+# Conexión de la cuenta de Google (pantalla de permiso y su vuelta). La
+# protege la clave de los recordatorios y un "state" firmado.
+[functions.google-calendar]
+verify_jwt = false

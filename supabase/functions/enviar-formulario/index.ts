@@ -31,6 +31,7 @@
 
 import { correoConfirmacion, type Evento } from '../_shared/eventos.ts';
 import { altaEnMailerLite } from '../_shared/mailerlite.ts';
+import { invitar } from '../_shared/google-calendar.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SERVICE_ROLE = Deno.env.get('CLAVE_SECRETA') ??
@@ -301,7 +302,7 @@ async function rpc(nombre: string, args: Record<string, unknown>) {
 
 /** Evento por id, con la clave secreta (incluye columnas que la web no ve). */
 async function leerEvento(id: number): Promise<Evento | null> {
-  const cols = 'id,titulo,fecha,hora,lugar,modalidad,slug,publicado,recordatorios,enlace_reunion,mailerlite_grupo';
+  const cols = 'id,titulo,fecha,hora,lugar,modalidad,slug,publicado,recordatorios,enlace_reunion,mailerlite_grupo,google_evento_id';
   const r = await fetch(`${SUPABASE_URL}/rest/v1/eventos?select=${cols}&id=eq.${id}`, {
     headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` },
   });
@@ -718,8 +719,35 @@ Deno.serve(async (req) => {
     if (rt?.waitUntil) rt.waitUntil(tarea); else await tarea;
   }
 
+  // Invitado en el evento de Google Calendar (también en segundo plano y
+  // con reintentos en `recordatorios`; ver _shared/google-calendar.ts).
+  if (evento?.google_evento_id) {
+    const tarea = sincronizarGoogle(evento.id, evento.google_evento_id, String(preparado.fila.email))
+      .catch((e) => console.error('Google Calendar (en segundo plano):', e));
+    // deno-lint-ignore no-explicit-any
+    const rt = (globalThis as any).EdgeRuntime;
+    if (rt?.waitUntil) rt.waitUntil(tarea); else await tarea;
+  }
+
   return responder({ ok: true }, 200, origen);
 });
+
+/** Invita en Google Calendar y apunta el resultado en la inscripción. */
+async function sincronizarGoogle(eventoId: number, eventoGoogle: string, email: string) {
+  const res = await invitar(eventoGoogle, email);
+  if (res.estado !== 'ok') console.warn('Google Calendar:', res.detalle);
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/inscripciones_evento` +
+    `?evento_id=eq.${eventoId}&email=eq.${encodeURIComponent(email)}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}`,
+      'Content-Type': 'application/json', Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({ google_estado: res.estado, google_detalle: res.detalle,
+                           google_en: new Date().toISOString() }),
+  });
+  if (!r.ok) console.error('No se pudo apuntar el resultado de Google:', r.status, await r.text());
+}
 
 /** Da de alta en MailerLite y apunta el resultado en la inscripción. */
 async function sincronizarMailerLite(eventoId: number, grupo: string, fila: Record<string, unknown>) {

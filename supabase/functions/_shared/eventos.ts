@@ -21,6 +21,7 @@ export type Evento = {
   publicado?: boolean;
   recordatorios?: boolean;
   mailerlite_grupo?: string | null;   // id del grupo de MailerLite del evento
+  google_evento_id?: string | null;   // id del evento en Google Calendar
   enlace_reunion?: string | null;
 };
 
