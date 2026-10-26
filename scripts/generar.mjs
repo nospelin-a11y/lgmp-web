@@ -30,10 +30,15 @@ const CLAVE  = process.env.SUPABASE_ANON || 'sb_publishable_hyev91V4OhpAo79Ox7vq
 
 // Fecha de hoy en formato ISO: se compara como texto con `eventos.fecha`,
 // que es un `date` y viene como 'AAAA-MM-DD'.
-const HOY = new Date().toISOString().slice(0, 10);
+// LGMP_HOY permite generar como si fuera otro dia, para comprobar que el
+// relevo de la portada ocurre cuando toca. Sin la variable, hoy.
+const HOY = process.env.LGMP_HOY || new Date().toISOString().slice(0, 10);
 
 const ESC = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' };
 const e = t => String(t ?? '').replace(/[&<>"]/g, c => ESC[c]);
+
+const DIAS = ['Domingo','Lunes','Martes','Mi\u00e9rcoles','Jueves','Viernes','S\u00e1bado'];
+const diaSemana = f => new Date(Date.parse(f + 'T12:00:00Z')).getUTCDay();
 
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio',
@@ -90,7 +95,7 @@ function tarjetaSocio(s) {
 /* Columnas de `eventos` que puede leer la clave pública. El enlace de la
    videollamada (`enlace_reunion`) es privado y no está en la lista. */
 const COLS_EVENTOS = 'id,creado_en,titulo,fecha,hora,lugar,descripcion,url_inscripcion,' +
-                     'publicado,slug,cuerpo,modalidad,imagen_url,recordatorios,aviso_inscripcion';
+                     'publicado,slug,cuerpo,modalidad,imagen_url,recordatorios,aviso_inscripcion,cartel_url';
 
 // Las imágenes para compartir tienen que ir con la dirección completa.
 const absoluta = u => (u && u.startsWith('/') ? BASE + u : u);
@@ -164,7 +169,7 @@ function ics(ev, url) {
    Plantilla de una página individual
    --------------------------------------------------------------------- */
 
-function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta, arriba, apunte, galeria }) {
+function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, cta, arriba, apunte, galeria, cartel }) {
   const ld = tipo === 'evento'
     ? { '@type':'Event', name:titulo, description:descripcion,
         startDate: momento(meta.fecha, meta.hora, 0),
@@ -236,6 +241,10 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
   .art .arriba{margin:26px 0 0}
   .apunte{scroll-margin-top:16px}
   .art .portada{width:100%;border-radius:20px;margin:32px 0 0;display:block}
+  /* El cartel es vertical: a lo ancho de la columna dejaria el texto a dos
+     pantallas de distancia, asi que se queda en una franja centrada. */
+  .art .cartel{display:block;width:100%;max-width:420px;margin:30px auto 0;border-radius:18px;
+               border:1px solid rgba(30,42,74,.08)}
   .art .hecho{display:inline-block;margin-left:10px;vertical-align:2px;background:#1E2A4A;color:#ffffff;
               border-radius:999px;padding:4px 12px;font-size:11px;letter-spacing:.12em}
 
@@ -343,6 +352,7 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
       ${meta.nota ? `<p class="nota">${e(meta.nota)}</p>` : ''}
       ${arriba ? `<div class="arriba">${arriba}</div>` : ''}
       ${imagen && tipo !== 'evento' ? `<img class="portada" src="${e(imagen)}" alt="${e(titulo)}">` : ''}
+      ${cartel ? `<img class="cartel" src="${e(cartel)}" alt="Cartel de ${e(titulo)}" decoding="async">` : ''}
     </div>
     ${galeria ? medios(galeria, titulo) : ''}
     <div class="cuerpo">${cuerpo || `<p>${e(descripcion)}</p>`}</div>
@@ -607,6 +617,70 @@ function medios({ video, cartel, fotos }, titulo) {
 }
 
 /* ---------------------------------------------------------------------
+   Tarjeta del proximo evento en la portada
+
+   Se genera sola para que no se quede nunca anunciando algo que ya paso.
+   Coge el **siguiente** evento, no el de hoy: el dia que un evento se
+   celebra ya no hay nada que planear, y lo util es ver el siguiente.
+   Si no hubiera ninguno por delante, se queda con el mas cercano antes
+   que dejar el hueco vacio.
+   --------------------------------------------------------------------- */
+
+function proximoEvento(eventos) {
+  const porFecha = [...eventos].filter(x => x.slug).sort((a, b) => a.fecha < b.fecha ? -1 : 1);
+  return porFecha.find(x => String(x.fecha) > HOY)
+      || porFecha.find(x => String(x.fecha) >= HOY)
+      || null;
+}
+
+function tarjetaPortada(ev) {
+  if (!ev) return `
+        <div style="position:relative;max-width:820px;margin:0 auto;text-align:center">
+          <p style="font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;margin:0 0 16px">Actividades</p>
+          <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(28px,4vw,44px);line-height:1.1;color:#ffffff;margin:0">Estamos preparando lo siguiente</h2>
+          <div style="display:flex;justify-content:center;margin-top:30px">
+            <a href="/actividades/" style="background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:16px 44px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-3px)">Ver las actividades</a>
+          </div>
+        </div>`;
+
+  const p = partes(ev.fecha);
+  const ruta = `/eventos/${e(ev.slug)}/`;
+  const online = ev.modalidad === 'online';
+  const cuando = `${DIAS[diaSemana(ev.fecha)]} ${p.dia} de ${p.mesLargo}${ev.hora ? ' \u00b7 ' + e(ev.hora) + ' h' : ''}`;
+  const donde = ev.lugar || (online ? 'Online' : 'Murcia');
+
+  // Sin inscripcion propia no hay boton de apuntarse: seria mentir.
+  const principal = ev.aviso_inscripcion
+    ? `<a href="${ruta}" style="background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:16px 44px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-3px)">Ver el evento</a>`
+    : `<a href="${ev.url_inscripcion ? e(ev.url_inscripcion) : ruta + '#apuntarme'}" style="background:#F0503C;color:#ffffff;font-family:'Nunito',sans-serif;font-weight:800;font-size:17px;padding:16px 44px;border-radius:999px;box-shadow:0 8px 24px rgba(240,80,60,.4);transition:transform .2s" style-hover="color:#ffffff;transform:translateY(-3px)">Ap\u00fantate</a>`;
+
+  const secundario = ev.aviso_inscripcion
+    ? `<a href="/actividades/" style="color:rgba(255,255,255,.8);font-family:'Nunito',sans-serif;font-weight:700;font-size:15.5px" style-hover="color:#ffffff">Todas las actividades \u2192</a>`
+    : `<a href="${ruta}" style="color:rgba(255,255,255,.8);font-family:'Nunito',sans-serif;font-weight:700;font-size:15.5px" style-hover="color:#ffffff">Ver el programa \u2192</a>`;
+
+  const cartel = ev.cartel_url ? `
+          <a href="${ruta}" style="display:block;border-radius:16px;overflow:hidden;box-shadow:0 18px 44px rgba(0,0,0,.35);transition:transform .25s" style-hover="transform:translateY(-4px)">
+            <img src="${e(ev.cartel_url)}" alt="Cartel de ${e(ev.titulo)}" style="width:100%;height:auto;display:block">
+          </a>` : '';
+
+  return `
+        <div class="lg-evento" style="position:relative;max-width:1040px;margin:0 auto;display:grid;grid-template-columns:${cartel ? 'minmax(0,290px) minmax(0,1fr)' : 'minmax(0,1fr)'};gap:clamp(26px,4vw,54px);align-items:center;text-align:left">${cartel}
+          <div>
+            <p style="font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#F0503C;margin:0 0 14px">Pr\u00f3ximo evento \u00b7 ${p.dia} de ${p.mesLargo}${online ? ' \u00b7 Online' : ''}</p>
+            <h2 style="font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(30px,4.4vw,50px);line-height:1.08;color:#ffffff;margin:0">${e(ev.titulo)}</h2>
+            <p style="font-size:clamp(16px,1.7vw,18.5px);line-height:1.6;color:rgba(255,255,255,.78);margin:20px 0 0">${e(ev.descripcion || resumir(ev.cuerpo, 220) || '')}</p>
+            <p style="font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;line-height:1.55;color:#ffffff;margin:22px 0 0">${cuando}<br><span style="font-weight:400;color:rgba(255,255,255,.7)">${e(donde)}</span></p>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:30px">
+              ${principal}
+              ${secundario}
+            </div>${ev.aviso_inscripcion ? `
+            <p style="font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.55);margin:26px 0 0">${e(ev.aviso_inscripcion)}</p>` : ''}
+          </div>
+        </div>
+      `;
+}
+
+/* ---------------------------------------------------------------------
    Tarjetas de los listados
    --------------------------------------------------------------------- */
 
@@ -721,6 +795,8 @@ async function main() {
                       realizado: String(ev.fecha) < HOY,
                       nota: ev.aviso_inscripcion || null },
                cuerpo:aHtml(ev.cuerpo), imagen:ev.imagen_url,
+               // Con fotos del evento manda la galer\u00eda: el cartel ya no aporta.
+               cartel: galeria ? null : ev.cartel_url,
                cta: arriba ? '' : cta, arriba, apunte, galeria }));
     escritas.push(`/eventos/${ev.slug}/`);
   }
@@ -755,6 +831,13 @@ async function main() {
                    : '\n        <p style="font-size:16px;color:rgba(30,42,74,.7);margin:0">Estamos preparando las próximas actividades. Te las contamos en cuanto haya fecha.</p>\n      ');
   html = entreMarcas(html, 'NOTICIAS', seccionNoticias(noticias));
   await writeFile(act, html);
+
+  // Tarjeta del pr\u00f3ximo evento en la portada
+  const portada = join(RAIZ, 'index.html');
+  const siguiente = proximoEvento(eventos);
+  await writeFile(portada,
+    entreMarcas(await readFile(portada, 'utf8'), 'PORTADA', tarjetaPortada(siguiente)));
+  console.log(`Portada: ${siguiente ? siguiente.titulo + ' (' + siguiente.fecha + ')' : 'sin evento'}`);
 
   // Página de socios. Si la consulta viniera vacía (fallo o nadie marcado),
   // se deja la página como está para no publicar una lista en blanco.
