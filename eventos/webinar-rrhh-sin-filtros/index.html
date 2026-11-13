@@ -145,11 +145,11 @@
 <main>
   <article>
     <div class="art">
-      <p class="kicker">Evento online · Gratis</p>
+      <p class="kicker">Evento online · Gratis<span class="hecho">REALIZADO</span></p>
       <h1>WEBINAR LGMP: Recursos Humanos sin filtros</h1>
       <p class="meta">12 de noviembre de 2026 · 19:00 a 20:00 · Online · Google Meet</p>
       
-      <div class="arriba"><a class="apuntarse" href="#apuntarme">Apúntate</a></div>
+      
       
       <img class="cartel" src="/assets/eventos/cartel-webinar-12-noviembre-2026.webp" alt="Cartel de WEBINAR LGMP: Recursos Humanos sin filtros" decoding="async">
     </div>
@@ -191,141 +191,6 @@
       <a class="volver" href="/actividades/">← Volver a Actividades</a>
     </div>
     
-    <section class="apunte" id="apuntarme">
-      <div class="caja">
-        <div id="exito" class="exito oculto">
-          <h2 id="exitoTitulo">¡Estás dentro!</h2>
-          <p id="exitoTexto">Te hemos mandado un correo con el enlace para entrar. Si no lo ves, mira en spam.</p>
-          <div class="calendario">
-            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;dates=20261112T180000Z/20261112T190000Z&amp;text=WEBINAR+LGMP%3A+Recursos+Humanos+sin+filtros&amp;details=https%3A%2F%2Flageneracionmejorpreparada.com%2Feventos%2Fwebinar-rrhh-sin-filtros%2F&amp;location=Online+%C2%B7+Google+Meet&amp;ctz=Europe%2FMadrid" target="_blank" rel="noopener">Añadir a Google Calendar</a>
-            <a href="/eventos/webinar-rrhh-sin-filtros/evento.ics" download>Outlook o Apple (.ics)</a>
-          </div>
-        </div>
-
-        <form id="formEvento" novalidate>
-          <h2>Apúntate</h2>
-          <p class="sub">Es gratis y online. Al apuntarte te mandamos por correo el enlace para entrar.</p>
-
-          <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
-
-          <div class="campo">
-            <label for="nombre">Nombre y apellidos</label>
-            <input type="text" id="nombre" name="nombre" autocomplete="name" required>
-          </div>
-
-          <div class="campo">
-            <label for="email">Correo electrónico</label>
-            <input type="email" id="email" name="email" autocomplete="email" required>
-          </div>
-
-          <div class="campo">
-            <label for="perfil">¿En qué momento estás?</label>
-            <select id="perfil" name="perfil" required>
-              <option value="">Elige una opción</option>
-              <option>Estudiante</option>
-              <option>Recién graduado/a</option>
-              <option>1-3 años de experiencia</option>
-              <option>Otro</option>
-            </select>
-          </div>
-
-          <div class="campo">
-            <label for="sector">¿Qué estudias o estudiaste? <span class="opt">(opcional)</span></label>
-            <input type="text" id="sector" name="sector" placeholder="Ej.: ADE, Derecho, Enfermería, FP de Marketing…">
-          </div>
-
-          <div class="campo">
-            <label for="comentario">Tu pregunta para los ponentes <span class="opt">(opcional)</span></label>
-            <textarea id="comentario" name="comentario" maxlength="1000" placeholder="Si quieres que respondan algo en concreto, escríbelo aquí."></textarea>
-            <p class="pista">Se la pasamos a los ponentes con tu nombre, sin tu correo.</p>
-          </div>
-
-          <label class="check">
-            <input type="checkbox" id="rgpd" required>
-            <span>He leído y acepto la <a href="/privacidad/" target="_blank" rel="noopener">Política de Privacidad</a> y el tratamiento de mis datos para gestionar mi inscripción.</span>
-          </label>
-
-          <label class="check">
-            <input type="checkbox" id="marketing">
-            <span>Quiero recibir novedades de la asociación.</span>
-          </label>
-
-          <p id="error" class="error oculto"></p>
-          <button type="submit" id="enviar" class="btn">Apuntarme</button>
-        </form>
-      </div>
-    </section>
-
-<script src="/lgmp-datos.js"></script>
-<script>
-(function(){
-  var form  = document.getElementById('formEvento');
-  var exito = document.getElementById('exito');
-  var error = document.getElementById('error');
-  var boton = document.getElementById('enviar');
-  var online = true;
-
-  function fallo(msg){
-    error.textContent = msg;
-    error.classList.remove('oculto');
-    boton.disabled = false;
-    boton.textContent = 'Apuntarme';
-  }
-
-  form.addEventListener('submit', function(ev){
-    ev.preventDefault();
-    error.classList.add('oculto');
-
-    var tel = form.telefono ? form.telefono.value.trim() : '';
-
-    if (!form.nombre.value.trim())
-      return fallo('Escribe tu nombre y apellidos.');
-    // Ojo: esto va dentro de una plantilla de texto de JavaScript, así que
-    // las barras invertidas van dobles para que lleguen a la página.
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.value.trim()))
-      return fallo('Escribe un correo electrónico válido.');
-    // El teléfono es opcional, pero si lo escribe que sea uno de verdad.
-    if (tel && tel.replace(/\D/g,'').length < 9)
-      return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
-    if (!form.perfil.value)
-      return fallo('Dinos en qué momento estás.');
-    if (!document.getElementById('rgpd').checked)
-      return fallo('Debes aceptar la Política de Privacidad para continuar.');
-
-    boton.disabled = true;
-    boton.textContent = 'Apuntándote…';
-
-    var datos = {
-      evento_id: 6,
-      evento:    "WEBINAR LGMP: Recursos Humanos sin filtros · 12 de noviembre de 2026",
-      nombre:    form.nombre.value,
-      email:     form.email.value,
-      perfil:    form.perfil.value,
-      acepta_comunicaciones: document.getElementById('marketing').checked
-    };
-    if (online) {
-      datos.sector = form.sector.value;
-      datos.comentario = form.comentario.value;
-    } else {
-      datos.telefono = tel;
-    }
-
-    window.LGMP.llamar('inscripcion-evento', datos, form.trampa.value)
-    .then(function(r){
-      if (r && r.ya_inscrito) {
-        document.getElementById('exitoTitulo').textContent = 'Ya estabas en la lista';
-        document.getElementById('exitoTexto').textContent =
-          'Este correo ya está inscrito, no hace falta que te apuntes otra vez. ' +
-          'Si no encuentras el correo de confirmación, mira en spam o escríbenos a ' + window.LGMP.correo + '.';
-      }
-      form.classList.add('oculto');
-      exito.classList.remove('oculto');
-      exito.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    })
-    .catch(function(err){ fallo(err.message); });
-  });
-})();
-</script>
   </article>
 </main>
 
