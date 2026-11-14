@@ -258,6 +258,13 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
   .media .fotos img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s}
   .media .fotos a:hover img{transform:scale(1.05)}
   .media .pie{font-size:13.5px;line-height:1.5;color:rgba(30,42,74,.6);margin:14px 0 0}
+  .charlas{max-width:760px;margin:34px auto 0;padding:0 28px}
+  .charlas h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(22px,3vw,27px);margin:0 0 6px}
+  .charlas .sub{font-size:15.5px;line-height:1.6;color:rgba(30,42,74,.72);margin:0 0 22px}
+  .charla{margin:0 0 30px}
+  .charla video{width:100%;display:block;border-radius:16px;background:#000;aspect-ratio:16/9}
+  .charla h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:19px;color:#1E2A4A;margin:14px 0 2px}
+  .charla p{font-size:14.5px;color:rgba(30,42,74,.65);margin:0}
   .cuerpo{max-width:760px;margin:0 auto;padding:28px 28px 0;font-size:17px;line-height:1.75;color:rgba(30,42,74,.85)}
   .cuerpo h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:24px;color:#1E2A4A;margin:36px 0 12px}
   .cuerpo h3{font-family:'Nunito',sans-serif;font-weight:800;font-size:19px;color:#1E2A4A;margin:28px 0 10px}
@@ -322,6 +329,7 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
     .art{padding:36px 20px 0} .cuerpo{padding:20px 20px 0;font-size:16px} .cierre{padding:14px 20px 0}
     /* El vídeo es vertical: a lo ancho del móvil empuja las fotos fuera de la vista. */
     .media{padding:0 20px} .media .fila{grid-template-columns:1fr;gap:14px}
+    .charlas{padding:0 20px}
     .media video{max-width:300px;margin:0 auto}
     .cuerpo h2{font-size:21px;margin-top:30px} .cuerpo h3{font-size:17.5px}
     .apunte{padding:0 12px;margin-top:32px} .apunte .caja{border-radius:20px;padding:24px 18px}
@@ -582,16 +590,47 @@ async function leerGaleria(slug) {
   const archivos = (await readdir(carpeta)).sort();
   const fotos = archivos.filter(f => f.startsWith('foto-') && IMAGENES.test(f));
   const video = archivos.includes('resumen.mp4');
-  if (!fotos.length && !video) return null;
   const base = `/assets/eventos/${slug}/`;
+  // charlas.json: [{ "archivo": "charla-sandra.mp4", "titulo": "…", "ponente": "…" }]
+  // Cada charla puede llevar su cartel con el mismo nombre en .jpg.
+  let charlas = [];
+  if (archivos.includes('charlas.json')) {
+    const lista = JSON.parse(await readFile(join(carpeta, 'charlas.json'), 'utf8'));
+    charlas = lista.filter(c => archivos.includes(c.archivo)).map(c => {
+      const cartel = c.archivo.replace(/\.mp4$/i, '.jpg');
+      return { ...c, video: base + c.archivo, cartel: archivos.includes(cartel) ? base + cartel : null };
+    });
+  }
+  if (!fotos.length && !video && !charlas.length) return null;
   return {
+    charlas,
     video:  video ? base + 'resumen.mp4' : null,
     cartel: archivos.includes('resumen.jpg') ? base + 'resumen.jpg' : null,
     fotos:  fotos.map(f => base + f),
   };
 }
 
-function medios({ video, cartel, fotos }, titulo) {
+/* Charlas completas en horizontal (webinars). Van antes de fotos y resumen. */
+function bloqueCharlas(charlas) {
+  if (!charlas.length) return '';
+  return `
+    <section class="charlas" id="charlas">
+      <h2>${charlas.length > 1 ? 'Las charlas completas' : 'La charla completa'}</h2>
+      <p class="sub">Por si no pudiste venir, o quieres volver a verlas.</p>
+      ${charlas.map(c => `
+      <div class="charla">
+        <video controls preload="none" playsinline${c.cartel ? ` poster="${e(c.cartel)}"` : ''}>
+          <source src="${e(c.video)}" type="video/mp4">
+          Tu navegador no puede reproducir el vídeo. <a href="${e(c.video)}">Descárgalo aquí</a>.
+        </video>
+        <h3>${e(c.titulo)}</h3>
+        ${c.ponente ? `<p>${e(c.ponente)}</p>` : ''}
+      </div>`).join('')}
+    </section>`;
+}
+
+function medios({ video, cartel, fotos, charlas = [] }, titulo) {
+  if (!video && !fotos.length) return bloqueCharlas(charlas);
   const galeriaFotos = fotos.length
     ? `<div class="fotos">${fotos.map((f, i) => `
           <a href="${e(f)}" target="_blank" rel="noopener" aria-label="Foto ${i + 1} del evento, a tamaño completo">
@@ -609,7 +648,7 @@ function medios({ video, cartel, fotos }, titulo) {
     ? `<div class="fila">${reproductor}${galeriaFotos}</div>`
     : reproductor + galeriaFotos;
 
-  return `
+  return bloqueCharlas(charlas) + `
     <section class="media">
       ${dentro}
       <p class="pie">Fotos y vídeo del evento. Pulsa una foto para verla a tamaño completo.</p>
