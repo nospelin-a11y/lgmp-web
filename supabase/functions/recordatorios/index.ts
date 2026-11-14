@@ -181,10 +181,18 @@ Deno.serve(async (req) => {
   // {"enviar":{"ids":[2,3],"asunto":"…","html":"…","texto":"…"}}. En html y
   // texto, {nombre} se cambia por el nombre de pila. Siempre con copia a hola@.
   if (cuerpo?.enviar) {
-    const { ids, asunto, html, texto } = cuerpo.enviar;
+    // En vez de ids se puede pasar "destinatarios": [{"nombre","email"}] (p. ej. socios).
+    const { ids, destinatarios, asunto, html, texto } = cuerpo.enviar;
     const lista = (Array.isArray(ids) ? ids : []).map(Number).filter(Number.isInteger);
-    if (!lista.length || !asunto || !html) return json({ ok: false, error: 'Faltan ids, asunto o html' }, 400);
-    const gente: Inscrito[] = await db(`inscripciones_evento?select=id,nombre,email&id=in.(${lista.join(',')})`);
+    const directos: Inscrito[] = (Array.isArray(destinatarios) ? destinatarios : [])
+      .filter((d: { email?: string }) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(d?.email ?? '')))
+      .map((d: { nombre?: string; email: string }, i: number) => ({ id: -1 - i, nombre: d.nombre ?? '', email: d.email }));
+    if ((!lista.length && !directos.length) || !asunto || !html) {
+      return json({ ok: false, error: 'Faltan destinatarios, asunto o html' }, 400);
+    }
+    const gente: Inscrito[] = lista.length
+      ? await db(`inscripciones_evento?select=id,nombre,email&id=in.(${lista.join(',')})`) : directos;
+    const clave = lista.length ? lista.join('-') : `${directos.length}-${directos[0].email}`;
     const correos = gente.filter((p) => p.email).map((p) => {
       const nombre = String(p.nombre ?? '').trim().split(/\s+/)[0] || 'hola';
       return { from: REMITENTE, to: [String(p.email)], cc: [CORREO_LGMP], reply_to: CORREO_LGMP,
@@ -194,7 +202,7 @@ Deno.serve(async (req) => {
     const r = await fetch('https://api.resend.com/emails/batch', {
       method: 'POST',
       headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json',
-                 'Idempotency-Key': `lgmp-puntual-${lista.join('-')}-${asunto}`.slice(0, 250) },
+                 'Idempotency-Key': `lgmp-puntual-${clave}-${asunto}`.slice(0, 250) },
       body: JSON.stringify(correos),
     });
     return json({ ok: r.ok, enviados: r.ok ? correos.length : 0, resend: await r.json().catch(() => null) }, r.ok ? 200 : 502);
