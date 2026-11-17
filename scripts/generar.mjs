@@ -95,7 +95,8 @@ function tarjetaSocio(s) {
 /* Columnas de `eventos` que puede leer la clave pública. El enlace de la
    videollamada (`enlace_reunion`) es privado y no está en la lista. */
 const COLS_EVENTOS = 'id,creado_en,titulo,fecha,hora,lugar,descripcion,url_inscripcion,' +
-                     'publicado,slug,cuerpo,modalidad,imagen_url,recordatorios,aviso_inscripcion,cartel_url';
+                     'publicado,slug,cuerpo,modalidad,imagen_url,recordatorios,aviso_inscripcion,cartel_url,' +
+                     'aforo,acompanantes_max';
 
 // Las imágenes para compartir tienen que ir con la dirección completa.
 const absoluta = u => (u && u.startsWith('/') ? BASE + u : u);
@@ -285,7 +286,7 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
   .apunte .caja{background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:24px;padding:clamp(26px,4.5vw,40px)}
   .apunte h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(22px,3vw,27px);margin:0 0 8px}
   .apunte .sub{font-size:16px;line-height:1.6;color:rgba(30,42,74,.72);margin:0 0 26px}
-  .apunte .fila{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .apunte .fila{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
   .apunte .campo{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
   .apunte .fila .campo{margin-bottom:0}
   .apunte label{font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:#1E2A4A}
@@ -303,6 +304,7 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
     background-repeat:no-repeat;background-position:right 18px center}
   .apunte textarea{min-height:110px;resize:vertical;line-height:1.55}
   .apunte .pista{font-size:13.5px;color:rgba(30,42,74,.55);margin:0}
+  .apunte .plazas{display:inline-block;background:rgba(240,80,60,.1);color:#F0503C;font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px;border-radius:999px;padding:7px 16px;margin:0 0 22px}
   .apunte input:focus,.apunte select:focus,.apunte textarea:focus{border-color:#F0503C;background-color:#ffffff}
   .apunte .calendario{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 4px}
   .apunte .calendario a{font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px;padding:11px 22px;
@@ -324,7 +326,7 @@ function pagina({ tipo, titulo, descripcion, url, kicker, meta, cuerpo, imagen, 
   .apunte .exito p{font-size:16.5px;line-height:1.65;color:rgba(30,42,74,.75);margin:0 auto;max-width:440px}
   .oculto{display:none !important}
   @media (max-width:640px){
-    .apunte .fila{grid-template-columns:1fr;gap:0} .apunte .fila .campo{margin-bottom:16px}
+    .apunte .fila{grid-template-columns:1fr;gap:0;margin-bottom:0} .apunte .fila .campo{margin-bottom:16px}
     .cab{padding:16px 0} .cab .cont{padding:0 20px} .cab img{height:40px}
     .art{padding:36px 20px 0} .cuerpo{padding:20px 20px 0;font-size:16px} .cierre{padding:14px 20px 0}
     /* El vídeo es vertical: a lo ancho del móvil empuja las fotos fuera de la vista. */
@@ -418,7 +420,39 @@ const desplegablePerfil = opciones => `
             </select>
           </div>`;
 
-function formulario({ id, evento, online, google, ics }) {
+// Eventos con acompañantes (eventos.acompanantes_max > 0): se pregunta si es
+// socio y con cuántos amigos viene. Con aforo, la página enseña las plazas
+// que quedan y la Edge Function no deja pasarse.
+function camposAcompanantes(max) {
+  const opciones = [`<option value="0">Vengo solo/a</option>`];
+  for (let i = 1; i <= max; i++) opciones.push(`<option value="${i}">Con ${i} amigo${i > 1 ? 's' : ''}</option>`);
+  return `
+          <div class="fila">
+            <div class="campo">
+              <label for="es_socio">¿Eres socio/a?</label>
+              <select id="es_socio" name="es_socio" required>
+                <option value="">Elige una opción</option>
+                <option>Sí</option>
+                <option>No</option>
+                <option>Aún no, pero quiero serlo</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="acompanantes">¿Vienes con amigos?</label>
+              <select id="acompanantes" name="acompanantes">
+                ${opciones.join('\n                ')}
+              </select>
+            </div>
+          </div>
+
+          <div class="campo oculto" id="campoAmigos">
+            <label for="acompanantes_nombres">Nombre y apellidos de tus amigos</label>
+            <input type="text" id="acompanantes_nombres" name="acompanantes_nombres" maxlength="300" placeholder="Ej.: Ana López, Luis Pérez">
+            <p class="pista">Para tenerlos en la lista. No hace falta que se apunten ellos.</p>
+          </div>`;
+}
+
+function formulario({ id, evento, online, google, ics, acompanantesMax = 0, aforo = null }) {
   const camposOnline = `${desplegablePerfil(SITUACIONES)}
 
           <div class="campo">
@@ -443,7 +477,7 @@ function formulario({ id, evento, online, google, ics }) {
               <input type="tel" id="telefono" name="telefono" autocomplete="tel" placeholder="Para el recordatorio por WhatsApp">
             </div>
           </div>
-${desplegablePerfil(PERFILES)}`;
+${desplegablePerfil(PERFILES)}${acompanantesMax ? camposAcompanantes(acompanantesMax) : ''}`;
 
   return `
     <section class="apunte" id="apuntarme">
@@ -459,12 +493,20 @@ ${desplegablePerfil(PERFILES)}`;
           </div>
         </div>
 
+        <div id="completo" class="exito oculto">
+          <h2>Ya no quedan plazas</h2>
+          <p>Hemos llenado el aforo. Si se libera alguna, la verás aquí. Para cualquier duda, escríbenos a <a href="mailto:hola@lageneracionmejorpreparada.com">hola@lageneracionmejorpreparada.com</a>.</p>
+        </div>
+
         <form id="formEvento" novalidate>
           <h2>Apúntate</h2>
           <p class="sub">${online
             ? 'Es gratis y online. Al apuntarte te mandamos por correo el enlace para entrar.'
-            : 'Es gratis. Déjanos tu correo y te avisamos unos días antes.'}</p>
-
+            : acompanantesMax
+              ? 'Apuntarse es gratis. Si vienes con amigos, apúntalos aquí también.'
+              : 'Es gratis. Déjanos tu correo y te avisamos unos días antes.'}</p>
+${aforo ? `          <p id="plazas" class="plazas oculto"></p>
+` : ''}
           <input type="text" name="trampa" class="oculto" tabindex="-1" autocomplete="off" aria-hidden="true">
 
           <div class="campo">
@@ -504,6 +546,34 @@ ${camposOnline}` : camposPresencial}
   var error = document.getElementById('error');
   var boton = document.getElementById('enviar');
   var online = ${online ? 'true' : 'false'};
+  var aforo = ${aforo ? Number(aforo) : 'null'};
+  var amigos = form.acompanantes;
+
+  // Con amigos, se piden sus nombres.
+  if (amigos) amigos.addEventListener('change', function(){
+    document.getElementById('campoAmigos').classList.toggle('oculto', amigos.value === '0');
+  });
+
+  // Plazas que quedan. Si no responde, el formulario sigue igual: la
+  // Edge Function es la que de verdad no deja pasarse del aforo.
+  if (aforo && window.LGMP && window.LGMP.plazasOcupadas) {
+    window.LGMP.plazasOcupadas(${Number(id)}).then(function(n){
+      if (n === null) return;
+      var libres = aforo - n;
+      if (libres <= 0) {
+        form.classList.add('oculto');
+        document.getElementById('completo').classList.remove('oculto');
+        return;
+      }
+      var p = document.getElementById('plazas');
+      p.textContent = libres === 1 ? 'Queda 1 plaza' : 'Quedan ' + libres + ' plazas';
+      p.classList.remove('oculto');
+      // No se ofrecen más amigos de los que caben.
+      if (amigos) Array.prototype.forEach.call(amigos.options, function(o){
+        if (Number(o.value) > libres - 1) o.disabled = true;
+      });
+    });
+  }
 
   function fallo(msg){
     error.textContent = msg;
@@ -529,6 +599,10 @@ ${camposOnline}` : camposPresencial}
       return fallo('Ese teléfono no parece válido. Déjalo en blanco si prefieres.');
     if (!form.perfil.value)
       return fallo('Dinos en qué momento estás.');
+    if (form.es_socio && !form.es_socio.value)
+      return fallo('Dinos si eres socio/a.');
+    if (amigos && amigos.value !== '0' && !form.acompanantes_nombres.value.trim())
+      return fallo('Escribe el nombre de los amigos que vienen contigo.');
     if (!document.getElementById('rgpd').checked)
       return fallo('Debes aceptar la Política de Privacidad para continuar.');
 
@@ -548,6 +622,11 @@ ${camposOnline}` : camposPresencial}
       datos.comentario = form.comentario.value;
     } else {
       datos.telefono = tel;
+    }
+    if (form.es_socio) datos.es_socio = form.es_socio.value;
+    if (amigos) {
+      datos.acompanantes = Number(amigos.value);
+      datos.acompanantes_nombres = amigos.value === '0' ? '' : form.acompanantes_nombres.value;
     }
 
     window.LGMP.llamar('inscripcion-evento', datos, form.trampa.value)
@@ -821,7 +900,9 @@ async function main() {
     const arriba = (abierto && !ev.url_inscripcion) ? cta : '';
     const apunte = (abierto && !ev.url_inscripcion)
       ? { id: ev.id, evento: `${ev.titulo} · ${fechaLarga(ev.fecha)}`, online,
-          google: urlGoogle(ev, url), ics: `/eventos/${ev.slug}/evento.ics` } : null;
+          google: urlGoogle(ev, url), ics: `/eventos/${ev.slug}/evento.ics`,
+          acompanantesMax: online ? 0 : Number(ev.acompanantes_max) || 0,
+          aforo: Number(ev.aforo) || null } : null;
     const galeria = await leerGaleria(ev.slug);
     await mkdir(join(RAIZ, 'eventos', ev.slug), { recursive: true });
     // Archivo de calendario (lo enlazan la página y el correo de confirmación)

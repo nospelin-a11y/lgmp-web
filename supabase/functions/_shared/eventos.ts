@@ -23,6 +23,8 @@ export type Evento = {
   mailerlite_grupo?: string | null;   // id del grupo de MailerLite del evento
   google_evento_id?: string | null;   // id del evento en Google Calendar
   enlace_reunion?: string | null;
+  aforo?: number | null;              // personas como máximo (inscritos + acompañantes)
+  acompanantes_max?: number | null;   // amigos que puede traer cada inscrito
 };
 
 const DIAS  = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -165,10 +167,14 @@ export function plantilla(titulo: string, cuerpoHtml: string, pie: string): stri
 
 export type Correo = { asunto: string; html: string; texto: string };
 
+/** «Ana», «Ana y Luis», «Ana, Luis y Marta». */
+const listaNombres = (n: string[]) =>
+  n.length < 2 ? n.join('') : `${n.slice(0, -1).join(', ')} y ${n[n.length - 1]}`;
+
 const FIRMA = 'Nos vemos,\nLa Junta de LGMP';
 
 /** Correo que recibe quien se acaba de inscribir. */
-export function correoConfirmacion(ev: Evento, nombre: string): Correo {
+export function correoConfirmacion(ev: Evento, nombre: string, acompanantes: string[] = []): Correo {
   const online = esOnline(ev);
   const google = urlGoogleCalendar(ev);
   const ics = urlIcs(ev);
@@ -185,6 +191,7 @@ export function correoConfirmacion(ev: Evento, nombre: string): Correo {
   const html = plantilla('Inscripción confirmada',
     parrafo(`Hola, ${nombre}:`) +
     parrafo(`Ya estás en la lista de «${ev.titulo}».`) +
+    (acompanantes.length ? parrafo(`Vienes con ${listaNombres(acompanantes)}: ya están apuntados contigo.`) : '') +
     fichaEvento(ev) +
     (aviso ? parrafo(aviso) : '') +
     (enlace
@@ -200,6 +207,7 @@ export function correoConfirmacion(ev: Evento, nombre: string): Correo {
   const texto = [
     `Hola, ${nombre}:`,
     `Ya estás en la lista de «${ev.titulo}».`,
+    ...(acompanantes.length ? [`Vienes con ${listaNombres(acompanantes)}: ya están apuntados contigo.`] : []),
     `Cuándo: ${fechaTexto(ev.fecha)}${horaTexto(ev) ? ', ' + horaTexto(ev) : ''}\nDónde: ${dondeTexto(ev)}`,
     ...(aviso ? [aviso + (enlace ? `\n${enlace}` : '')] : []),
     `Añadir a Google Calendar: ${google}` + (ics ? `\nArchivo para Outlook o Apple: ${ics}` : ''),

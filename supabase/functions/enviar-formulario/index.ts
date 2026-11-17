@@ -302,13 +302,18 @@ async function rpc(nombre: string, args: Record<string, unknown>) {
 
 /** Evento por id, con la clave secreta (incluye columnas que la web no ve). */
 async function leerEvento(id: number): Promise<Evento | null> {
-  const cols = 'id,titulo,fecha,hora,lugar,modalidad,slug,publicado,recordatorios,enlace_reunion,mailerlite_grupo,google_evento_id';
+  const cols = 'id,titulo,fecha,hora,lugar,modalidad,slug,publicado,recordatorios,enlace_reunion,mailerlite_grupo,google_evento_id,aforo,acompanantes_max';
   const r = await fetch(`${SUPABASE_URL}/rest/v1/eventos?select=${cols}&id=eq.${id}`, {
     headers: { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` },
   });
   if (!r.ok) throw new Error(`Leer evento ${id} (${r.status}): ${await r.text()}`);
   const filas = await r.json();
   return Array.isArray(filas) && filas[0] ? filas[0] : null;
+}
+
+/** Personas ya apuntadas a un evento (inscritos + acompañantes). */
+async function plazasOcupadas(eventoId: number): Promise<number> {
+  return Number(await rpc('plazas_ocupadas', { p_evento: eventoId })) || 0;
 }
 
 /** ¿Ya hay una inscripción con este correo en este evento? */
@@ -392,8 +397,15 @@ function preparar(tipo: string, d: Record<string, unknown>): Preparado {
     const como = txt(d.como_conocio, 80);
     const comentario = parrafo(d.comentario, 2000);
     const comunicaciones = bool(d.acepta_comunicaciones);
+    // Solo en eventos con acompañantes (eventos.acompanantes_max > 0). El
+    // máximo de cada evento se comprueba después, al leer el evento.
+    const esSocio = txt(d.es_socio, 40);
+    const acompanantes = Number(d.acompanantes ?? 0);
+    const nombresAcomp = txt(d.acompanantes_nombres, 300);
     exigir(nombre, 'Escribe tu nombre y apellidos.');
     exigir(emailValido(email), 'Escribe un correo electrónico válido.');
+    exigir(Number.isInteger(acompanantes) && acompanantes >= 0 && acompanantes <= 10, 'Revisa cuántos amigos vienen contigo.');
+    exigir(!acompanantes || nombresAcomp, 'Escribe el nombre de los amigos que vienen contigo.');
     // En los formularios de las páginas de evento solo pedimos nombre y correo:
     // el resto es opcional, pero si viene escrito tiene que ser válido.
     exigir(!telefono || telefonoValido(telefono), 'Ese teléfono no parece válido.');
@@ -404,6 +416,7 @@ function preparar(tipo: string, d: Record<string, unknown>): Preparado {
         evento, nombre, email, telefono, perfil, sector,
         anio_graduacion: anio, como_conocio: como, comentario,
         acepta_comunicaciones: comunicaciones,
+        es_socio: esSocio, acompanantes, acompanantes_nombres: acompanantes ? nombresAcomp : null,
       },
       asunto: `Nueva inscripción al evento · ${nombre}`,
       responderA: email,
@@ -417,6 +430,8 @@ function preparar(tipo: string, d: Record<string, unknown>): Preparado {
         ['Año de graduación', anio ?? '—'],
         ['Cómo se enteró', como ?? '—'],
         ['Comentario o pregunta', comentario ?? '—'],
+        ...(esSocio ? [['¿Es socio?', esSocio] as [string, string]] : []),
+        ...(acompanantes ? [['Acompañantes', `${acompanantes}: ${nombresAcomp}`] as [string, string]] : []),
         ['Acepta comunicaciones', si(comunicaciones)],
       ],
     };
@@ -628,6 +643,12 @@ Deno.serve(async (req) => {
     if (!evento || !evento.publicado || evento.fecha < hoyMadrid()) {
       return responder({ ok: false, error: 'Las inscripciones de este evento están cerradas.' }, 400, origen);
     }
+    const acomp = Number(preparado.fila.acompanantes ?? 0);
+    if (acomp > Number(evento.acompanantes_max ?? 0)) {
+      return responder({ ok: false, error: Number(evento.acompanantes_max)
+        ? `Cada persona puede venir con ${evento.acompanantes_max} amigos como máximo.`
+        : 'En este evento no se apuntan acompañantes: que cada uno se inscriba con su correo.' }, 400, origen);
+    }
     preparado.fila.evento_id = evento.id;
     preparado.fila.evento = `${evento.titulo} · ${fechaLarga(evento.fecha)}`;
     preparado.resumen[0] = ['Evento', String(preparado.fila.evento)];
@@ -649,6 +670,26 @@ Deno.serve(async (req) => {
       }
     } catch (e) {
       console.error('Error al comprobar duplicados:', e);   // el índice único lo para igualmente
+    }
+
+    // Aforo: cuentan el inscrito y sus acompañantes.
+    if (evento.aforo) {
+      const quiere = 1 + Number(preparado.fila.acompanantes ?? 0);
+      let libres: number;
+      try {
+        libres = evento.aforo - await plazasOcupadas(evento.id);
+      } catch (e) {
+        console.error('Error al contar plazas:', e);
+        return responder({ ok: false, error: `No hemos podido apuntarte. Escríbenos a ${CORREO_LGMP} y lo resolvemos.` }, 500, origen);
+      }
+      if (libres <= 0) {
+        return responder({ ok: false, completo: true, error: 'Lo sentimos, ya no quedan plazas.' }, 409, origen);
+      }
+      if (quiere > libres) {
+        return responder({ ok: false, error: libres === 1
+          ? 'Solo queda 1 plaza: apúntate sin acompañantes.'
+          : `Solo quedan ${libres} plazas: apúntate con ${libres - 1} amigo${libres - 1 === 1 ? '' : 's'} como máximo.` }, 409, origen);
+      }
     }
   }
 
@@ -691,7 +732,9 @@ Deno.serve(async (req) => {
   if (evento) {
     try {
       const nombre = String(preparado.fila.nombre).split(' ')[0];
-      const c = correoConfirmacion(evento, nombre);
+      const amigos = String(preparado.fila.acompanantes_nombres ?? '')
+        .split(/\s*[,;\n]\s*|\s+y\s+/).map((x) => x.trim()).filter(Boolean);
+      const c = correoConfirmacion(evento, nombre, Number(preparado.fila.acompanantes) ? amigos : []);
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },

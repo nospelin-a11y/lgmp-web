@@ -113,11 +113,30 @@
       .catch(function () { return null; });
   }
 
+  /**
+   * Personas ya apuntadas a un evento (inscritos + acompañantes), para
+   * enseñar «Quedan N plazas». Si falla, devuelve null.
+   * @returns {Promise<number|null>}
+   */
+  function plazasOcupadas(eventoId) {
+    if (SIN_CONFIGURAR) return Promise.resolve(null);
+
+    return fetch(SUPABASE_URL + '/rest/v1/rpc/plazas_ocupadas', {
+      method: 'POST',
+      headers: cabeceras(),
+      body: JSON.stringify({ p_evento: eventoId })
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (n) { return typeof n === 'number' ? n : null; })
+      .catch(function () { return null; });
+  }
+
   window.LGMP = {
     configurado: !SIN_CONFIGURAR,
     correo: CORREO,
     enviar: enviar,
     llamar: llamar,
-    contarSocios: contarSocios
+    contarSocios: contarSocios,
+    plazasOcupadas: plazasOcupadas
   };
 })();
