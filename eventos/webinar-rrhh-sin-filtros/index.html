@@ -84,7 +84,7 @@
   .apunte .caja{background:#ffffff;border:1px solid rgba(30,42,74,.08);border-radius:24px;padding:clamp(26px,4.5vw,40px)}
   .apunte h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:clamp(22px,3vw,27px);margin:0 0 8px}
   .apunte .sub{font-size:16px;line-height:1.6;color:rgba(30,42,74,.72);margin:0 0 26px}
-  .apunte .fila{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .apunte .fila{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
   .apunte .campo{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
   .apunte .fila .campo{margin-bottom:0}
   .apunte label{font-family:'Nunito',sans-serif;font-weight:700;font-size:14.5px;color:#1E2A4A}
@@ -102,6 +102,7 @@
     background-repeat:no-repeat;background-position:right 18px center}
   .apunte textarea{min-height:110px;resize:vertical;line-height:1.55}
   .apunte .pista{font-size:13.5px;color:rgba(30,42,74,.55);margin:0}
+  .apunte .plazas{display:inline-block;background:rgba(240,80,60,.1);color:#F0503C;font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px;border-radius:999px;padding:7px 16px;margin:0 0 22px}
   .apunte input:focus,.apunte select:focus,.apunte textarea:focus{border-color:#F0503C;background-color:#ffffff}
   .apunte .calendario{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 4px}
   .apunte .calendario a{font-family:'Nunito',sans-serif;font-weight:800;font-size:14.5px;padding:11px 22px;
@@ -123,7 +124,7 @@
   .apunte .exito p{font-size:16.5px;line-height:1.65;color:rgba(30,42,74,.75);margin:0 auto;max-width:440px}
   .oculto{display:none !important}
   @media (max-width:640px){
-    .apunte .fila{grid-template-columns:1fr;gap:0} .apunte .fila .campo{margin-bottom:16px}
+    .apunte .fila{grid-template-columns:1fr;gap:0;margin-bottom:0} .apunte .fila .campo{margin-bottom:16px}
     .cab{padding:16px 0} .cab .cont{padding:0 20px} .cab img{height:40px}
     .art{padding:36px 20px 0} .cuerpo{padding:20px 20px 0;font-size:16px} .cierre{padding:14px 20px 0}
     /* El vídeo es vertical: a lo ancho del móvil empuja las fotos fuera de la vista. */

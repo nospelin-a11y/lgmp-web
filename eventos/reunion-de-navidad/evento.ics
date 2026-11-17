@@ -1,0 +1,18 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//LGMP//Eventos//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:evento-7@lageneracionmejorpreparada.com
+DTSTAMP:20261116T221356Z
+DTSTART:20261223T173000Z
+DTEND:20261223T200000Z
+SUMMARY:Reunión de Navidad La Generación Mejor Preparada
+DESCRIPTION:https://lageneracionmejorpreparada.com/eventos/reunion-de-navi
+ dad/
+LOCATION:Cervecería Cervemur · Av. de Santa Catalina\, 100 · San Benito-Pa
+ tiño\, Murcia
+URL:https://lageneracionmejorpreparada.com/eventos/reunion-de-navidad/
+END:VEVENT
+END:VCALENDAR
